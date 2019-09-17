@@ -1,0 +1,3 @@
+[submodule "trac-ik"]
+	path = trac-ik
+	url = https://bitbucket.org/traclabs/trac_ik/src/master/

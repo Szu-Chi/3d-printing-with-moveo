@@ -1,0 +1,11 @@
+moveit_setup_assistant_config:
+  URDF:
+    package: moveo_urdf
+    relative_path: urdf/moveo_urdf.urdf
+    xacro_args: ""
+  SRDF:
+    relative_path: config/moveo_urdf.srdf
+  CONFIG:
+    author_name: Szu-Chi Huang
+    author_email: t106360231@ntut.org.tw
+    generated_timestamp: 1568627394

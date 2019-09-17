@@ -1,0 +1,11 @@
+controller_list:
+  - name: fake_arm_controller
+    joints:
+      - moveo_joint1
+      - moveo_joint2
+      - moveo_joint3
+      - moveo_joint4
+      - moveo_joint5
+  - name: fake_gripper_controller
+    joints:
+      - moveo_gripper_joint1
