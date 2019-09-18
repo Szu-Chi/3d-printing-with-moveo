@@ -10,8 +10,9 @@ Panels:
         - /MotionPlanning1/Planning Metrics1
         - /MotionPlanning1/Planned Path1
         - /MarkerArray1
+        - /Trajectory1
       Splitter Ratio: 0.7425600290298462
-    Tree Height: 403
+    Tree Height: 267
   - Class: rviz/Help
     Name: Help
   - Class: rviz/Views
@@ -83,36 +84,7 @@ Visualization Manager:
             Show Axes: false
             Show Trail: false
             Value: true
-          dummy:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-          moveo_gripper_link1:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-            Value: true
-          moveo_gripper_link2:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-            Value: true
-          moveo_gripper_link3:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-            Value: true
-          moveo_gripper_link4:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-            Value: true
-          moveo_gripper_link5:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-            Value: true
-          moveo_gripper_link6:
+          end_effector_link:
             Alpha: 1
             Show Axes: false
             Show Trail: false
@@ -142,11 +114,11 @@ Visualization Manager:
             Show Axes: false
             Show Trail: false
             Value: true
-        Loop Animation: true
+        Loop Animation: false
         Robot Alpha: 0.5
         Robot Color: 150; 50; 150
         Show Robot Collision: false
-        Show Robot Visual: false
+        Show Robot Visual: true
         Show Trail: false
         State Display Time: 0.05 s
         Trail Step Size: 1
@@ -162,7 +134,7 @@ Visualization Manager:
         Colliding Link Color: 255; 0; 0
         Goal State Alpha: 1
         Goal State Color: 250; 128; 0
-        Interactive Marker Size: 0.25
+        Interactive Marker Size: 0.20000000298023224
         Joint Violation Color: 255; 0; 255
         Planning Group: arm
         Query Goal State: false
@@ -192,36 +164,7 @@ Visualization Manager:
             Show Axes: false
             Show Trail: false
             Value: true
-          dummy:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-          moveo_gripper_link1:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-            Value: true
-          moveo_gripper_link2:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-            Value: true
-          moveo_gripper_link3:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-            Value: true
-          moveo_gripper_link4:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-            Value: true
-          moveo_gripper_link5:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-            Value: true
-          moveo_gripper_link6:
+          end_effector_link:
             Alpha: 1
             Show Axes: false
             Show Trail: false
@@ -258,17 +201,75 @@ Visualization Manager:
       Velocity_Scaling_Factor: 1
     - Class: rviz/MarkerArray
       Enabled: true
-      Marker Topic: /rviz_visual_tools
+      Marker Topic: rviz_visual_tools
       Name: MarkerArray
       Namespaces:
-        {}
+        Text: true
+        target_pose1: true
       Queue Size: 100
       Value: true
+    - Class: moveit_rviz_plugin/Trajectory
+      Color Enabled: false
+      Enabled: false
+      Interrupt Display: false
+      Links:
+        All Links Enabled: true
+        Expand Joint Details: false
+        Expand Link Details: false
+        Expand Tree: false
+        Link Tree Style: Links in Alphabetic Order
+        base_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        end_effector_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        moveo_link1:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        moveo_link2:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        moveo_link3:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        moveo_link4:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        moveo_link5:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+      Loop Animation: false
+      Name: Trajectory
+      Robot Alpha: 0.5
+      Robot Color: 150; 50; 150
+      Robot Description: robot_description
+      Show Robot Collision: false
+      Show Robot Visual: true
+      Show Trail: false
+      State Display Time: 0.05 s
+      Trail Step Size: 1
+      Trajectory Topic: /move_group/display_planned_path
+      Value: false
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
     Default Light: true
-    Fixed Frame: dummy
+    Fixed Frame: base_link
     Frame Rate: 30
   Name: root
   Tools:
@@ -280,30 +281,30 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/XYOrbit
-      Distance: 2.4597182273864746
+      Distance: 1.7969870567321777
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: -0.3986496925354004
-        Y: 0.011812001466751099
-        Z: 2.2351800055275817e-7
+        X: -0.18947547674179077
+        Y: 0.24033470451831818
+        Z: 3.427272758926847e-7
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.3697963058948517
-      Target Frame: dummy
+      Pitch: 0.46479690074920654
+      Target Frame: base_link
       Value: XYOrbit (rviz)
-      Yaw: 3.0217647552490234
+      Yaw: 6.274951457977295
     Saved: ~
 Window Geometry:
   Displays:
     collapsed: false
-  Height: 1056
+  Height: 922
   Help:
     collapsed: false
   Hide Left Dock: false
@@ -312,7 +313,9 @@ Window Geometry:
     collapsed: false
   MotionPlanning - Trajectory Slider:
     collapsed: false
-  QMainWindow State: 000000ff00000000fd0000000100000000000002a2000003dcfc0200000007fb000000100044006900730070006c006100790073010000002700000224000000c900fffffffb0000000800480065006c00700000000342000000bb0000006e00fffffffb0000000a0056006900650077007300000003b0000000b0000000a400fffffffb0000000c00430061006d00650072006100000002ff000001610000000000000000fb0000001e004d006f00740069006f006e00200050006c0061006e006e0069006e00670100000374000001890000000000000000fb00000044004d006f00740069006f006e0050006c0061006e006e0069006e00670020002d0020005400720061006a006500630074006f0072007900200053006c00690064006500720000000000ffffffff0000004100fffffffb0000001c004d006f00740069006f006e0050006c0061006e006e0069006e00670100000251000001b20000019b00ffffff00000497000003dc00000001000000020000000100000002fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  QMainWindow State: 000000ff00000000fd0000000100000000000002a200000356fc0200000008fb000000100044006900730070006c00610079007301000000270000019c000000c900fffffffb0000000800480065006c00700000000342000000bb0000006e00fffffffb0000000a0056006900650077007300000003b0000000b0000000a400fffffffb0000000c00430061006d00650072006100000002ff000001610000000000000000fb0000001e004d006f00740069006f006e00200050006c0061006e006e0069006e00670100000374000001890000000000000000fb00000044004d006f00740069006f006e0050006c0061006e006e0069006e00670020002d0020005400720061006a006500630074006f0072007900200053006c00690064006500720000000000ffffffff0000004100fffffffb0000001c004d006f00740069006f006e0050006c0061006e006e0069006e006701000001c9000001b40000019b00fffffffb000000280020002d0020005400720061006a006500630074006f0072007900200053006c00690064006500720000000000ffffffff0000001600000016000004970000035600000001000000020000000100000002fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  Trajectory - Slider:
+    collapsed: false
   Views:
     collapsed: false
   Width: 1855

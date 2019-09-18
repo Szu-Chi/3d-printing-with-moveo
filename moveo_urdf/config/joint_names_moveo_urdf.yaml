@@ -1,1 +1,1 @@
-controller_joint_names: ['', 'moveo_joint1', 'moveo_joint2', 'moveo_joint3', 'moveo_joint4', 'moveo_joint5', 'moveo_gripper_joint1', 'moveo_gripper_joint2', 'moveo_gripper_joint4', 'moveo_gripper_joint5', 'moveo_gripper_joint3', 'moveo_gripper_joint6', ]
+controller_joint_names: ['', 'moveo_joint1', 'moveo_joint2', 'moveo_joint3', 'moveo_joint4', 'moveo_joint5', ]

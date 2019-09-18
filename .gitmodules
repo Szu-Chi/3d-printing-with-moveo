@@ -1,3 +1,6 @@
 [submodule "trac-ik"]
 	path = trac-ik
 	url = https://bitbucket.org/traclabs/trac_ik/src/master/
+[submodule "fusion2urdf"]
+	path = fusion2urdf
+	url = https://github.com/syuntoku14/fusion2urdf

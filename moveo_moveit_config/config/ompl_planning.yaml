@@ -146,8 +146,8 @@ arm:
     - LazyPRMstar
     - SPARS
     - SPARStwo
-gripper:
-  default_planner_config: None
+end_effector:
+  default_planner_config: ""
   planner_configs:
     - SBL
     - EST
