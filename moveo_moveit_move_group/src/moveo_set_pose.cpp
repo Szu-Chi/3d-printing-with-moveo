@@ -76,6 +76,15 @@ std::vector<double> solveJoint(KDL::Frame end_effector_pose){
   }
 }
 
+void print_current_pose(geometry_msgs::PoseStamped current_pose){
+  ROS_INFO_NAMED("moveo", "x position: %f", current_pose.pose.position.x);
+  ROS_INFO_NAMED("moveo", "y position: %f", current_pose.pose.position.y);
+  ROS_INFO_NAMED("moveo", "z position: %f", current_pose.pose.position.z);
+  ROS_INFO_NAMED("moveo", "x orientation: %f", current_pose.pose.orientation.x);
+  ROS_INFO_NAMED("moveo", "y orientation: %f", current_pose.pose.orientation.y);
+  ROS_INFO_NAMED("moveo", "z orientation: %f", current_pose.pose.orientation.z);
+  ROS_INFO_NAMED("moveo", "w orientation: %f", current_pose.pose.orientation.w);
+}
 int main(int argc, char **argv)
 {	
   ros::init(argc, argv, "move_group_1");
@@ -104,13 +113,7 @@ int main(int argc, char **argv)
   // also printing the current position and orientation of the robot.
   ros::Publisher pose_pub = node_handle.advertise<geometry_msgs::PoseStamped>("robot_pose", 10);
   ros::Publisher pose_joint_pub = node_handle.advertise<sensor_msgs::JointState>("pose_joint", 10);
-  ROS_INFO_NAMED("moveo", "x position: %f", current_pose.pose.position.x);
-  ROS_INFO_NAMED("moveo", "y position: %f", current_pose.pose.position.y);
-  ROS_INFO_NAMED("moveo", "z position: %f", current_pose.pose.position.z);
-  ROS_INFO_NAMED("moveo", "x orientation: %f", current_pose.pose.orientation.x);
-  ROS_INFO_NAMED("moveo", "y orientation: %f", current_pose.pose.orientation.y);
-  ROS_INFO_NAMED("moveo", "z orientation: %f", current_pose.pose.orientation.z);
-  ROS_INFO_NAMED("moveo", "w orientation: %f", current_pose.pose.orientation.w);
+  print_current_pose(move_group.getCurrentPose());
  
  
   // Visualization
@@ -189,16 +192,7 @@ int main(int argc, char **argv)
     visual_tools.trigger();
     move_group.move();
     //ROS_INFO_STREAM("joint :" << target_joints);
-    current_pose = move_group.getCurrentPose();
-    // We can print the name of the reference frame for this robot.
-    // also printing the current position and orientation of the robot.
-    ROS_INFO_NAMED("moveo", "x position: %f", current_pose.pose.position.x);
-    ROS_INFO_NAMED("moveo", "y position: %f", current_pose.pose.position.y);
-    ROS_INFO_NAMED("moveo", "z position: %f", current_pose.pose.position.z);
-    ROS_INFO_NAMED("moveo", "x orientation: %f", current_pose.pose.orientation.x);
-    ROS_INFO_NAMED("moveo", "y orientation: %f", current_pose.pose.orientation.y);
-    ROS_INFO_NAMED("moveo", "z orientation: %f", current_pose.pose.orientation.z);
-    ROS_INFO_NAMED("moveo", "w orientation: %f", current_pose.pose.orientation.w);
+     print_current_pose(move_group.getCurrentPose());
     sensor_msgs::JointState moveo_joint_state;
     std::vector<std::string> name{"moveo_joint1", "moveo_joint2", "moveo_joint3", "moveo_joint4", "moveo_joint5"};
     std::vector<double> position = move_group.getCurrentJointValues();
