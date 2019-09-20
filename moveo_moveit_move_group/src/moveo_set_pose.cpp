@@ -13,10 +13,67 @@
 #include <trac_ik/trac_ik.hpp>
 #include <ros/ros.h>
 
-double fRand(double min, double max)
-{
-  double f = (double)rand() / RAND_MAX;
-  return min + f * (max - min);
+std::vector<double> solveJoint(KDL::Frame end_effector_pose){
+  ros::NodeHandle node_handle("~");
+  //init TRAC_IK
+  std::string chain_start, chain_end, urdf_param;
+  double timeout;
+  node_handle.param("chain_start", chain_start, std::string(""));
+  node_handle.param("chain_end", chain_end, std::string(""));
+  if (chain_start == "" || chain_end == "")
+  {
+    ROS_FATAL("Missing chain info in launch file");
+    exit(-1);
+  }
+  node_handle.param("timeout", timeout, 0.005);
+  node_handle.param("urdf_param", urdf_param, std::string("/robot_description"));
+
+  double eps = 1e-5;
+  node_handle.param("eps", eps, 1e-5);
+  ROS_INFO_STREAM("eps :" << eps);
+  TRAC_IK::TRAC_IK tracik_solver(chain_start, chain_end, urdf_param, timeout, eps, TRAC_IK::Distance);
+  
+  KDL::Chain chain;
+  KDL::JntArray ll, ul; //lower joint limits, upper joint limits
+
+  bool valid = tracik_solver.getKDLChain(chain);
+  ROS_INFO_NAMED("moveo", "TRAC-IK setup");
+  if (!valid)
+  {
+    ROS_ERROR("There was no valid KDL chain found");
+    exit(-1);
+  }
+
+  valid = tracik_solver.getKDLLimits(ll, ul);
+
+  if (!valid)
+  {
+    ROS_ERROR("There were no valid KDL joint limits found");
+    exit(-1);
+  }
+
+  assert(chain.getNrOfJoints() == ll.data.size());
+  assert(chain.getNrOfJoints() == ul.data.size());
+  ROS_INFO("Using %d joints", chain.getNrOfJoints());
+  // Create Nominal chain configuration midway between all joint limits
+  KDL::JntArray nominal(chain.getNrOfJoints());
+
+  //solving IK
+  KDL::Vector target_bounds_rot(0, 0, 2* M_PI), target_bounds_vel(0,0,0);
+  const KDL::Twist target_bounds(target_bounds_vel, target_bounds_rot);
+  KDL::JntArray result;
+  int rc = tracik_solver.CartToJnt(nominal, end_effector_pose, result, target_bounds);
+  ROS_INFO_STREAM("rc :" << rc);
+    
+  if(rc > 0){
+    std::vector<double> target_joints(chain.getNrOfJoints());
+    for(int i = 0; i < chain.getNrOfJoints(); i++){
+        target_joints.at(i) = result.data(i);
+    }
+    return target_joints;
+  }else{
+    return {};
+  }
 }
 
 int main(int argc, char **argv)
@@ -55,48 +112,7 @@ int main(int argc, char **argv)
   ROS_INFO_NAMED("moveo", "z orientation: %f", current_pose.pose.orientation.z);
   ROS_INFO_NAMED("moveo", "w orientation: %f", current_pose.pose.orientation.w);
  
-  std::string chain_start, chain_end, urdf_param;
-  double timeout;
-  node_handle.param("chain_start", chain_start, std::string(""));
-  node_handle.param("chain_end", chain_end, std::string(""));
-  if (chain_start == "" || chain_end == "")
-  {
-    ROS_FATAL("Missing chain info in launch file");
-    exit(-1);
-  }
-  node_handle.param("timeout", timeout, 0.005);
-  node_handle.param("urdf_param", urdf_param, std::string("/robot_description"));
-
-  double eps = 1e-5;
-  node_handle.param("eps", eps, 1e-5);
-  ROS_INFO_STREAM("eps :" << eps);
-  TRAC_IK::TRAC_IK tracik_solver(chain_start, chain_end, urdf_param, timeout, eps, TRAC_IK::Distance);
-  
-  KDL::Chain chain;
-  KDL::JntArray ll, ul; //lower joint limits, upper joint limits
-
-  bool valid = tracik_solver.getKDLChain(chain);
-  ROS_INFO_NAMED("moveo", "TRAC-IK setup");
-  if (!valid)
-  {
-    ROS_ERROR("There was no valid KDL chain found");
-    return -1;
-  }
-
-  valid = tracik_solver.getKDLLimits(ll, ul);
-
-  if (!valid)
-  {
-    ROS_ERROR("There were no valid KDL joint limits found");
-    return -1;
-  }
-
-  assert(chain.getNrOfJoints() == ll.data.size());
-  assert(chain.getNrOfJoints() == ul.data.size());
-  ROS_INFO("Using %d joints", chain.getNrOfJoints());
-  // Create Nominal chain configuration midway between all joint limits
-  KDL::JntArray nominal(chain.getNrOfJoints());
-
+ 
   // Visualization
   // ^^^^^^^^^^^^^
   //
@@ -135,8 +151,6 @@ int main(int argc, char **argv)
 
   //Plan a motion for this group to a desired pose for end-effector
   // hardcode desired position here before running node in a separate terminal
- 
-  KDL::JntArray result;
   KDL::Vector end_effector_target_vol;
   node_handle.param("end_effector_target_vol_x", end_effector_target_vol.data[0], 0.0);
   node_handle.param("end_effector_target_vol_y", end_effector_target_vol.data[1], 0.3);
@@ -164,32 +178,10 @@ int main(int argc, char **argv)
   visual_tools.publishAxisLabeled(target_pose1, "target_pose1");
   visual_tools.trigger();
   current_pose = move_group.getCurrentPose();
-  int rc;
-  std::vector<KDL::JntArray> JointList;
-  KDL::Vector target_bounds_rot(0, 0, 2* M_PI), target_bounds_vel(0,0,0);
-  const KDL::Twist target_bounds(target_bounds_vel, target_bounds_rot);
-  KDL::Frame temp_pose(end_effector_target_rot, end_effector_target_vol);
- /*
-  temp_pose.p.x ( (end_effector_pose.p.x() - current_pose.pose.position.x) * i / 10 + current_pose.pose.position.x);
-  temp_pose.p.y ( (end_effector_pose.p.y() - current_pose.pose.position.y) * i / 10 + current_pose.pose.position.y);
-  temp_pose.p.z ( (end_effector_pose.p.z() - current_pose.pose.position.z) * i / 10 + current_pose.pose.position.z);
-  target_pose1.position.x    = temp_pose.p.x();
-  target_pose1.position.y    = temp_pose.p.y();
-  target_pose1.position.z    = temp_pose.p.z();
-  //visual_tools.publishAxisLabeled(target_pose1, "temp_pose");
-  visual_tools.trigger();
-  */
-  rc = tracik_solver.CartToJnt(nominal, end_effector_pose, result, target_bounds);
-
+  
   // Create desired number of valid, random joint configurations
-  ROS_INFO_STREAM("rc :" << rc);
-    
-  if (rc >= 0){
-    std::vector<double> target_joints;
-    target_joints = move_group.getCurrentJointValues();
-    for(int i = 0; i < chain.getNrOfJoints(); i++){
-        target_joints.at(i) = result.data(i);
-    }
+  std::vector<double> target_joints = solveJoint(end_effector_pose);
+  if (!target_joints.empty()){
     move_group.setJointValueTarget(target_joints);
     moveit::planning_interface::MoveGroupInterface::Plan my_plan;
     moveit::planning_interface::MoveItErrorCode success = move_group.plan(my_plan);
@@ -214,6 +206,7 @@ int main(int argc, char **argv)
     moveo_joint_state.position = position;
     pose_joint_pub.publish(moveo_joint_state);
   }
+
   
   ros::shutdown();  
   return 0;
