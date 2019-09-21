@@ -6,3 +6,6 @@ controller_list:
       - moveo_joint3
       - moveo_joint4
       - moveo_joint5
+  - name: fake_nozzle_controller
+    joints:
+      []

@@ -10,18 +10,22 @@
     <!--CHAINS: When a chain is specified, all the links along the chain (including endpoints) are included in the group. Additionally, all the joints that are parents to included links are also included. This means that joints along the chain and the parent joint of the base link are included in the group-->
     <!--SUBGROUPS: Groups can also be formed by referencing to already defined group names-->
     <group name="arm">
+        <link name="base_link" />
         <link name="moveo_link1" />
         <link name="moveo_link2" />
         <link name="moveo_link3" />
         <link name="moveo_link4" />
         <link name="moveo_link5" />
-        <link name="base_link" />
         <joint name="moveo_joint1" />
         <joint name="moveo_joint2" />
         <joint name="moveo_joint3" />
         <joint name="moveo_joint4" />
         <joint name="moveo_joint5" />
         <chain base_link="base_link" tip_link="moveo_link5" />
+    </group>
+    <group name="nozzle">
+        <link name="moveo_nozzle_link" />
+        <joint name="moveo_nozzle_joint" />
     </group>
     <!--GROUP STATES: Purpose: Define a named state for a particular group, in terms of joint values. This is useful to define states like 'folded arms'-->
     <group_state name="upright" group="arm">
@@ -32,7 +36,7 @@
         <joint name="moveo_joint5" value="0" />
     </group_state>
     <!--END EFFECTOR: Purpose: Represent information about an end effector.-->
-    <end_effector name="moveo_link5" parent_link="moveo_link4" group="arm" />
+    <end_effector name="moveo_nozzle_link" parent_link="moveo_link5" group="nozzle" parent_group="arm" />
     <!--VIRTUAL JOINT: Purpose: this element defines a virtual joint between a robot link and an external frame of reference (considered fixed with respect to the robot)-->
     <virtual_joint name="virtual_joint" type="fixed" parent_frame="world" child_link="dummy" />
     <!--DISABLE COLLISIONS: By default it is assumed that any link of the robot could potentially come into collision with any other link in the robot. This tag disables collision checking between a specified pair of links. -->
@@ -40,14 +44,20 @@
     <disable_collisions link1="base_link" link2="moveo_link2" reason="Never" />
     <disable_collisions link1="base_link" link2="moveo_link3" reason="Never" />
     <disable_collisions link1="base_link" link2="moveo_link4" reason="Never" />
+    <disable_collisions link1="base_link" link2="moveo_link5" reason="Never" />
     <disable_collisions link1="moveo_link1" link2="moveo_link2" reason="Adjacent" />
     <disable_collisions link1="moveo_link1" link2="moveo_link3" reason="Never" />
     <disable_collisions link1="moveo_link1" link2="moveo_link4" reason="Never" />
     <disable_collisions link1="moveo_link1" link2="moveo_link5" reason="Never" />
+    <disable_collisions link1="moveo_link1" link2="moveo_nozzle_link" reason="Never" />
     <disable_collisions link1="moveo_link2" link2="moveo_link3" reason="Adjacent" />
     <disable_collisions link1="moveo_link2" link2="moveo_link4" reason="Never" />
     <disable_collisions link1="moveo_link2" link2="moveo_link5" reason="Never" />
+    <disable_collisions link1="moveo_link2" link2="moveo_nozzle_link" reason="Never" />
     <disable_collisions link1="moveo_link3" link2="moveo_link4" reason="Adjacent" />
     <disable_collisions link1="moveo_link3" link2="moveo_link5" reason="Never" />
+    <disable_collisions link1="moveo_link3" link2="moveo_nozzle_link" reason="Never" />
     <disable_collisions link1="moveo_link4" link2="moveo_link5" reason="Adjacent" />
+    <disable_collisions link1="moveo_link4" link2="moveo_nozzle_link" reason="Never" />
+    <disable_collisions link1="moveo_link5" link2="moveo_nozzle_link" reason="Adjacent" />
 </robot>
