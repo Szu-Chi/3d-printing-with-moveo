@@ -147,7 +147,7 @@ arm:
     - SPARS
     - SPARStwo
 nozzle:
-  default_planner_config: ""
+  default_planner_config: None
   planner_configs:
     - SBL
     - EST

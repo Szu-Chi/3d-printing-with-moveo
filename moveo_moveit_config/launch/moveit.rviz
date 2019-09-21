@@ -9,7 +9,6 @@ Panels:
         - /MotionPlanning1/Planning Request1
         - /MotionPlanning1/Planned Path1
         - /MarkerArray1
-        - /MarkerArray1/Namespaces1
       Splitter Ratio: 0.7425600290298462
     Tree Height: 403
   - Class: rviz/Help
@@ -83,6 +82,10 @@ Visualization Manager:
             Show Axes: false
             Show Trail: false
             Value: true
+          dummy:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
           moveo_link1:
             Alpha: 1
             Show Axes: false
@@ -163,6 +166,10 @@ Visualization Manager:
             Show Axes: false
             Show Trail: false
             Value: true
+          dummy:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
           moveo_link1:
             Alpha: 1
             Show Axes: false
@@ -203,17 +210,14 @@ Visualization Manager:
       Marker Topic: /rviz_visual_tools
       Name: MarkerArray
       Namespaces:
-        Path: true
-        Sphere: false
-        Text: true
-        target_pose1: true
+        {}
       Queue Size: 100
       Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
     Default Light: true
-    Fixed Frame: base_link
+    Fixed Frame: dummy
     Frame Rate: 30
   Name: root
   Tools:
@@ -225,25 +229,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/XYOrbit
-      Distance: 1.5207035541534424
+      Distance: 1.5561753511428833
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 0.11356700211763382
-        Y: 0.10592000186443329
-        Z: 2.2351800055275817e-7
+        X: -0.05348080396652222
+        Y: 0.05620908737182617
+        Z: 1.0430871100197692e-7
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.6447970271110535
-      Target Frame: base_link
+      Pitch: 0.6997963190078735
+      Target Frame: dummy
       Value: XYOrbit (rviz)
-      Yaw: 0.2017642855644226
+      Yaw: 5.1449503898620605
     Saved: ~
 Window Geometry:
   Displays:

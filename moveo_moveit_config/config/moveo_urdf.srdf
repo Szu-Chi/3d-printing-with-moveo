@@ -21,7 +21,8 @@
         <joint name="moveo_joint3" />
         <joint name="moveo_joint4" />
         <joint name="moveo_joint5" />
-        <chain base_link="base_link" tip_link="moveo_link5" />
+        <chain base_link="base_link" tip_link="moveo_nozzle_link" />
+        <group name="nozzle" />
     </group>
     <group name="nozzle">
         <link name="moveo_nozzle_link" />
