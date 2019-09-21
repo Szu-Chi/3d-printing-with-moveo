@@ -85,11 +85,82 @@ void print_current_pose(geometry_msgs::PoseStamped current_pose){
   ROS_INFO_NAMED("moveo", "z orientation: %f", current_pose.pose.orientation.z);
   ROS_INFO_NAMED("moveo", "w orientation: %f", current_pose.pose.orientation.w);
 }
+
+void set_target_pose(const geometry_msgs::PoseStamped& chain_end){
+  ros::NodeHandle node_handle("~");
+  
+  //----------------------------
+  //Setup
+  //----------------------------
+  static const std::string PLANNING_GROUP = "arm";
+
+  // The :move_group_interface:`MoveGroup` class can be easily
+  // setup using just the name of the planning group you would like to control and plan for
+  moveit::planning_interface::MoveGroupInterface move_group(PLANNING_GROUP);
+
+  //Using :planning_scene_interface:'PlanningSceneInterface' class to deal directly with the world
+  moveit::planning_interface::PlanningSceneInterface planning_scene_interface;
+
+  // Raw pointers are frequently used to refer to the planning group for improved performance.
+  const robot_state::JointModelGroup *joint_model_group =
+    move_group.getCurrentState()->getJointModelGroup(PLANNING_GROUP);
+
+  ros::Publisher pose_joint_pub = node_handle.advertise<sensor_msgs::JointState>("pose_joint", 10);
+  moveit_visual_tools::MoveItVisualTools visual_tools("base_link");
+  geometry_msgs::PoseStamped current_pose = move_group.getCurrentPose();
+
+
+  KDL::Vector end_effector_target_vol;
+  end_effector_target_vol.data[0] =chain_end.pose.position.x;
+  end_effector_target_vol.data[1] =chain_end.pose.position.y;
+  end_effector_target_vol.data[2] =chain_end.pose.position.z;
+
+
+  KDL::Rotation end_effector_target_rot;
+  double end_effector_target_R, end_effector_target_P,end_effector_target_Y; 
+  end_effector_target_rot  = KDL::Rotation::Quaternion(chain_end.pose.orientation.x, chain_end.pose.orientation.y, chain_end.pose.orientation.z, chain_end.pose.orientation.w); 
+  
+  //node_handle.param("end_effector_target_rot", end_effector_rot,(0, 0.3, 0.4));
+  KDL::Frame end_effector_pose(end_effector_target_rot, end_effector_target_vol);
+  
+  // Now, we call the planner to compute the plan and visualize it.
+  // Note that we are just planning, not asking move_group
+  // to actually move the robot.
+  visual_tools.deleteAllMarkers();
+  geometry_msgs::Pose target_pose1;
+  target_pose1.position.x    = end_effector_pose.p.x();
+  target_pose1.position.y    = end_effector_pose.p.y();
+  target_pose1.position.z    = end_effector_pose.p.z();
+  end_effector_pose.M.GetQuaternion	(target_pose1.orientation.x, target_pose1.orientation.y, target_pose1.orientation.z, target_pose1.orientation.w);
+  visual_tools.publishAxisLabeled(target_pose1, "target_pose1");
+  visual_tools.trigger();
+  current_pose = move_group.getCurrentPose();
+  
+  // Create desired number of valid, random joint configurations
+  std::vector<double> target_joints = solveJoint(end_effector_pose);
+  if (!target_joints.empty()){
+    move_group.setJointValueTarget(target_joints);
+    moveit::planning_interface::MoveGroupInterface::Plan my_plan;
+    moveit::planning_interface::MoveItErrorCode success = move_group.plan(my_plan);
+    visual_tools.publishTrajectoryLine(my_plan.trajectory_, joint_model_group);
+    visual_tools.trigger();
+    move_group.move();
+    //ROS_INFO_STREAM("joint :" << target_joints);
+     print_current_pose(move_group.getCurrentPose());
+    sensor_msgs::JointState moveo_joint_state;
+    std::vector<std::string> name{"moveo_joint1", "moveo_joint2", "moveo_joint3", "moveo_joint4", "moveo_joint5"};
+    std::vector<double> position = move_group.getCurrentJointValues();
+    moveo_joint_state.name = name;
+    moveo_joint_state.position = position;
+    pose_joint_pub.publish(moveo_joint_state);
+  }
+}
+
 int main(int argc, char **argv)
 {	
   ros::init(argc, argv, "move_group_1");
   ros::NodeHandle node_handle("~");
-  ros::AsyncSpinner spinner(1);
+  ros::AsyncSpinner spinner(2);
   spinner.start();
 
   //----------------------------
@@ -112,7 +183,7 @@ int main(int argc, char **argv)
   // We can print the name of the reference frame for this robot.
   // also printing the current position and orientation of the robot.
   ros::Publisher pose_pub = node_handle.advertise<geometry_msgs::PoseStamped>("robot_pose", 10);
-  ros::Publisher pose_joint_pub = node_handle.advertise<sensor_msgs::JointState>("pose_joint", 10);
+  ros::Subscriber eff_pose_sub = node_handle.subscribe("chain_end_pose", 100000, set_target_pose);
   print_current_pose(move_group.getCurrentPose());
  
  
@@ -154,51 +225,8 @@ int main(int argc, char **argv)
 
   //Plan a motion for this group to a desired pose for end-effector
   // hardcode desired position here before running node in a separate terminal
-  KDL::Vector end_effector_target_vol;
-  node_handle.param("end_effector_target_vol_x", end_effector_target_vol.data[0], 0.0);
-  node_handle.param("end_effector_target_vol_y", end_effector_target_vol.data[1], 0.3);
-  node_handle.param("end_effector_target_vol_z", end_effector_target_vol.data[2], 0.4);
-  
-  KDL::Rotation end_effector_target_rot;
-  double end_effector_target_R, end_effector_target_P,end_effector_target_Y; 
-  node_handle.param("end_effector_target_rot_R", end_effector_target_R, 0.0);
-  node_handle.param("end_effector_target_rot_P", end_effector_target_P, 0.0);
-  node_handle.param("end_effector_target_rot_Y", end_effector_target_Y, 0.0);
-  end_effector_target_rot  = KDL::Rotation::RPY(end_effector_target_R, end_effector_target_P, end_effector_target_Y); 
-  
-  //node_handle.param("end_effector_target_rot", end_effector_rot,(0, 0.3, 0.4));
-  KDL::Frame end_effector_pose(end_effector_target_rot, end_effector_target_vol);
-  
-  // Now, we call the planner to compute the plan and visualize it.
-  // Note that we are just planning, not asking move_group
-  // to actually move the robot.
-  visual_tools.deleteAllMarkers();
-  geometry_msgs::Pose target_pose1;
-  target_pose1.position.x    = end_effector_pose.p.x();
-  target_pose1.position.y    = end_effector_pose.p.y();
-  target_pose1.position.z    = end_effector_pose.p.z();
-  end_effector_pose.M.GetQuaternion	(target_pose1.orientation.x, target_pose1.orientation.y, target_pose1.orientation.z, target_pose1.orientation.w);
-  visual_tools.publishAxisLabeled(target_pose1, "target_pose1");
-  visual_tools.trigger();
-  current_pose = move_group.getCurrentPose();
-  
-  // Create desired number of valid, random joint configurations
-  std::vector<double> target_joints = solveJoint(end_effector_pose);
-  if (!target_joints.empty()){
-    move_group.setJointValueTarget(target_joints);
-    moveit::planning_interface::MoveGroupInterface::Plan my_plan;
-    moveit::planning_interface::MoveItErrorCode success = move_group.plan(my_plan);
-    visual_tools.publishTrajectoryLine(my_plan.trajectory_, joint_model_group);
-    visual_tools.trigger();
-    move_group.move();
-    //ROS_INFO_STREAM("joint :" << target_joints);
-     print_current_pose(move_group.getCurrentPose());
-    sensor_msgs::JointState moveo_joint_state;
-    std::vector<std::string> name{"moveo_joint1", "moveo_joint2", "moveo_joint3", "moveo_joint4", "moveo_joint5"};
-    std::vector<double> position = move_group.getCurrentJointValues();
-    moveo_joint_state.name = name;
-    moveo_joint_state.position = position;
-    pose_joint_pub.publish(moveo_joint_state);
+  while(ros::ok()){
+    ros::waitForShutdown();
   }
 
   
