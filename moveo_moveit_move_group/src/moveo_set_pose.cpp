@@ -164,7 +164,7 @@ int main(int argc, char **argv)
   const robot_state::JointModelGroup *joint_model_group = start_state.getJointModelGroup(move_group.getName());
   KDL::Vector target_bounds_rot(0, 0, 2* M_PI), target_bounds_vel(0,0,0);
   const KDL::Twist target_bounds(target_bounds_vel, target_bounds_rot);
-  std::ifstream inputFile("/home/arthur/git_ws/moveo_moveit_ws/src/moveo_moveit_move_group/src/15mm test.gcode");
+  std::ifstream inputFile("15mm test.gcode");
   std::string line;
   bool check = 0;
   int second_execution = 0;
