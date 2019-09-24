@@ -151,7 +151,7 @@ int main(int argc, char **argv)
             }
             size_t colon_pos_Y = file_line.find('Y');
             if(colon_pos_Y < 100){
-              end_effector_target_vol.data[1] = (stod(file_line.substr(colon_pos_Y+1))*1e-3)+0.05;
+              end_effector_target_vol.data[1] = (stod(file_line.substr(colon_pos_Y+1))*1e-3)+0.25;
             }
             size_t colon_pos_Z = file_line.find('Z');
             if(colon_pos_Z < 100){
@@ -164,9 +164,9 @@ int main(int argc, char **argv)
               second_execution++;
             }
             ROS_INFO_STREAM("rc :" << rc);
-            target_pose1.position.x    = end_effector_pose.p.x();
-            target_pose1.position.y    = end_effector_pose.p.y();
-            target_pose1.position.z    = end_effector_pose.p.z();
+            target_pose1.position.x = end_effector_pose.p.x();
+            target_pose1.position.y = end_effector_pose.p.y();
+            target_pose1.position.z = end_effector_pose.p.z();
             end_effector_pose.M.GetQuaternion	(target_pose1.orientation.x, target_pose1.orientation.y, target_pose1.orientation.z, target_pose1.orientation.w);
             if(rc >= 0){
               for(int i = 0; i < chain.getNrOfJoints(); i++){
