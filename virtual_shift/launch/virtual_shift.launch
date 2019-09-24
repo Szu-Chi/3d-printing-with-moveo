@@ -6,15 +6,15 @@
   <arg name="eps" default="1e-5"/>
   <arg name="model" default="$(find moveo_urdf)/urdf/moveo_urdf.urdf"/>
   <param name="robot_description" textfile="$(arg model)" />
-  <arg name="end_effector_target_vol_x" default="-0.3"/>
+  <arg name="end_effector_target_vol_x" default="-0.0"/>
   <arg name="end_effector_target_vol_y" default="0.2"/>
-  <arg name="end_effector_target_vol_z" default="0.4"/>
+  <arg name="end_effector_target_vol_z" default="0.5"/>
   <arg name="end_effector_target_rot_R" default="0.0"/>
   <arg name="end_effector_target_rot_Y" default="0.0"/>
   <arg name="end_effector_target_rot_P" default="0.0"/>
   
 
-  <node name="gcode_translation" pkg="gcode_translation" type="read_file" output="screen">
+  <node name="virtual_shift" pkg="virtual_shift" type="virtual_shift" output="screen">
     <param name="chain_start" value="$(arg chain_start)"/>
     <param name="chain_end" value="$(arg chain_end)"/>
     <param name="timeout" value="$(arg timeout)"/>

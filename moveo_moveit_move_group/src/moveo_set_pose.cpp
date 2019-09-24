@@ -21,6 +21,7 @@
 ros::WallTime start_, end_;
 int main(int argc, char **argv)
 {
+  start_ = ros::WallTime::now();
   ros::init(argc, argv, "move_group_1");
   ros::NodeHandle node_handle("~");
   ros::AsyncSpinner spinner(1);
@@ -160,8 +161,7 @@ int main(int argc, char **argv)
   geometry_msgs::Pose target_pose1;
   std::vector<double> target_joints;
   robot_state::RobotState start_state(*move_group.getCurrentState());
-  const robot_state::JointModelGroup *joint_model_group =
-                start_state.getJointModelGroup(move_group.getName());
+  const robot_state::JointModelGroup *joint_model_group = start_state.getJointModelGroup(move_group.getName());
   KDL::Vector target_bounds_rot(0, 0, 2* M_PI), target_bounds_vel(0,0,0);
   const KDL::Twist target_bounds(target_bounds_vel, target_bounds_rot);
   std::ifstream inputFile("15mm test.gcode");
@@ -178,12 +178,9 @@ int main(int argc, char **argv)
           check = 1;
         }
       }
-      size_t colon_pos_non = file_line.find(';');
-      if(colon_pos_non < 1){
-        size_t colon_pos_G = file_line.find('G');
-        if(colon_pos_G < 9){
-          size_t colon_pos_c = file_line.find('c');
-          if(colon_pos_c < 10){
+      if(file_line.find(';') < 1){
+        if(file_line.find('G') < 9){
+          if(file_line.find('c') < 10){
             end_ = ros::WallTime::now();
             double execution_time = (end_ - start_).toNSec() * 1e-9;
             ROS_INFO_STREAM("Exectution time (ms): " << execution_time);
@@ -233,7 +230,12 @@ int main(int argc, char **argv)
               move_group.setMaxVelocityScalingFactor(1);
               move_group.setMaxAccelerationScalingFactor(1);
               //visual_tools.publishAxisLabeled(target_pose1, "target_pose1");
-              visual_tools.publishTrajectoryLine(my_plan.trajectory_, joint_model_group);
+              size_t colon_pos_E = file_line.find('E');
+              if(colon_pos_E < 100){
+                if(stod(file_line.substr(colon_pos_E+1)) > 0){
+                  visual_tools.publishTrajectoryLine(my_plan.trajectory_, joint_model_group);
+                }
+              }
               visual_tools.trigger();
               move_group.move();
               //start_state.setJointGroupPositions(joint_model_group, target_joints);
@@ -259,6 +261,11 @@ int main(int argc, char **argv)
               //pose_joint_pub.publish(moveo_joint_state);
             }
             else{
+              move_group.setJointValueTarget(target_joints);
+              moveit::planning_interface::MoveGroupInterface::Plan my_plan;
+              move_group.plan(my_plan);
+              visual_tools.publishAxisLabeled(target_pose1, "target_pose1");
+              visual_tools.trigger();
               ROS_INFO_STREAM("second_execution: " << second_execution);
               ros::shutdown();
               return 0;
