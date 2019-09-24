@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<launch>
+  <arg name="chain_start" default="base_link" />
+  <arg name="chain_end" default="moveo_link5" />
+  <arg name="timeout" default="0.05" />
+  <arg name="eps" default="1e-5"/>
+  <arg name="model" default="$(find moveo_urdf)/urdf/moveo_urdf.urdf"/>
+  <param name="robot_description" textfile="$(arg model)" />
+  <arg name="end_effector_target_vol_x" default="-0.3"/>
+  <arg name="end_effector_target_vol_y" default="0.2"/>
+  <arg name="end_effector_target_vol_z" default="0.4"/>
+  <arg name="end_effector_target_rot_R" default="0.0"/>
+  <arg name="end_effector_target_rot_Y" default="0.0"/>
+  <arg name="end_effector_target_rot_P" default="0.0"/>
+  
+
+  <node name="gcode_translation" pkg="gcode_translation" type="read_file" output="screen">
+    <param name="chain_start" value="$(arg chain_start)"/>
+    <param name="chain_end" value="$(arg chain_end)"/>
+    <param name="timeout" value="$(arg timeout)"/>
+    <param name="eps" value="$(arg eps)" type = "double"/>
+    <param name="urdf_param" value="/robot_description"/>
+    <param name="end_effector_target_vol_x" value = "$(arg end_effector_target_vol_x)"/>
+    <param name="end_effector_target_vol_y" value = "$(arg end_effector_target_vol_y)"/>
+    <param name="end_effector_target_vol_z" value = "$(arg end_effector_target_vol_z)"/>
+    <param name="end_effector_target_rot_R" value = "$(arg end_effector_target_rot_R)"/>
+    <param name="end_effector_target_rot_Y" value = "$(arg end_effector_target_rot_Y)"/>
+    <param name="end_effector_target_rot_P" value = "$(arg end_effector_target_rot_P)"/>
+  </node>
+</launch>
