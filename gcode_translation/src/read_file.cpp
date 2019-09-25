@@ -24,16 +24,6 @@ int main(int argc, char **argv)
   //----------------------------
   //Setup
   //----------------------------
-  static const std::string PLANNING_GROUP = "arm";
-  // The :move_group_interface:`MoveGroup` class can be easily
-  // setup using just the name of the planning group you would like to control and plan for
-  moveit::planning_interface::MoveGroupInterface move_group(PLANNING_GROUP);
-
-  //Using :planning_scene_interface:'PlanningSceneInterface' class to deal directly with the world
-  moveit::planning_interface::PlanningSceneInterface planning_scene_interface;
-
-  geometry_msgs::PoseStamped current_pose = move_group.getCurrentPose();
-
   std::string chain_start, chain_end, urdf_param;
   double timeout;
   node_handle.param("chain_start", chain_start, std::string(""));
@@ -79,12 +69,6 @@ int main(int argc, char **argv)
   //Getting Basic Information
   //-----------------------------
 
-  // We can print the name of the reference frame for this robot.
-  ROS_INFO_NAMED("moveo", "Reference frame: %s", move_group.getPlanningFrame().c_str());
-
-  // We can also print the name of the end-effector link for this group.
-  ROS_INFO_NAMED("moveo", "End effector link: %s", move_group.getEndEffectorLink().c_str());
-
   KDL::JntArray result;
   KDL::Vector end_effector_target_vol;
   KDL::Rotation end_effector_target_rot;
@@ -93,9 +77,6 @@ int main(int argc, char **argv)
   std::vector<KDL::JntArray> JointList;
   geometry_msgs::Pose target_pose1;
   std::vector<double> target_joints;
-  robot_state::RobotState start_state(*move_group.getCurrentState());
-  const robot_state::JointModelGroup *joint_model_group =
-                start_state.getJointModelGroup(move_group.getName());
   KDL::Vector target_bounds_rot(0, 0, 2* M_PI), target_bounds_vel(0,0,0);
   const KDL::Twist target_bounds(target_bounds_vel, target_bounds_rot);
   
