@@ -209,6 +209,8 @@ Visualization Manager:
       Marker Topic: /rviz_visual_tools
       Name: MarkerArray
       Namespaces:
+        Path: true
+        Sphere: false
         Text: true
       Queue Size: 100
       Value: true
@@ -238,6 +240,7 @@ Visualization Manager:
         X: 0.11356700211763382
         Y: 0.10592000186443329
         Z: 2.2351800055275817e-7
+
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
