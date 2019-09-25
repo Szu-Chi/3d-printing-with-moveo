@@ -87,14 +87,8 @@ int main(int argc, char **argv)
 
   KDL::JntArray result;
   KDL::Vector end_effector_target_vol;
-
   KDL::Rotation end_effector_target_rot;
-  double end_effector_target_R, end_effector_target_P,end_effector_target_Y;
-  node_handle.param("end_effector_target_rot_R", end_effector_target_R, 0.0);
-  node_handle.param("end_effector_target_rot_P", end_effector_target_P, 0.0);
-  node_handle.param("end_effector_target_rot_Y", end_effector_target_Y, 0.0);
-  end_effector_target_rot  = KDL::Rotation::RPY(end_effector_target_R, end_effector_target_P, end_effector_target_Y);
-
+ 
   int rc;
   std::vector<KDL::JntArray> JointList;
   geometry_msgs::Pose target_pose1;
