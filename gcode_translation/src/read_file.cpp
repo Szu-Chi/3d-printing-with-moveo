@@ -17,7 +17,7 @@ ros::WallTime start_, end_;
 int main(int argc, char **argv)
 {
   start_ = ros::WallTime::now();
-  ros::init(argc, argv, "move_group_1");
+  ros::init(argc, argv, "gcode_translation");
   ros::NodeHandle node_handle("~");
   ros::AsyncSpinner spinner(1);
   spinner.start();
@@ -32,11 +32,6 @@ int main(int argc, char **argv)
   //Using :planning_scene_interface:'PlanningSceneInterface' class to deal directly with the world
   moveit::planning_interface::PlanningSceneInterface planning_scene_interface;
 
-  //     http://docs.ros.org/kinetic/api/moveit_ros_planning/html/classrobot__model__loader_1_1RobotModelLoader.html
-  // Raw pointers are frequently used to refer to the planning group for improved performance.
-  //const robot_state::JointModelGroup *joint_model_group =
-  //  move_group.getCurrentState()->getJointModelGroup(PLANNING_GROUP);
-
   geometry_msgs::PoseStamped current_pose = move_group.getCurrentPose();
 
   std::string chain_start, chain_end, urdf_param;
@@ -50,9 +45,7 @@ int main(int argc, char **argv)
   }
   node_handle.param("timeout", timeout, 0.005);
   node_handle.param("urdf_param", urdf_param, std::string("/robot_description"));
-  //TRAC_IK::SolveType solve_type;
-  //node_handle.param("solve_type", solve_type, TRAC_IK::Speed);
-
+ 
   double eps = 1e-5;
   node_handle.param("eps", eps, 1e-5);
   ROS_INFO_STREAM("eps :" << eps);
@@ -111,14 +104,22 @@ int main(int argc, char **argv)
                 start_state.getJointModelGroup(move_group.getName());
   KDL::Vector target_bounds_rot(0, 0, 2* M_PI), target_bounds_vel(0,0,0);
   const KDL::Twist target_bounds(target_bounds_vel, target_bounds_rot);
-  std::ifstream inputFile("/home/arthur/git_ws/moveo_moveit_ws/src/gcode_translation/src/15mm test.gcode");
-  std::ofstream outfile ("/home/arthur/git_ws/moveo_moveit_ws/src/gcode_translation/src/15mm test_new.gcode");
+  
+  std::string gcode_in, gcode_out;
+  node_handle.param("gcode_in", gcode_in, std::string("/gcode_in"));
+  node_handle.param("gcode_out", gcode_out, std::string("/gcode_out")); 
+  std::ifstream input_file(gcode_in);
+  if(!input_file.is_open())ROS_ERROR_STREAM("Can't open " <<gcode_in);
+  
+  std::ofstream output_file(gcode_out);
+  if(!output_file.is_open())ROS_ERROR_STREAM("Can't open " <<gcode_out);
+  
   std::string line;
   std::string file_line;
   bool check = 0;
   int second_execution = 0;
   while(ros::ok()){
-    while(getline(inputFile, line)){
+    while(getline(input_file, line)){
       std::istringstream get_line(line);
       file_line = get_line.str();
       if(file_line.find('G') < 1){
@@ -129,8 +130,8 @@ int main(int argc, char **argv)
       if(file_line.find(';') < 1){
         if(file_line.find('G') < 9){
           if(file_line.find('c') < 10){
-            outfile << file_line << std::endl;
-            outfile.close();
+            output_file << file_line << std::endl;
+            output_file.close();
             end_ = ros::WallTime::now();
             double execution_time = (end_ - start_).toNSec() * 1e-9;
             ROS_INFO_STREAM("Exectution time (ms): " << execution_time);
@@ -139,19 +140,19 @@ int main(int argc, char **argv)
             return 0;
           }
         }
-        outfile << file_line << std::endl;
+        output_file << file_line << std::endl;
       }
       else if(check == 1){
         if(file_line.find('G') < 1){
           if(file_line.find('0') < 2 || file_line.find('1') < 2){
-            outfile << file_line[0] << file_line[1];
+            output_file << file_line[0] << file_line[1];
             size_t colon_pos_X = file_line.find('X');
             if(colon_pos_X < 100){
               end_effector_target_vol.data[0] = stod(file_line.substr(colon_pos_X+1))*1e-3;
             }
             size_t colon_pos_Y = file_line.find('Y');
             if(colon_pos_Y < 100){
-              end_effector_target_vol.data[1] = (stod(file_line.substr(colon_pos_Y+1))*1e-3)+0.05;
+              end_effector_target_vol.data[1] = (stod(file_line.substr(colon_pos_Y+1))*1e-3)+0.35;
             }
             size_t colon_pos_Z = file_line.find('Z');
             if(colon_pos_Z < 100){
@@ -172,26 +173,26 @@ int main(int argc, char **argv)
               for(int i = 0; i < chain.getNrOfJoints(); i++){
                 switch (i){
                   case 0:
-                  outfile << " J" << int(result.data(i)*65600/(2*M_PI));
+                  output_file << " J" << int(result.data(i)*65600/(2*M_PI));
                   break;
                   case 1:
-                  outfile << " A" << int(result.data(i)*18000/(2*M_PI));
+                  output_file << " A" << int(result.data(i)*18000/(2*M_PI));
                   break;
                   case 2:
-                  outfile << " B" << int(result.data(i)*144000/(2*M_PI));
+                  output_file << " B" << int(result.data(i)*144000/(2*M_PI));
                   break;
                   case 3:
-                  outfile << " C" << int(result.data(i)*6560/(2*M_PI));
+                  output_file << " C" << int(result.data(i)*6560/(2*M_PI));
                   break;
                   case 4:
-                  outfile << " D" << int(result.data(i)*28800/(2*M_PI));
+                  output_file << " D" << int(result.data(i)*28800/(2*M_PI));
                   break;
                 }
               }
               for(int j = 2;j < file_line.length(); j++){
-                outfile << file_line[j];
+                output_file << file_line[j];
               }
-              outfile << std::endl;
+              output_file << std::endl;
             }
             else{
               ros::shutdown();
@@ -200,11 +201,11 @@ int main(int argc, char **argv)
           }
         }
         else{
-          outfile << file_line << std::endl;
+          output_file << file_line << std::endl;
         }
       }
       else{
-        outfile << file_line << std::endl;
+        output_file << file_line << std::endl;
       }
     }
   }
