@@ -104,77 +104,73 @@ int main(int argc, char **argv)
   std::string line;
   bool check = 0;
   int second_execution = 0;
-  while(ros::ok()){
-    while(input_file){
-      std::getline(input_file, line);
-      if(!line.compare(0,2,"G0")){
-        check = 1;
-      }else{
-        if(!check)std::cout << line << std::endl;
-      }
+  while(input_file){
+    std::getline(input_file, line);
+    if(!line.compare(0,2,"G0")){
+      check = 1;
+    }else{
+      if(!check)std::cout << line << std::endl;
+    }
 
-      if(!line.compare(0,1,";")){
-        if(!line.compare(";End of Gcode")){
-            output_file << line << std::endl;
-            output_file.close();
-            end_ = ros::WallTime::now();
-            double execution_time = (end_ - start_).toNSec() * 1e-9;
-            ROS_INFO_STREAM("Exectution time (ms): " << execution_time);
-            ROS_INFO_STREAM("second_execution: " << second_execution);
-            ros::shutdown();
-            return 0;
+    if(!line.compare(0,1,";")){
+      output_file << line << std::endl;
+    }
+    else if(check == 1){
+      if(!line.compare(0,2,"G0") || !line.compare(0,2,"G1")){
+        output_file << line[0] << line[1];
+        size_t colon_pos_X = line.find('X');
+        if(colon_pos_X < 100){
+          end_effector_target_vol.data[0] = stod(line.substr(colon_pos_X+1))*1e-3;
         }
-        output_file << line << std::endl;
-      }
-      else if(check == 1){
-        if(!line.compare(0,2,"G0") || !line.compare(0,2,"G1")){
-          output_file << line[0] << line[1];
-          size_t colon_pos_X = line.find('X');
-          if(colon_pos_X < 100){
-            end_effector_target_vol.data[0] = stod(line.substr(colon_pos_X+1))*1e-3;
+        size_t colon_pos_Y = line.find('Y');
+        if(colon_pos_Y < 100){
+          end_effector_target_vol.data[1] = (stod(line.substr(colon_pos_Y+1))*1e-3)+0.30;
+        }
+        size_t colon_pos_Z = line.find('Z');
+        if(colon_pos_Z < 100){
+          end_effector_target_vol.data[2] = stod(line.substr(colon_pos_Z+1))*1e-3;
+        }
+        KDL::Frame end_effector_pose(end_effector_target_rot, end_effector_target_vol);
+        rc = tracik_solver.CartToJnt(nominal, end_effector_pose, result, target_bounds);
+        if(rc < 0){
+          rc = tracik_solver2.CartToJnt(nominal, end_effector_pose, result, target_bounds);
+          second_execution++;
+        }
+        ROS_INFO_STREAM("rc :" << rc);
+        target_pose1.position.x    = end_effector_pose.p.x();
+        target_pose1.position.y    = end_effector_pose.p.y();
+        target_pose1.position.z    = end_effector_pose.p.z();
+        end_effector_pose.M.GetQuaternion	(target_pose1.orientation.x, target_pose1.orientation.y, target_pose1.orientation.z, target_pose1.orientation.w);
+        motor_setep_convert(result.data);
+        if(rc >= 0){
+          for(int i = 0; i < chain.getNrOfJoints(); i++){
+            static const char joint_code[5] = {'J', 'A', 'B', 'C', 'D'};
+            output_file << " " << joint_code[i] << result.data(i);
           }
-          size_t colon_pos_Y = line.find('Y');
-          if(colon_pos_Y < 100){
-            end_effector_target_vol.data[1] = (stod(line.substr(colon_pos_Y+1))*1e-3)+0.30;
+          for(int j = 2;j < line.length(); j++){
+            output_file << line[j];
           }
-          size_t colon_pos_Z = line.find('Z');
-          if(colon_pos_Z < 100){
-            end_effector_target_vol.data[2] = stod(line.substr(colon_pos_Z+1))*1e-3;
-          }
-          KDL::Frame end_effector_pose(end_effector_target_rot, end_effector_target_vol);
-          rc = tracik_solver.CartToJnt(nominal, end_effector_pose, result, target_bounds);
-          if(rc < 0){
-            rc = tracik_solver2.CartToJnt(nominal, end_effector_pose, result, target_bounds);
-            second_execution++;
-          }
-          ROS_INFO_STREAM("rc :" << rc);
-          target_pose1.position.x    = end_effector_pose.p.x();
-          target_pose1.position.y    = end_effector_pose.p.y();
-          target_pose1.position.z    = end_effector_pose.p.z();
-          end_effector_pose.M.GetQuaternion	(target_pose1.orientation.x, target_pose1.orientation.y, target_pose1.orientation.z, target_pose1.orientation.w);
-          if(rc >= 0){
-            for(int i = 0; i < chain.getNrOfJoints(); i++){
-              static const char joint_code[5] = {'J', 'A', 'B', 'C', 'D'};
-              motor_setep_convert(result.data);
-              output_file << " " << joint_code[i] << result.data(i);
-            }
-            for(int j = 2;j < line.length(); j++){
-              output_file << line[j];
-            }
-            output_file << std::endl;
-          }
-          else{
-            ros::shutdown();
-            return 0;
-          }
+          output_file << std::endl;
         }
         else{
-          output_file << line << std::endl;
+          ros::shutdown();
+          return 0;
         }
       }
       else{
         output_file << line << std::endl;
       }
     }
+    else{
+      output_file << line << std::endl;
+    }
   }
+  end_ = ros::WallTime::now();
+  double execution_time = (end_ - start_).toNSec() * 1e-9;
+  ROS_INFO_STREAM("Exectution time (ms): " << execution_time);
+  ROS_INFO_STREAM("second_execution: " << second_execution);
+  ros::shutdown();
+  return 0;
+  ros::shutdown();
+  return 0;      
 }

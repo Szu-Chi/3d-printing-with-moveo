@@ -27,7 +27,7 @@ int main(int argc, char **argv)
   robot_state::RobotState start_state(*move_group.getCurrentState());
   const robot_state::JointModelGroup *joint_model_group = start_state.getJointModelGroup(move_group.getName());
   bool check = 0;
-  std::ifstream inputFile("/home/arthur/git_ws/moveo_moveit_ws/src/gcode_translation/src/15mm test_new.gcode");
+  std::ifstream inputFile("15mm test_new.gcode");
   std::string line;
   while(ros::ok()){
     while(getline(inputFile, line)){
