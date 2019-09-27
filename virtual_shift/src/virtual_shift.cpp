@@ -27,7 +27,12 @@ int main(int argc, char **argv)
   robot_state::RobotState start_state(*move_group.getCurrentState());
   const robot_state::JointModelGroup *joint_model_group = start_state.getJointModelGroup(move_group.getName());
   bool check = 0;
-  std::ifstream inputFile("15mm test_new.gcode");
+  
+  std::string gcode_in;
+  node_handle.param("gcode_in", gcode_in, std::string("/gcode_in"));
+  std::ifstream inputFile(gcode_in);
+  if(!inputFile.is_open())ROS_ERROR_STREAM("Can't open " <<gcode_in);
+  
   std::string line;
   while(ros::ok()){
     while(getline(inputFile, line)){
