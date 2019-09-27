@@ -64,7 +64,7 @@ int main(int argc, char **argv)
   node_handle.param("eps", eps, 1e-5);
   ROS_INFO_STREAM("eps :" << eps);
   TRAC_IK::TRAC_IK tracik_solver(chain_start, chain_end, urdf_param, timeout, eps, TRAC_IK::Distance);
-  TRAC_IK::TRAC_IK tracik_solver2(chain_start, chain_end, urdf_param, timeout*10, eps, TRAC_IK::Distance);
+  TRAC_IK::TRAC_IK tracik_solver2(chain_start, chain_end, urdf_param, timeout*20, eps, TRAC_IK::Distance);
 
   KDL::Chain chain;
   KDL::JntArray ll, ul; //lower joint limits, upper joint limits
@@ -170,7 +170,5 @@ int main(int argc, char **argv)
   ROS_INFO_STREAM("Exectution time (ms): " << execution_time);
   ROS_INFO_STREAM("second_execution: " << second_execution);
   ros::shutdown();
-  return 0;
-  ros::shutdown();
-  return 0;      
+  return 0; 
 }

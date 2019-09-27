@@ -2,7 +2,7 @@
 <launch>
   <arg name="model" default="$(find moveo_urdf)/urdf/moveo_urdf.urdf"/>
   <param name="robot_description" textfile="$(arg model)" />  
-  <arg name="gcode_in" default="$(find gcode_translation)/gcode/new 15mm test.gcode"/>
+  <arg name="gcode_in" default="$(find gcode_translation)/gcode/75mm test_new.gcode"/>
   
   <node name="virtual_shift" pkg="virtual_shift" type="virtual_shift" output="screen">
     <param name="urdf_param" value="/robot_description"/>

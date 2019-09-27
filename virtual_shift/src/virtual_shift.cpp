@@ -34,6 +34,7 @@ int main(int argc, char **argv)
   if(!input_file.is_open())ROS_ERROR_STREAM("Can't open " <<gcode_in);
   
   std::string line;
+  int first = 0;
   while(input_file){
     std::getline(input_file, line);
     if(!line.compare(0,2,"G0")){
@@ -64,7 +65,22 @@ int main(int argc, char **argv)
           if(colon_pos_D < 100){
             target_joints.at(4) = double(stod(line.substr(colon_pos_D+1))*(2*M_PI)/28800);
           }
+          
           move_group.setJointValueTarget(target_joints);
+          moveit_msgs::OrientationConstraint ocm;
+          if(first++ > 2){
+            ocm.link_name = "moveo_nozzle_link";
+            ocm.header.frame_id = "base_link";
+            ocm.orientation.w = 1.0;
+            ocm.absolute_x_axis_tolerance = 0.1;
+            ocm.absolute_y_axis_tolerance = 0.1;
+            ocm.absolute_z_axis_tolerance = 2 * M_PI;
+            ocm.weight = 1.0;
+            moveit_msgs::Constraints test_constraints;
+            test_constraints.orientation_constraints.push_back(ocm);
+            move_group.setPathConstraints(test_constraints);
+          }
+          move_group.setPlanningTime(0.05);
           moveit::planning_interface::MoveGroupInterface::Plan my_plan;
           move_group.plan(my_plan);
           move_group.setMaxVelocityScalingFactor(1);
