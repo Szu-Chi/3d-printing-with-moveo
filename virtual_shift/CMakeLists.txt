@@ -64,4 +64,3 @@ add_executable(virtual_shift src/virtual_shift.cpp)
 target_link_libraries(virtual_shift
   ${catkin_LIBRARIES}
 )
-

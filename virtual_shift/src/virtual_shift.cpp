@@ -1,15 +1,15 @@
 #include <moveit/move_group_interface/move_group_interface.h>
+#include <moveit/trajectory_processing/iterative_time_parameterization.h>
 #include <moveit_visual_tools/moveit_visual_tools.h>
 #include <ros/ros.h>
 #include <sstream>
 #include <fstream>
 #include <math.h>
-
 ros::WallTime start_, end_;
 int main(int argc, char **argv)
 {
   start_ = ros::WallTime::now();
-  ros::init(argc, argv, "move_group_1");
+  ros::init(argc, argv, "virtual_shift");
   ros::NodeHandle node_handle("~");
   ros::AsyncSpinner spinner(1);
   spinner.start();
@@ -21,14 +21,17 @@ int main(int argc, char **argv)
   moveit_visual_tools::MoveItVisualTools visual_tools("base_link");
   visual_tools.deleteAllMarkers();
   visual_tools.loadRemoteControl();
-
   std::vector<double> target_joints;
   target_joints = move_group.getCurrentJointValues();
-  robot_state::RobotState start_state(*move_group.getCurrentState());
-  const robot_state::JointModelGroup *joint_model_group = start_state.getJointModelGroup(move_group.getName());
+  moveit::core::RobotStatePtr start_state(move_group.getCurrentState());
+  const robot_state::JointModelGroup *joint_model_group = start_state->getJointModelGroup(move_group.getName());
+  //start_state->copyJointGroupPositions(joint_model_group, joint_group_positions);
   bool check = 0;
-  std::ifstream inputFile("/home/arthur/git_ws/moveo_moveit_ws/src/gcode_translation/src/15mm test_new.gcode");
+  bool A = 0;
+  bool K = 0;
+  std::ifstream inputFile("/home/arthur/git_ws/moveo_moveit_ws/src/gcode_translation/src/75mm test_new.gcode");
   std::string line;
+  moveit_msgs::RobotTrajectory trajectory;
   while(ros::ok()){
     while(getline(inputFile, line)){
       std::istringstream get_line(line);
@@ -41,15 +44,11 @@ int main(int argc, char **argv)
           }
         }
       }
-      else if(check == 1){
+      if(check == 1){
         if(file_line.find(';') < 1){
           if(file_line.find('G') < 9){
             if(file_line.find('c') < 10){
-              end_ = ros::WallTime::now();
-              double execution_time = (end_ - start_).toNSec() * 1e-9;
-              ROS_INFO_STREAM("Exectution time (ms): " << execution_time);
-              ros::shutdown();
-              return 0;
+              K=1;
             }
           }
         }
@@ -77,18 +76,48 @@ int main(int argc, char **argv)
             }
             move_group.setJointValueTarget(target_joints);
             moveit::planning_interface::MoveGroupInterface::Plan my_plan;
-            move_group.plan(my_plan);
-            move_group.setMaxVelocityScalingFactor(1);
-            move_group.setMaxAccelerationScalingFactor(1);
-            size_t colon_pos_E = file_line.find('E');
-            if(colon_pos_E < 100){
-              if(stod(file_line.substr(colon_pos_E+1)) > 0){
-                visual_tools.publishTrajectoryLine(my_plan.trajectory_, joint_model_group);
+            moveit::planning_interface::MoveItErrorCode success = move_group.plan(my_plan);
+            if(A == 0){
+              move_group.move();
+              A = 1;
+            }
+            else if(A == 1){
+              trajectory.joint_trajectory.joint_names = my_plan.trajectory_.joint_trajectory.joint_names;
+              joint_model_group = start_state->getJointModelGroup(move_group.getName());
+              start_state->setJointGroupPositions(joint_model_group, target_joints);
+              move_group.setStartState(*start_state);
+              for(int j = 0; j < my_plan.trajectory_.joint_trajectory.points.size(); j++){
+                trajectory.joint_trajectory.points.push_back(my_plan.trajectory_.joint_trajectory.points[j]);
               }
             }
-            visual_tools.trigger();
-            move_group.move();
+            //move_group.setMaxVelocityScalingFactor(1);
+            //move_group.setMaxAccelerationScalingFactor(1);
+            //size_t colon_pos_E = file_line.find('E');
+            //if(colon_pos_E < 100){
+            //  if(stod(file_line.substr(colon_pos_E+1)) > 0){
+            //    visual_tools.publishTrajectoryLine(my_plan.trajectory_, joint_model_group);
+            //  }
+            //}
+            //visual_tools.trigger();
           }
+        }
+        if(K == 1){
+          moveit::planning_interface::MoveGroupInterface::Plan joinedPlan;
+          robot_trajectory::RobotTrajectory rt(move_group.getCurrentState()->getRobotModel(), "arm");
+          rt.setRobotTrajectoryMsg(*move_group.getCurrentState(),trajectory);
+          trajectory_processing::IterativeParabolicTimeParameterization iptp;
+          iptp.computeTimeStamps(rt);
+          rt.getRobotTrajectoryMsg(trajectory);
+          joinedPlan.trajectory_ = trajectory;
+          if(!move_group.execute(joinedPlan)){
+            ROS_ERROR("Failed to execute plan");
+            return false;
+          }
+          end_ = ros::WallTime::now();
+          double execution_time = (end_ - start_).toNSec() * 1e-9;
+          ROS_INFO_STREAM("Exectution time (ms): " << execution_time);
+          ros::shutdown();
+          return 0;
         }
       }
     }
