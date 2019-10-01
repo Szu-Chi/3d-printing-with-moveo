@@ -10,6 +10,7 @@
   <arg name="gcode_in" default="$(find gcode_translation)/gcode/75mm test.gcode"/>
   <arg name="gcode_out" default="$(find gcode_translation)/gcode/new 75mm test.gcode"/>
 
+
   <node name="gcode_translation" pkg="gcode_translation" type="read_file" output="screen">
     <param name="chain_start" value="$(arg chain_start)"/>
     <param name="chain_end" value="$(arg chain_end)"/>

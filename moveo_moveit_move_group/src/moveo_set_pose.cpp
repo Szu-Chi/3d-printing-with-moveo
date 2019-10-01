@@ -187,6 +187,7 @@ int main(int argc, char **argv)
   print_current_pose(move_group.getCurrentPose());
 
 
+
   // Visualization
   // ^^^^^^^^^^^^^
   //
@@ -229,7 +230,6 @@ int main(int argc, char **argv)
     ros::waitForShutdown();
   }
 
-
-  ros::shutdown();
+  ros::shutdown();  
   return 0;
 }

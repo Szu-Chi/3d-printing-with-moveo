@@ -26,12 +26,12 @@ int main(int argc, char **argv)
   moveit::core::RobotStatePtr start_state(move_group.getCurrentState());
   const robot_state::JointModelGroup *joint_model_group = start_state->getJointModelGroup(move_group.getName());
   bool check = 0;
+
   std::string gcode_in;
   node_handle.param("gcode_in", gcode_in, std::string("/gcode_in"));
   std::ifstream input_file(gcode_in);
   if(!input_file.is_open())ROS_ERROR_STREAM("Can't open " <<gcode_in);
   moveit_msgs::RobotTrajectory trajectory;
-
   std::string line;
   int first = 0;
   while(input_file){
@@ -39,7 +39,6 @@ int main(int argc, char **argv)
     if(!line.compare(0,2,"G0")){
       check = 1;
     }
-
     if(!line.compare(0,1,";")){
     }
     else if(check == 1){
