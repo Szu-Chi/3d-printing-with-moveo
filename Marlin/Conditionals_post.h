@@ -1,3 +1,4 @@
+
 /**
  * Marlin 3D Printer Firmware
  * Copyright (C) 2016 MarlinFirmware [https://github.com/MarlinFirmware/Marlin]
@@ -703,6 +704,27 @@
 #define HAS_Z2_DIR        (PIN_EXISTS(Z2_DIR))
 #define HAS_Z2_STEP       (PIN_EXISTS(Z2_STEP))
 #define HAS_Z2_MICROSTEPS (PIN_EXISTS(Z2_MS1))
+
+//Joint
+#define HAS_Joint1_ENABLE      (PIN_EXISTS(Joint1_ENABLE))
+#define HAS_Joint1_DIR         (PIN_EXISTS(Joint1_DIR))
+#define HAS_Joint1_STEP        (PIN_EXISTS(Joint1_STEP))
+
+#define HAS_Joint2_ENABLE      (PIN_EXISTS(Joint2_ENABLE))
+#define HAS_Joint2_DIR         (PIN_EXISTS(Joint2_DIR))
+#define HAS_Joint2_STEP        (PIN_EXISTS(Joint2_STEP))
+
+#define HAS_Joint3_ENABLE      (PIN_EXISTS(Joint3_ENABLE))
+#define HAS_Joint3_DIR         (PIN_EXISTS(Joint3_DIR))
+#define HAS_Joint3_STEP        (PIN_EXISTS(Joint3_STEP))
+
+#define HAS_Joint4_ENABLE      (PIN_EXISTS(Joint4_ENABLE))
+#define HAS_Joint4_DIR         (PIN_EXISTS(Joint4_DIR))
+#define HAS_Joint4_STEP        (PIN_EXISTS(Joint4_STEP))
+
+#define HAS_Joint5_ENABLE      (PIN_EXISTS(Joint5_ENABLE))
+#define HAS_Joint5_DIR         (PIN_EXISTS(Joint5_DIR))
+#define HAS_Joint5_STEP        (PIN_EXISTS(Joint5_STEP))
 
 // Extruder steppers and solenoids
 #define HAS_E0_ENABLE     (PIN_EXISTS(E0_ENABLE))

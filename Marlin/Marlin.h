@@ -91,6 +91,44 @@ extern const char axis_codes[XYZE];
   #define disable_Z() NOOP
 #endif
 
+//Joint
+#if HAS_Joint1_ENABLE
+  #define  enable_Joint1() Joint1_ENABLE_WRITE( Joint1_ENABLE_ON)
+  #define disable_Joint1() do{ Joint1_ENABLE_WRITE(!Z_ENABLE_ON); CBI(axis_known_position, Joint1_AXIS); }while(0)
+#else
+  #define  enable_Joint1() NOOP
+  #define disable_Joint1() NOOP
+#endif
+#if HAS_Joint2_ENABLE
+  #define  enable_Joint2() Joint2_ENABLE_WRITE( Joint2_ENABLE_ON)
+  #define disable_Joint2() do{ Joint2_ENABLE_WRITE(!Z_ENABLE_ON); CBI(axis_known_position, Joint2_AXIS); }while(0)
+#else
+  #define  enable_Joint2() NOOP
+  #define disable_Joint2() NOOP
+#endif
+#if HAS_Joint3_ENABLE
+  #define  enable_Joint3() Joint3_ENABLE_WRITE( Joint3_ENABLE_ON)
+  #define disable_Joint3() do{ Joint3_ENABLE_WRITE(!Z_ENABLE_ON); CBI(axis_known_position, Joint3_AXIS); }while(0)
+#else
+  #define  enable_Joint3() NOOP
+  #define disable_Joint3() NOOP
+#endif
+#if HAS_Joint4_ENABLE
+  #define  enable_Joint4() Joint4_ENABLE_WRITE( Joint4_ENABLE_ON)
+  #define disable_Joint4() do{ Joint4_ENABLE_WRITE(!Z_ENABLE_ON); CBI(axis_known_position, Joint4_AXIS); }while(0)
+#else
+  #define  enable_Joint4() NOOP
+  #define disable_Joint4() NOOP
+#endif
+#if HAS_Joint5_ENABLE
+  #define  enable_Joint5() Joint5_ENABLE_WRITE( Joint5_ENABLE_ON)
+  #define disable_Joint5() do{ Joint5_ENABLE_WRITE(!Z_ENABLE_ON); CBI(axis_known_position, Joint5_AXIS); }while(0)
+#else
+  #define  enable_Joint5() NOOP
+  #define disable_Joint5() NOOP
+#endif
+
+
 #if ENABLED(MIXING_EXTRUDER)
 
   /**
@@ -280,6 +318,9 @@ extern volatile bool wait_for_heatup;
 #endif
 
 extern float current_position[XYZE], destination[XYZE];
+extern long int current_position_Joint[Joint_All], destination_Joint[Joint_All];
+
+
 
 /**
  * Workspace offsets
@@ -546,8 +587,15 @@ extern uint8_t active_extruder;
   extern float mixing_factor[MIXING_STEPPERS];
 #endif
 
-inline void set_current_from_destination() { COPY(current_position, destination); }
-inline void set_destination_from_current() { COPY(destination, current_position); }
+inline void set_current_from_destination() { 
+  COPY(current_position, destination); 
+  COPY(current_position_Joint, destination_Joint);
+}
+inline void set_destination_from_current() { 
+  COPY(destination, current_position); 
+  COPY(destination_Joint, current_position_Joint); 
+}
+
 void prepare_move_to_destination();
 
 /**

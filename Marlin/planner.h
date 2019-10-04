@@ -92,10 +92,12 @@ typedef struct {
     struct {
       // Fields used by the Bresenham algorithm for tracing the line
       uint32_t steps[NUM_AXIS];             // Step count along each axis
+      uint32_t step_Joint[5];
     };
     // Data used by all sync blocks
     struct {
       int32_t position[NUM_AXIS];           // New position to force when this sync block is executed
+      int32_t position_Joint[5];
     };
   };
   uint32_t step_event_count;                // The number of step events required to complete this block
@@ -121,6 +123,7 @@ typedef struct {
   #endif
 
   uint8_t direction_bits;                   // The direction bit set for this block (refers to *_DIRECTION_BIT in config.h)
+  uint8_t direction_bits_joint;
 
   // Advance extrusion
   #if ENABLED(LIN_ADVANCE)
@@ -277,6 +280,7 @@ class Planner {
      * Recalculated if any axis_steps_per_mm are changed by gcode
      */
     static int32_t position[NUM_AXIS];
+    static int32_t position_joint[5];
 
     /**
      * Speed of previous path line segment
@@ -513,6 +517,18 @@ class Planner {
       #endif
     );
 
+    static bool _buffer_steps_joint(const int32_t (&target)[NUM_AXIS], const int32_t (&joint)[5]
+      #if HAS_POSITION_FLOAT
+        , const float (&target_float)[NUM_AXIS]
+      #endif
+      , float fr_mm_s, const uint8_t extruder, const float &millimeters=0.0
+      #if ENABLED(UNREGISTERED_MOVE_SUPPORT)
+        , const bool count_it=true
+      #endif
+    );
+
+
+
     /**
      * Planner::_populate_block
      *
@@ -528,6 +544,18 @@ class Planner {
      */
     static bool _populate_block(block_t * const block, bool split_move,
         const int32_t (&target)[NUM_AXIS]
+      #if HAS_POSITION_FLOAT
+        , const float (&target_float)[NUM_AXIS]
+      #endif
+      , float fr_mm_s, const uint8_t extruder, const float &millimeters=0.0
+      #if ENABLED(UNREGISTERED_MOVE_SUPPORT)
+        , const bool count_it=true
+      #endif
+    );
+
+
+    static bool _populate_block_joint(block_t * const block, bool split_move,
+        const int32_t (&target)[NUM_AXIS], const int32_t (&joint)[Joint_All]
       #if HAS_POSITION_FLOAT
         , const float (&target_float)[NUM_AXIS]
       #endif
@@ -567,16 +595,16 @@ class Planner {
       #endif
     );
 
-    static bool buffer_segment_joint(const long &j1, const long &j2, const long &j3, const long &j4, const long &j5
+    static bool buffer_segment_joint(const float &a, const float &b, const float &c, 
+      const long &j1, const long &j2, const long &j3, const long &j4, const long &j5,
       #if ENABLED(HANGPRINTER)
         const float &d,
       #endif
-      , const float &e, const float &fr_mm_s, const uint8_t extruder, const float &millimeters=0.0
+      const float &e, const float &fr_mm_s, const uint8_t extruder, const float &millimeters=0.0
       #if ENABLED(UNREGISTERED_MOVE_SUPPORT)
         , bool count_it=true
       #endif
     );
-
 
 
     static void _set_position_mm(const float &a, const float &b, const float &c,
@@ -618,27 +646,29 @@ class Planner {
     }
 
 
-
-
-    FORCE_INLINE static bool buffer_line_to_joint(long j1, long j2, long j3, long j4, long j5
+    FORCE_INLINE static bool buffer_line_joint(ARG_X, ARG_Y, ARG_Z,
+      const long &j1, const long &j2, const long &j3, const long &j4, const long &j5,
       #if ENABLED(HANGPRINTER)
         ARG_E1,
       #endif
-    , const float &e, const float &fr_mm_s, const uint8_t extruder, const float millimeters = 0.0)
-    {
+      const float &e, const float &fr_mm_s, const uint8_t extruder, const float millimeters = 0.0
+    ) {
       #if PLANNER_LEVELING && IS_CARTESIAN
         apply_leveling(rx, ry, rz);
       #endif
-
-      return buffer_segment_joint(j1, j2, j3, j4, j5
+      return buffer_segment_joint(rx, ry, rz, j1, j2, j3, j4, j5,
         #if ENABLED(HANGPRINTER)
           re1,
         #endif
         e, fr_mm_s, extruder, millimeters
       );
+      //SERIAL_ECHOLNPAIR("feedrate_mm_s:",feedrate_mm_s);
+      //SERIAL_ECHOLNPAIR("J1",j1); 
+      //SERIAL_ECHOLNPAIR("J2",j2); 
+      //SERIAL_ECHOLNPAIR("J3",j3); 
+      //SERIAL_ECHOLNPAIR("J4",j4); 
+      //SERIAL_ECHOLNPAIR("J5",j5); 
     }
-
-
 
 
     /**

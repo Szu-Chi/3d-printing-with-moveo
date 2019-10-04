@@ -466,6 +466,14 @@
 #define INVERT_Z_STEP_PIN false
 #define INVERT_E_STEP_PIN false
 
+//Joint
+#define INVERT_Joint1_STEP_PIN false
+#define INVERT_Joint2_STEP_PIN false
+#define INVERT_Joint3_STEP_PIN false
+#define INVERT_Joint4_STEP_PIN false
+#define INVERT_Joint5_STEP_PIN false
+
+
 // Default stepper release if idle. Set to 0 to deactivate.
 // Steppers will shut down DEFAULT_STEPPER_DEACTIVE_TIME seconds after the last move when DISABLE_INACTIVE_? is true.
 // Time can be set by M18 and M84.
@@ -900,7 +908,7 @@
  *
  * Override the default value based on the driver type set in Configuration.h.
  */
-//#define MINIMUM_STEPPER_PULSE 2
+#define MINIMUM_STEPPER_PULSE 30
 
 /**
  * Maximum stepping rate (in Hz) the stepper driver allows
@@ -914,7 +922,7 @@
  *
  * Override the default value based on the driver type set in Configuration.h.
  */
-//#define MAXIMUM_STEPPER_RATE 250000
+#define MAXIMUM_STEPPER_RATE 15000
 
 // @section temperature
 

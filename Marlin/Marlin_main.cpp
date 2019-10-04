@@ -385,7 +385,7 @@ uint8_t marlin_debug_flags = DEBUG_NONE;
  *   Used by 'SYNC_PLAN_POSITION_KINEMATIC' to update 'planner.position'.
  */
 float current_position[XYZE] = { 0 };
-long current_position_Joint[5] = { 0 };
+long int current_position_Joint[Joint_All] = { 0 };
 
 /**
  * Cartesian Destination
@@ -394,7 +394,7 @@ long current_position_Joint[5] = { 0 };
  *   Set with 'gcode_get_destination' or 'set_destination_from_current'.
  */
 float destination[XYZE] = { 0 };
-long destination_Joint[5] = { 0 };
+long int destination_Joint[Joint_All] = { 0 };
 
 /**
  * axis_homed
@@ -527,7 +527,6 @@ volatile bool wait_for_heatup = true;
 #endif
 
 const char axis_codes[XYZE] = { 'X', 'Y', 'Z', 'E' };
-const char Joint_codes[5]={'J1','J2','J3','J4','J5'};
 
 #if ENABLED(HANGPRINTER)
   const char axis_codes_hangprinter[ABCDE] = { 'A', 'B', 'C', 'D', 'E' };
@@ -1593,7 +1592,10 @@ inline float get_homing_bump_feedrate(const AxisEnum axis) {
  */
 inline void buffer_line_to_current_position() {
   #if DISABLED(HANGPRINTER) // emptying this function probably breaks do_blocking_move_to()
-    planner.buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_CART], feedrate_mm_s, active_extruder);
+    planner.buffer_line_joint(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], 
+                              current_position_Joint[Joint1_AXIS], current_position_Joint[Joint2_AXIS], current_position_Joint[Joint3_AXIS], 
+                              current_position_Joint[Joint4_AXIS], current_position_Joint[Joint5_AXIS], 
+                              current_position[E_CART], feedrate_mm_s, active_extruder);
   #endif
 }
 
@@ -1605,19 +1607,13 @@ inline void buffer_line_to_destination(const float &fr_mm_s) {
   #if ENABLED(HANGPRINTER)
     UNUSED(fr_mm_s);
   #else
-    planner.buffer_line(destination[X_AXIS], destination[Y_AXIS], destination[Z_AXIS], destination[E_CART], fr_mm_s, active_extruder);
+  planner.buffer_line_joint(destination[X_AXIS], destination[Y_AXIS], destination[Z_AXIS], 
+                        destination_Joint[Joint1_AXIS], destination_Joint[Joint2_AXIS], destination_Joint[Joint3_AXIS], 
+                        destination_Joint[Joint4_AXIS], destination_Joint[Joint5_AXIS],
+                        destination[E_CART], fr_mm_s, active_extruder);
+  //SERIAL_ECHOLNPAIR("feedrate_mm_s:",fr_mm_s);
   #endif
 }
-
-inline void buffer_line_to_joint(const float &fr_mm_s) {
-  #if ENABLED(HANGPRINTER)
-    UNUSED(fr_mm_s);
-  #else
-    planner.buffer_line_joint(destination_Joint[0], destination_Joint[1], destination_Joint[2], destination_Joint[3], destination_Joint[4],
-                              destination[E_CART], fr_mm_s, active_extruder);
-  #endif
-}
-
 
 #if IS_KINEMATIC
   /**
@@ -3552,36 +3548,33 @@ static void homeaxis(const AxisEnum axis) {
 void gcode_get_destination() {
 	 char *joint[5]={'J','A','B','C','D'};
   	for(int i1=1;i1<6;i1++) {
-  		SERIAL_ECHO(i1);
-  		SERIAL_ECHOPGM(": ");
     	if (parser.seen(joint[i1-1])) {
-    		int32_t data = parser.value_axis_units((AxisEnum)(i1-1));
-    		SERIAL_ECHOPAIR("J",i1);
-    		SERIAL_ECHOPAIR(", data = ",data);
-    		SERIAL_ECHOLNPGM(" ");
+    		int32_t data = parser.value_axis_units(i1-1);	
     		destination_Joint[i1-1] = data;
-
     	}
+      else{
+        destination_Joint[i1-1] = current_position_Joint[i1-1];
+      }
+      //SERIAL_ECHOPAIR("J",i1);
+    	//SERIAL_ECHOPAIR(" = ",destination_Joint[i1-1]);
+      //SERIAL_PROTOCOLCHAR(" ");
     }
-
-
+   //SERIAL_ECHOLN(" ");
    LOOP_XYZE(i) {
      if (parser.seen(axis_codes[i])) {
-     	SERIAL_ECHOPGM(axis_codes[i]);
-  		SERIAL_ECHOPGM(": ");
        const float v = parser.value_axis_units((AxisEnum)i);
        destination[i] = (axis_relative_modes[i] || relative_mode)
          ? current_position[i] + v
          : (i == E_CART) ? v : LOGICAL_TO_NATIVE(v, i);
-        SERIAL_ECHOPGM(axis_codes[i]);
-    	SERIAL_ECHOPAIR(", data = ",v);
-    	SERIAL_ECHOLNPGM(" ");
      }
-     else
+     else{
        destination[i] = current_position[i];
+     }
+     //SERIAL_PROTOCOLCHAR(" ");
+     //SERIAL_PROTOCOLCHAR(axis_codes[i]);
+     //SERIAL_ECHOPAIR(" = ",destination[i]);
    }
-
-
+  //SERIAL_ECHOLN(" ");
   if (parser.linearval('F') > 0)
     feedrate_mm_s = MMM_TO_MMS(parser.value_feedrate());
 
@@ -3589,6 +3582,16 @@ void gcode_get_destination() {
     if (!DEBUGGING(DRYRUN))
       print_job_timer.incFilamentUsed(destination[E_CART] - current_position[E_CART]);
   #endif
+
+  // SERIAL_PROTOCOLPGM("Before");
+  // stepper.report_positions();
+
+  // stepper.set_position(destination[X_AXIS],destination[Y_AXIS],destination[Z_AXIS],
+  // 	// destination_Joint[Joint1_AXIS],destination_Joint[Joint2_AXIS],destination_Joint[Joint3_AXIS],destination_Joint[Joint4_AXIS],destination_Joint[Joint5_AXIS],
+  // 	destination[E_AXIS]);
+
+  // SERIAL_PROTOCOLPGM("After");
+  // stepper.report_positions();
 
   // Get ABCDHI mixing factors
   #if ENABLED(MIXING_EXTRUDER) && ENABLED(DIRECT_MIXING_IN_G1)
@@ -9146,6 +9149,12 @@ inline void gcode_M83() { axis_relative_modes[E_CART] = true; }
  * M18, M84: Disable stepper motors
  */
 inline void gcode_M18_M84() {
+  disable_Joint1();
+  disable_Joint2();
+  disable_Joint3();
+  disable_Joint4();
+  disable_Joint5();
+
   if (parser.seenval('S')) {
     stepper_inactive_time = parser.value_millis_from_seconds();
   }
@@ -9159,6 +9168,7 @@ inline void gcode_M18_M84() {
       if (parser.seen('X')) disable_X();
       if (parser.seen('Y')) disable_Y();
       if (parser.seen('Z')) disable_Z();
+      
       #if E0_ENABLE_PIN != X_ENABLE_PIN && E1_ENABLE_PIN != Y_ENABLE_PIN // Only disable on boards that have separate ENABLE_PINS
         if (parser.seen('E')) disable_e_steppers();
       #endif
@@ -12453,7 +12463,7 @@ inline void invalid_extruder_error(const uint8_t e) {
           i == 0 ? current_position[X_AXIS] : xhome,
           current_position[Y_AXIS],
           i == 2 ? current_position[Z_AXIS] : raised_z,
-          current_position[E_CART],
+          current_position[E_CART],0,0,0,0,0,
           planner.max_feedrate_mm_s[i == 1 ? X_AXIS : Z_AXIS],
           active_extruder
         );
@@ -14343,42 +14353,9 @@ void set_current_from_steppers_for_axis(const AxisEnum axis) {
     #endif // HAS_MESH
 
     buffer_line_to_destination(MMS_SCALED(feedrate_mm_s));
+    //SERIAL_ECHOPAIR("feedrate_mm_s:",feedrate_mm_s);
     return false; // caller will update current_position
   }
-
-
-
-
-  inline bool prepare_move_to_destination_joint() {
-    #if HAS_MESH
-      if (planner.leveling_active && planner.leveling_active_at_z(destination[Z_AXIS])) {
-        #if ENABLED(AUTO_BED_LEVELING_UBL)
-          ubl.line_to_destination_cartesian(MMS_SCALED(feedrate_mm_s), active_extruder);  // UBL's motion routine needs to know about
-          return true;                                                                    // all moves, including Z-only moves.
-        #elif ENABLED(SEGMENT_LEVELED_MOVES)
-          segmented_line_to_destination(MMS_SCALED(feedrate_mm_s));
-          return false; // caller will update current_position
-        #else
-          /**
-           * For MBL and ABL-BILINEAR only segment moves when X or Y are involved.
-           * Otherwise fall through to do a direct single move.
-           */
-          if (current_position[X_AXIS] != destination[X_AXIS] || current_position[Y_AXIS] != destination[Y_AXIS]) {
-            #if ENABLED(MESH_BED_LEVELING)
-              mesh_line_to_destination(MMS_SCALED(feedrate_mm_s));
-            #elif ENABLED(AUTO_BED_LEVELING_BILINEAR)
-              bilinear_line_to_destination(MMS_SCALED(feedrate_mm_s));
-            #endif
-            return true;
-          }
-        #endif
-      }
-    #endif // HAS_MESH
-
-    buffer_line_to_joint(MMS_SCALED(feedrate_mm_s));
-    return false; // caller will update current_position
-  }
-
 
 #endif // !IS_KINEMATIC
 #endif // !UBL_SEGMENTED
@@ -14503,8 +14480,7 @@ void prepare_move_to_destination() {
     #elif IS_KINEMATIC
       prepare_kinematic_move_to(destination)
     #else
-      //prepare_move_to_destination_cartesian()
-      prepare_move_to_destination_joint()
+      prepare_move_to_destination_cartesian()
     #endif
   ) return;
 
@@ -14910,6 +14886,12 @@ void enable_all_steppers() {
     enable_Y();
     enable_Z();
     enable_E4();
+
+    enable_Joint1();
+    enable_Joint2();
+    enable_Joint3();
+    enable_Joint4();
+    enable_Joint5();
   #endif
   enable_E0();
   enable_E1();
@@ -14940,6 +14922,12 @@ void disable_all_steppers() {
   disable_Y();
   disable_Z();
   disable_e_steppers();
+
+  disable_Joint1();
+  disable_Joint2();
+  disable_Joint3();
+  disable_Joint4();
+  disable_Joint5();
 }
 
 /**

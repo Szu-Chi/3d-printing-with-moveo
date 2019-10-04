@@ -185,6 +185,12 @@
 // The minimum allowable frequency for step smoothing will be 1/10 of the maximum nominal frequency (in Hz)
 #define MIN_STEP_ISR_FREQUENCY MAX_STEP_ISR_FREQUENCY_1X
 
+// #define Joint1_AXIS 0
+// #define Joint2_AXIS 1
+// #define Joint3_AXIS 2
+// #define Joint4_AXIS 3
+// #define Joint5_AXIS 4
+
 //
 // Stepper class definition
 //
@@ -242,6 +248,7 @@ class Stepper {
     static block_t* current_block;          // A pointer to the block currently being traced
 
     static uint8_t last_direction_bits,     // The next stepping-bits to be output
+                   last_direction_bits_joint,
                    axis_did_move;           // Last Movement in the given direction is not null, as computed when the last movement was fetched from planner
 
     static bool abort_current_block;        // Signals to the stepper that current block should be aborted
@@ -271,7 +278,9 @@ class Stepper {
 
     // Delta error variables for the Bresenham line tracer
     static int32_t delta_error[NUM_AXIS];
+    static int32_t delta_error_Joint[5];
     static uint32_t advance_dividend[NUM_AXIS],
+                    advance_dividend_Joint[Joint_All],
                     advance_divisor,
                     step_events_completed,  // The number of step events executed in the current block
                     accelerate_until,       // The point from where we need to stop acceleration
@@ -318,11 +327,13 @@ class Stepper {
     // Positions of stepper motors, in step units
     //
     static volatile int32_t count_position[NUM_AXIS];
+    static volatile int32_t count_position_Joint[Joint_All];
 
     //
     // Current direction of stepper motors (+1 or -1)
     //
     static int8_t count_direction[NUM_AXIS];
+    static int8_t count_direction_Joint[Joint_All];
 
   public:
 
@@ -354,7 +365,8 @@ class Stepper {
     static bool is_block_busy(const block_t* const block);
 
     // Get the position of a stepper, in steps
-    static int32_t position(const AxisEnum axis);
+    static int32_t position(const AxisEnum axis);    
+    static int32_t position_Joint(const JointEnum axis);
 
     // Report the positions of the steppers, in steps
     static void report_positions();
@@ -368,6 +380,7 @@ class Stepper {
 
     // The direction of a single motor
     FORCE_INLINE static bool motor_direction(const AxisEnum axis) { return TEST(last_direction_bits, axis); }
+    FORCE_INLINE static bool motor_direction_Joint(const JointEnum axis) { return TEST(last_direction_bits_joint, axis); }
 
     // The last movement direction was not null on the specified axis. Note that motor direction is not necessarily the same.
     FORCE_INLINE static bool axis_is_moving(const AxisEnum axis) { return TEST(axis_did_move, axis); }
@@ -425,11 +438,12 @@ class Stepper {
     #endif
 
     // Set the current position in steps
-    inline static void set_position(const int32_t &a, const int32_t &b, const int32_t &c
+    inline static void set_position(const int32_t &a, const int32_t &b, const int32_t &c,
       #if ENABLED(HANGPRINTER)
         , const int32_t &d
       #endif
-      , const int32_t &e
+      const int32_t &J1, const int32_t &J2, const int32_t &J3, const int32_t &J4, const int32_t &J5,
+      const int32_t &e
     ) {
       planner.synchronize();
       const bool was_enabled = STEPPER_ISR_ENABLED();
@@ -440,6 +454,7 @@ class Stepper {
         #endif
         , e
       );
+       _set_position_Joint(J1,J2,J3,J4,J5);       
       if (was_enabled) ENABLE_STEPPER_DRIVER_INTERRUPT();
     }
 
@@ -454,6 +469,17 @@ class Stepper {
       if (was_enabled) ENABLE_STEPPER_DRIVER_INTERRUPT();
     }
 
+    inline static void _Joint(const JointEnum a, const int32_t &v) {
+      planner.synchronize();
+
+      const bool was_enabled = STEPPER_ISR_ENABLED();
+      if (was_enabled) DISABLE_STEPPER_DRIVER_INTERRUPT();
+
+      count_position_Joint[a] = v;
+      
+      if (was_enabled) ENABLE_STEPPER_DRIVER_INTERRUPT();
+    }
+
   private:
 
     // Set the current position in steps
@@ -461,11 +487,13 @@ class Stepper {
       #if ENABLED(HANGPRINTER)
         , const int32_t &d
       #endif
-      , const int32_t &e
-    );
+      , const int32_t &e);
+
+    static void _set_position_Joint(const int32_t &J1, const int32_t &J2, const int32_t &J3, const int32_t &J4, const int32_t &J5);
 
     // Set direction bits for all steppers
     static void set_directions();
+    static void set_directions_Joint();
 
     // Allow reset_stepper_drivers to access private set_directions
     friend void reset_stepper_drivers();

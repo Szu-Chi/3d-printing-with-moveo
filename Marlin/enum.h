@@ -51,6 +51,14 @@ enum AxisEnum : unsigned char {
   NO_AXIS   = 0xFF
 };
 
+enum JointEnum: unsigned char {
+  Joint1_AXIS = 0,
+  Joint2_AXIS = 1,
+  Joint3_AXIS = 2,
+  Joint4_AXIS = 3,
+  Joint5_AXIS = 4
+};
+
 #define LOOP_S_LE_N(VAR, S, N) for (uint8_t VAR=S; VAR<=N; VAR++)
 #define LOOP_S_L_N(VAR, S, N) for (uint8_t VAR=S; VAR<N; VAR++)
 #define LOOP_LE_N(VAR, N) LOOP_S_LE_N(VAR, 0, N)
