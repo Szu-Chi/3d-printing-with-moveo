@@ -15512,6 +15512,13 @@ void setup() {
   #if ENABLED(SDSUPPORT) && DISABLED(ULTRA_LCD)
     card.beginautostart();
   #endif
+
+
+  enable_Joint1();
+  enable_Joint2();
+  enable_Joint3();
+  enable_Joint4();
+  enable_Joint5();
 }
 
 /**

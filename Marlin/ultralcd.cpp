@@ -2952,8 +2952,13 @@ void lcd_quick_feedback(const bool clear_buttons) {
     if (processing_manual_move) return;
 
     if (manual_move_joint != (int8_t)NO_AXIS && ELAPSED(millis(), manual_move_start_time) && !planner.is_full()) {
-
-        planner.buffer_line_kinematic_joint(current_position_Joint, MMM_TO_MMS(manual_feedrate_mm_m_joint[manual_move_joint]), 0);
+        stepper.set_position_Joint_manual(current_position_Joint[Joint1_AXIS],
+                                          current_position_Joint[Joint2_AXIS],
+                                          current_position_Joint[Joint3_AXIS],
+                                          current_position_Joint[Joint4_AXIS],
+                                          current_position_Joint[Joint5_AXIS]
+                                        );
+        //planner.buffer_line_kinematic_joint(current_position_Joint, MMM_TO_MMS(manual_feedrate_mm_m_joint[manual_move_joint]), 0);
         manual_move_joint = (int8_t)NO_AXIS;
     }
   }

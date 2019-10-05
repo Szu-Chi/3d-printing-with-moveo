@@ -189,14 +189,15 @@ int32_t Stepper::ticks_nominal = -1;
 
 volatile int32_t Stepper::endstops_trigsteps[XYZ],
                  Stepper::count_position[NUM_AXIS] = { 0 },
-                 Stepper::count_position_Joint[Joint_All] = { 0 };
+                 Stepper::count_position_Joint[Joint_All] = { 0 },
+                 Stepper::count_position_Joint_manual[Joint_All] = { 0 };
 int8_t Stepper::count_direction[NUM_AXIS] = {
   1, 1, 1, 1
   #if ENABLED(HANGPRINTER)
     , 1
   #endif
 };
- int8_t Stepper::count_direction_Joint[Joint_All] = {1,1,1,1,1};
+int8_t Stepper::count_direction_Joint[Joint_All] = {1,1,1,1,1};
 
 #if ENABLED(X_DUAL_ENDSTOPS) || ENABLED(Y_DUAL_ENDSTOPS) || ENABLED(Z_DUAL_ENDSTOPS)
   #define DUAL_ENDSTOP_APPLY_STEP(A,V)                                                                                        \
@@ -1363,7 +1364,7 @@ void Stepper::stepper_pulse_phase_isr() {
   // Take multiple steps per interrupt (For high speed moves)
   do {
 
-    #define _APPLY_STEP(AXIS) AXIS ##_APPLY_STEP
+    #define _APPLY_STEP(AXIS) AXIS ##_APPLY_STEP 
     #define _INVERT_STEP_PIN(AXIS) INVERT_## AXIS ##_STEP_PIN
 
     // Start an active pulse, if Bresenham says so, and update position
@@ -2377,6 +2378,86 @@ int32_t Stepper::position_Joint(const JointEnum axis) {
   if (was_enabled) ENABLE_STEPPER_DRIVER_INTERRUPT();
   return v;
 }
+
+void Stepper::set_position_Joint_manual(const int32_t &J1, const int32_t &J2, const int32_t &J3, const int32_t &J4, const int32_t &J5){
+
+  #define _APPLY_STEP(AXIS) AXIS ##_APPLY_STEP 
+  #define _INVERT_STEP_PIN(AXIS) INVERT_## AXIS ##_STEP_PIN 
+  #define SET_DIR_Joint(A)    A##_APPLY_DIR(INVERT_## A##_DIR, false)
+  #define RESET_DIR_Joint(A)  A##_APPLY_DIR(!INVERT_## A##_DIR, false)
+ 
+    
+  const int32_t d0 = J1 - count_position_Joint_manual[Joint1_AXIS],
+                d1 = J2 - count_position_Joint_manual[Joint2_AXIS],
+                d2 = J3 - count_position_Joint_manual[Joint3_AXIS],
+                d3 = J4 - count_position_Joint_manual[Joint4_AXIS],
+                d4 = J5 - count_position_Joint_manual[Joint5_AXIS];
+
+  if(d0<0) SET_DIR_Joint(Joint1); else RESET_DIR_Joint(Joint1);
+  if(d1<0) SET_DIR_Joint(Joint2); else RESET_DIR_Joint(Joint2);
+  if(d2<0) SET_DIR_Joint(Joint3); else RESET_DIR_Joint(Joint3);
+  if(d3<0) SET_DIR_Joint(Joint4); else RESET_DIR_Joint(Joint4);
+  if(d4<0) SET_DIR_Joint(Joint5); else RESET_DIR_Joint(Joint5);
+ 
+  const int32_t target_micro_step[Joint_All] = {abs(d0),abs(d1),abs(d2),abs(d3),abs(d4)};
+
+  for(int joint_axis=0;joint_axis<Joint_All;joint_axis++){
+    for (int microstep = 0; microstep < target_micro_step[joint_axis]; microstep++) {
+      // These four lines result in 1 step:
+      switch (joint_axis)
+      {
+        case Joint1_AXIS:
+          _APPLY_STEP(Joint1)(!_INVERT_STEP_PIN(Joint1), 0);
+          delayMicroseconds(1000);
+          _APPLY_STEP(Joint1)(_INVERT_STEP_PIN(Joint1), 0);
+          delayMicroseconds(1000);
+          break;
+        case Joint2_AXIS:
+          _APPLY_STEP(Joint2)(!_INVERT_STEP_PIN(Joint2), 0);
+          delayMicroseconds(1000);
+          _APPLY_STEP(Joint2)(_INVERT_STEP_PIN(Joint2), 0);
+          delayMicroseconds(1000);
+          break;
+        case Joint3_AXIS:
+          _APPLY_STEP(Joint3)(!_INVERT_STEP_PIN(Joint3), 0);
+          delayMicroseconds(1000);
+          _APPLY_STEP(Joint3)(_INVERT_STEP_PIN(Joint3), 0);
+          delayMicroseconds(1000);
+          break;
+        case Joint4_AXIS:
+          _APPLY_STEP(Joint4)(!_INVERT_STEP_PIN(Joint4), 0);
+          delayMicroseconds(1000);
+          _APPLY_STEP(Joint4)(_INVERT_STEP_PIN(Joint4), 0);
+          delayMicroseconds(1000);
+          break;
+        case Joint5_AXIS:
+          _APPLY_STEP(Joint5)(!_INVERT_STEP_PIN(Joint5), 0);
+          delayMicroseconds(1000);
+          _APPLY_STEP(Joint5)(_INVERT_STEP_PIN(Joint5), 0);
+          delayMicroseconds(1000);
+          break;
+      }
+    }
+  }
+  
+
+  count_position_Joint_manual[Joint1_AXIS] = J1;
+  count_position_Joint_manual[Joint2_AXIS] = J2;
+  count_position_Joint_manual[Joint3_AXIS] = J3;
+  count_position_Joint_manual[Joint4_AXIS] = J4;
+  count_position_Joint_manual[Joint5_AXIS] = J5;
+
+}
+
+
+
+
+
+
+
+
+
+
 
 // Signal endstops were triggered - This function can be called from
 // an ISR context  (Temperature, Stepper or limits ISR), so we must
