@@ -444,6 +444,25 @@
 #ifndef MSG_MOVE_E
   #define MSG_MOVE_E                          _UxGT("Extruder")
 #endif
+
+//joint 
+#ifndef MSG_MOVE_J
+  #define MSG_MOVE_J                          _UxGT("Move J")
+#endif
+#ifndef MSG_MOVE_A
+  #define MSG_MOVE_A                          _UxGT("Move A")
+#endif
+#ifndef MSG_MOVE_B
+  #define MSG_MOVE_B                          _UxGT("Move B")
+#endif
+#ifndef MSG_MOVE_C
+  #define MSG_MOVE_C                          _UxGT("Move C")
+#endif
+#ifndef MSG_MOVE_D
+  #define MSG_MOVE_D                          _UxGT("Move D")
+#endif
+//end joint
+
 #ifndef MSG_MOVE_01MM
   #define MSG_MOVE_01MM                       _UxGT("Move 0.1mm")
 #endif

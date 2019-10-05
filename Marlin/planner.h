@@ -704,6 +704,39 @@ class Planner {
     }
 
     /**
+     * Add a new linear movement to the buffer.
+     * The target is cartesian, it's translated to delta/scara if
+     * needed.
+     *
+     *  jcart        - J,A,B,C,D CARTESIAN target in mm
+     *  fr_mm_s      - (target) speed of the move (mm/s)
+     *  extruder     - target extruder
+     *  millimeters  - the length of the movement, if known
+     */
+
+    FORCE_INLINE static bool buffer_line_kinematic_joint(const long (&jcart)[Joint_All], const float &fr_mm_s, const uint8_t extruder, const float millimeters = 0.0) {
+      #if PLANNER_LEVELING
+        float raw[XYZ] = { cart[X_AXIS], cart[Y_AXIS], cart[Z_AXIS] };
+        apply_leveling(raw);
+      #else
+        const long (&jraw)[Joint_All] = jcart;
+      #endif
+      #if IS_KINEMATIC
+        inverse_kinematics(raw);
+        return buffer_segment(
+          #if ENABLED(HANGPRINTER)
+            line_lengths[A_AXIS], line_lengths[B_AXIS], line_lengths[C_AXIS], line_lengths[D_AXIS]
+          #else
+            delta[A_AXIS], delta[B_AXIS], delta[C_AXIS]
+          #endif
+          , cart[E_CART], fr_mm_s, extruder, millimeters
+        );
+      #else
+        return buffer_segment_joint(0,0,0,jraw[Joint1_AXIS], jraw[Joint2_AXIS], jraw[Joint3_AXIS], jraw[Joint4_AXIS], jraw[Joint5_AXIS],0, fr_mm_s, extruder, millimeters);
+      #endif
+    }
+
+    /**
      * Set the planner.position and individual stepper positions.
      * Used by G92, G28, G29, and other procedures.
      *

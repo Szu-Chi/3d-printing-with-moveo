@@ -492,6 +492,7 @@
 
 #if ENABLED(ULTIPANEL)
   #define MANUAL_FEEDRATE {50*60, 50*60, 4*60, 60} // Feedrates for manual moves along X, Y, Z, E from panel
+  #define MANUAL1_FEEDRATE {50*60, 50*60, 50*60, 50*60,50*60}
   #define ULTIPANEL_FEEDMULTIPLY  // Comment to disable setting feedrate multiplier via encoder
 #endif
 
