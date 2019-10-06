@@ -472,6 +472,18 @@
 #ifndef MSG_MOVE_10MM
   #define MSG_MOVE_10MM                       _UxGT("Move 10mm")
 #endif
+
+#ifndef MSG_MOVE_1step
+  #define MSG_MOVE_1step                      _UxGT("Move 1step")
+#endif
+#ifndef MSG_MOVE_10step
+  #define MSG_MOVE_10step                     _UxGT("Move 10step")
+#endif
+#ifndef MSG_MOVE_100step
+  #define MSG_MOVE_100step                    _UxGT("Move 100step")
+#endif
+
+
 #ifndef MSG_SPEED
   #define MSG_SPEED                           _UxGT("Speed")
 #endif
