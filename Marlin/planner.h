@@ -614,6 +614,8 @@ class Planner {
       const float &e
     );
 
+    static void _set_position_mm_Joint(const uint32_t &j1, const uint32_t &j2, const uint32_t &j3, const uint32_t &j4, const uint32_t &j5);
+
     /**
      * Add a new linear movement to the buffer.
      * The target is NOT translated to delta/scara
@@ -761,6 +763,10 @@ class Planner {
         e
       );
     }
+    FORCE_INLINE static void set_position_mm_Joint(int32_t &j1, int32_t &j2, int32_t &j3,int32_t &j4,int32_t &j5) {
+       _set_position_mm_Joint(j1,j2,j3,j4,j5);
+    }
+
     static void set_position_mm_kinematic(const float (&cart)[XYZE]);
     static void set_position_mm(const AxisEnum axis, const float &v);
     FORCE_INLINE static void set_z_position_mm(const float &z) { set_position_mm(Z_AXIS, z); }

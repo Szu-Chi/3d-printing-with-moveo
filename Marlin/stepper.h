@@ -456,7 +456,7 @@ class Stepper {
         #endif
         , e
       );
-       _set_position_Joint(J1,J2,J3,J4,J5);       
+      _set_position_Joint(J1,J2,J3,J4,J5);       
       if (was_enabled) ENABLE_STEPPER_DRIVER_INTERRUPT();
     }
 

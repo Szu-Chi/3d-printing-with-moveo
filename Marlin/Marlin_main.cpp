@@ -406,6 +406,7 @@ long int destination_Joint[Joint_All] = { 0 };
  *   Cleared whenever a stepper powers off, potentially losing its position.
  */
 uint8_t axis_homed, axis_known_position; // = 0
+uint8_t Joint_homed, Joint_known_position; // = 0
 
 /**
  * GCode line number handling. Hosts may opt to include line numbers when
@@ -457,7 +458,16 @@ static const float homing_feedrate_mm_s[] PROGMEM = {
     MMM_TO_MMS(HOMING_FEEDRATE_Z), 0
   #endif
 };
+
+static const float homing_feedrate_mm_s_Joint[] PROGMEM = {
+  MMM_TO_MMS(HOMING_FEEDRATE_Joint),
+  MMM_TO_MMS(HOMING_FEEDRATE_Joint),
+  MMM_TO_MMS(HOMING_FEEDRATE_Joint),
+  MMM_TO_MMS(HOMING_FEEDRATE_Joint),
+  MMM_TO_MMS(HOMING_FEEDRATE_Joint) 
+};
 FORCE_INLINE float homing_feedrate(const AxisEnum a) { return pgm_read_float(&homing_feedrate_mm_s[a]); }
+FORCE_INLINE float homing_feedrate_Joint(const JointEnum a) { return pgm_read_float(&homing_feedrate_mm_s_Joint[a]); }
 
 float feedrate_mm_s = MMM_TO_MMS(1500.0f);
 static float saved_feedrate_mm_s;
@@ -470,21 +480,27 @@ bool axis_relative_modes[XYZE] = AXIS_RELATIVE_MODES;
   #if HAS_POSITION_SHIFT
     // The distance that XYZ has been offset by G92. Reset by G28.
     float position_shift[XYZ] = { 0 };
+    float position_shift_Joint[Joint_All] = { 0 };
   #endif
   #if HAS_HOME_OFFSET
     // This offset is added to the configured home position.
     // Set by M206, M428, or menu item. Saved to EEPROM.
     float home_offset[XYZ] = { 0 };
+    float home_offset_Joint[Joint_All] = { 0 };
   #endif
   #if HAS_HOME_OFFSET && HAS_POSITION_SHIFT
     // The above two are combined to save on computes
     float workspace_offset[XYZ] = { 0 };
+    float workspace_offset_Joint[Joint_All] = { 0 };
   #endif
 #endif
 
 // Software Endstops are based on the configured limits.
 float soft_endstop_min[XYZ] = { X_MIN_BED, Y_MIN_BED, Z_MIN_POS },
       soft_endstop_max[XYZ] = { X_MAX_BED, Y_MAX_BED, Z_MAX_POS };
+//joint
+float soft_endstop_min_Joint[Joint_All] = { Joint1_MIN_POS, Joint2_MIN_POS, Joint3_MIN_POS, Joint4_MIN_POS, Joint5_MIN_POS},
+      soft_endstop_max_Joint[Joint_All] = { Joint1_MAX_POS, Joint2_MAX_POS, Joint3_MAX_POS, Joint4_MAX_POS, Joint5_MAX_POS};
 #if HAS_SOFTWARE_ENDSTOPS
   bool soft_endstops_enabled = true;
   #if IS_KINEMATIC
@@ -527,6 +543,7 @@ volatile bool wait_for_heatup = true;
 #endif
 
 const char axis_codes[XYZE] = { 'X', 'Y', 'Z', 'E' };
+const char Joint_codes[Joint_All] = { 'J', 'A', 'B', 'C', 'D'};
 
 #if ENABLED(HANGPRINTER)
   const char axis_codes_hangprinter[ABCDE] = { 'A', 'B', 'C', 'D', 'E' };
@@ -748,6 +765,18 @@ XYZ_CONSTS_FROM_CONFIG(float, max_length,     MAX_LENGTH);
 XYZ_CONSTS_FROM_CONFIG(float, home_bump_mm,   HOME_BUMP_MM);
 XYZ_CONSTS_FROM_CONFIG(signed char, home_dir, HOME_DIR);
 
+#define Joint_CONSTS_FROM_CONFIG(type, array, CONFIG) \
+  static const PROGMEM type array##_P[Joint_All] = { Joint1_##CONFIG, Joint2_##CONFIG, Joint3_##CONFIG, Joint4_##CONFIG, Joint5_##CONFIG }; \
+  static inline type array(const JointEnum axis) { return pgm_read_any(&array##_P[axis]); } \
+  typedef void __void_##CONFIG##__
+
+Joint_CONSTS_FROM_CONFIG(float, base_min_pos_Joint,   MIN_POS); 
+Joint_CONSTS_FROM_CONFIG(float, base_max_pos_Joint,   MAX_POS); 
+Joint_CONSTS_FROM_CONFIG(float, base_home_pos_Joint,  HOME_POS); 
+Joint_CONSTS_FROM_CONFIG(float, max_length_Joint,     MAX_LENGTH);
+Joint_CONSTS_FROM_CONFIG(float, home_bump_mm_Joint,   HOME_BUMP_MM);
+Joint_CONSTS_FROM_CONFIG(signed char, home_dir_Joint, HOME_DIR); 
+
 /**
  * ***************************************************************************
  * ******************************** FUNCTIONS ********************************
@@ -807,6 +836,15 @@ void sync_plan_position() {
       if (DEBUGGING(LEVELING)) DEBUG_POS("sync_plan_position", current_position);
     #endif
     planner.set_position_mm(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_CART]);
+  #endif
+}
+
+void sync_plan_position_Joint() {
+  #if DISABLED(HANGPRINTER)
+    #if ENABLED(DEBUG_LEVELING_FEATURE)
+      if (DEBUGGING(LEVELING)) DEBUG_POS("sync_plan_position", current_position);
+    #endif
+    planner.set_position_mm_Joint(current_position_Joint[Joint1_AXIS], current_position_Joint[Joint2_AXIS], current_position_Joint[Joint3_AXIS], current_position_Joint[Joint4_AXIS], current_position_Joint[Joint5_AXIS]);
   #endif
 }
 void sync_plan_position_e() { planner.set_e_position_mm(current_position[E_CART]); }
@@ -1422,6 +1460,80 @@ bool get_target_extruder_from_command(const uint16_t code) {
 
 #endif // HAS_WORKSPACE_OFFSET || DUAL_X_CARRIAGE || DELTA
 
+#if HAS_WORKSPACE_OFFSET || ENABLED(DUAL_X_CARRIAGE) || ENABLED(DELTA)
+void update_software_endstops_Joint(const JointEnum axis) {
+    #if HAS_HOME_OFFSET && HAS_POSITION_SHIFT
+      workspace_offset_Joint[axis] = home_offset_Joint[axis] + position_shift_Joint[axis];
+    #endif
+
+    #if ENABLED(DUAL_X_CARRIAGE)
+      if (axis == X_AXIS) {
+
+        // In Dual X mode hotend_offset[X] is T1's home position
+        const float dual_max_x = MAX(hotend_offset[X_AXIS][1], X2_MAX_POS);
+
+        if (active_extruder != 0) {
+          // T1 can move from X2_MIN_POS to X2_MAX_POS or X2 home position (whichever is larger)
+          soft_endstop_min[X_AXIS] = X2_MIN_POS;
+          soft_endstop_max[X_AXIS] = dual_max_x;
+        }
+        else if (dual_x_carriage_mode == DXC_DUPLICATION_MODE) {
+          // In Duplication Mode, T0 can move as far left as X_MIN_POS
+          // but not so far to the right that T1 would move past the end
+          soft_endstop_min[X_AXIS] = base_min_pos(X_AXIS);
+          soft_endstop_max[X_AXIS] = MIN(base_max_pos(X_AXIS), dual_max_x - duplicate_extruder_x_offset);
+        }
+        else {
+          // In other modes, T0 can move from X_MIN_POS to X_MAX_POS
+          soft_endstop_min[axis] = base_min_pos(axis);
+          soft_endstop_max[axis] = base_max_pos(axis);
+        }
+      }
+    #elif ENABLED(DELTA)
+      soft_endstop_min[axis] = base_min_pos(axis);
+      soft_endstop_max[axis] = axis == Z_AXIS ? delta_height
+      #if HAS_BED_PROBE
+        - zprobe_zoffset
+      #endif
+      : base_max_pos(axis);
+    #else
+      soft_endstop_min_Joint[axis] = base_min_pos_Joint(axis);
+      soft_endstop_max_Joint[axis] = base_max_pos_Joint(axis);
+    #endif
+
+    #if ENABLED(DEBUG_LEVELING_FEATURE)
+      if (DEBUGGING(LEVELING)) {
+        SERIAL_ECHOPAIR("For ", axis_codes[axis]);
+        #if HAS_HOME_OFFSET
+          SERIAL_ECHOPAIR(" axis:\n home_offset = ", home_offset[axis]);
+        #endif
+        #if HAS_POSITION_SHIFT
+          SERIAL_ECHOPAIR("\n position_shift = ", position_shift[axis]);
+        #endif
+        SERIAL_ECHOPAIR("\n soft_endstop_min = ", soft_endstop_min[axis]);
+        SERIAL_ECHOLNPAIR("\n soft_endstop_max = ", soft_endstop_max[axis]);
+      }
+    #endif
+
+    #if ENABLED(DELTA)
+      switch (axis) {
+        #if HAS_SOFTWARE_ENDSTOPS
+          case X_AXIS:
+          case Y_AXIS:
+            // Get a minimum radius for clamping
+            soft_endstop_radius = MIN3(ABS(MAX(soft_endstop_min[X_AXIS], soft_endstop_min[Y_AXIS])), soft_endstop_max[X_AXIS], soft_endstop_max[Y_AXIS]);
+            soft_endstop_radius_2 = sq(soft_endstop_radius);
+            break;
+        #endif
+        case Z_AXIS:
+          delta_clip_start_height = soft_endstop_max[axis] - delta_safe_distance_from_top();
+        default: break;
+      }
+    #endif
+  }
+
+#endif // HAS_WORKSPACE_OFFSET || DUAL_X_CARRIAGE || DELTA
+
 #if HAS_M206_COMMAND
   /**
    * Change the home offset for an axis.
@@ -1563,6 +1675,118 @@ static void set_axis_is_at_home(const AxisEnum axis) {
   #endif
 }
 
+static void set_Joint_is_at_home(const JointEnum axis) {
+  #if ENABLED(DEBUG_LEVELING_FEATURE)
+    if (DEBUGGING(LEVELING)) {
+      SERIAL_ECHOPAIR(">>> set_Joint_is_at_home(", Joint_codes[axis]);
+      SERIAL_CHAR(')');
+      SERIAL_EOL();
+    }
+  #endif
+
+  SBI(Joint_known_position, axis);
+  SBI(Joint_homed, axis);
+
+  #if HAS_POSITION_SHIFT
+    position_shift_Joint[axis] = 0;
+    update_software_endstops_Joint(axis);
+  #endif
+
+  #if ENABLED(DUAL_X_CARRIAGE)
+    if (axis == X_AXIS && (active_extruder == 1 || dual_x_carriage_mode == DXC_DUPLICATION_MODE)) {
+      current_position[X_AXIS] = x_home_pos(active_extruder);
+      return;
+    }
+  #endif
+
+  #if ENABLED(MORGAN_SCARA)
+
+    /**
+     * Morgan SCARA homes XY at the same time
+     */
+    if (axis == X_AXIS || axis == Y_AXIS) {
+
+      float homeposition[XYZ] = {
+        base_home_pos(X_AXIS),
+        base_home_pos(Y_AXIS),
+        base_home_pos(Z_AXIS)
+      };
+
+      // SERIAL_ECHOPAIR("homeposition X:", homeposition[X_AXIS]);
+      // SERIAL_ECHOLNPAIR(" Y:", homeposition[Y_AXIS]);
+
+      /**
+       * Get Home position SCARA arm angles using inverse kinematics,
+       * and calculate homing offset using forward kinematics
+       */
+      inverse_kinematics(homeposition);
+      forward_kinematics_SCARA(delta[A_AXIS], delta[B_AXIS]);
+
+      // SERIAL_ECHOPAIR("Cartesian X:", cartes[X_AXIS]);
+      // SERIAL_ECHOLNPAIR(" Y:", cartes[Y_AXIS]);
+
+      current_position[axis] = cartes[axis];
+
+      /**
+       * SCARA home positions are based on configuration since the actual
+       * limits are determined by the inverse kinematic transform.
+       */
+      soft_endstop_min[axis] = base_min_pos(axis); // + (cartes[axis] - base_home_pos(axis));
+      soft_endstop_max[axis] = base_max_pos(axis); // + (cartes[axis] - base_home_pos(axis));
+    }
+    else
+  #elif ENABLED(DELTA)
+    current_position[axis] = (axis == Z_AXIS ? delta_height
+    #if HAS_BED_PROBE
+      - zprobe_zoffset
+    #endif
+    : base_home_pos(axis));
+  #else
+    current_position_Joint[axis] = base_home_pos_Joint(axis);
+  #endif
+
+  /**
+   * Z Probe Z Homing? Account for the probe's Z offset.
+   */
+  #if HAS_BED_PROBE && Z_HOME_DIR < 0
+    if (axis == Z_AXIS) {
+      #if HOMING_Z_WITH_PROBE
+
+        current_position[Z_AXIS] -= zprobe_zoffset;
+
+        #if ENABLED(DEBUG_LEVELING_FEATURE)
+          if (DEBUGGING(LEVELING)) {
+            SERIAL_ECHOLNPGM("*** Z HOMED WITH PROBE (Z_MIN_PROBE_USES_Z_MIN_ENDSTOP_PIN) ***");
+            SERIAL_ECHOLNPAIR("> zprobe_zoffset = ", zprobe_zoffset);
+          }
+        #endif
+
+      #elif ENABLED(DEBUG_LEVELING_FEATURE)
+
+        if (DEBUGGING(LEVELING)) SERIAL_ECHOLNPGM("*** Z HOMED TO ENDSTOP (Z_MIN_PROBE_ENDSTOP) ***");
+
+      #endif
+    }
+  #endif
+
+  #if ENABLED(DEBUG_LEVELING_FEATURE)
+    if (DEBUGGING(LEVELING)) {
+      #if HAS_HOME_OFFSET
+        SERIAL_ECHOPAIR("> home_offset[", Joint_codes[axis]);
+        SERIAL_ECHOLNPAIR("] = ", home_offset[axis]);
+      #endif
+      DEBUG_POS("", current_position);
+      SERIAL_ECHOPAIR("<<< set_Joint_is_at_home(", Joint_codes[axis]);
+      SERIAL_CHAR(')');
+      SERIAL_EOL();
+    }
+  #endif
+
+  #if ENABLED(I2C_POSITION_ENCODERS)
+    I2CPEM.homed(axis);
+  #endif
+}
+
 /**
  * Homing bump feedrate (mm/s)
  */
@@ -1579,6 +1803,24 @@ inline float get_homing_bump_feedrate(const AxisEnum axis) {
   }
   return homing_feedrate(axis) / hbd;
 }
+
+/**
+ * Homing bump feedrate (mm/s)
+ */
+inline float get_homing_bump_feedrate_Joint(const JointEnum axis) {
+  #if HOMING_Z_WITH_PROBE
+    if (axis == Z_AXIS) return MMM_TO_MMS(Z_PROBE_SPEED_SLOW);
+  #endif
+  static const uint8_t homing_bump_divisor_Joint[] PROGMEM = HOMING_BUMP_DIVISOR_Joint;
+  uint8_t hbd = pgm_read_byte(&homing_bump_divisor_Joint[axis]);
+  if (hbd < 1) {
+    hbd = 10;
+    SERIAL_ECHO_START();
+    SERIAL_ECHOLNPGM("Warning: Homing Bump Divisor < 1");
+  }
+  return homing_feedrate_Joint(axis) / hbd;
+}
+
 
 /**
  * Some planner shorthand inline functions
@@ -3273,6 +3515,98 @@ static void do_homing_move(const AxisEnum axis, const float distance, const floa
   #endif
 }
 
+static void do_homing_move_Joint(const JointEnum axis, const float distance, const float fr_mm_s=0) {
+
+  #if ENABLED(DEBUG_LEVELING_FEATURE)
+    if (DEBUGGING(LEVELING)) {
+      SERIAL_ECHOPAIR(">>> do_homing_move(", Joint_codes[axis]);
+      SERIAL_ECHOPAIR(", ", distance);
+      SERIAL_ECHOPGM(", ");
+      if (fr_mm_s)
+        SERIAL_ECHO(fr_mm_s);
+      else {
+        SERIAL_ECHOPAIR("[", homing_feedrate_Joint(axis));
+        SERIAL_CHAR(']');
+      }
+      SERIAL_ECHOLNPGM(")");
+    }
+  #endif
+
+  #if HOMING_Z_WITH_PROBE && HAS_HEATED_BED && ENABLED(WAIT_FOR_BED_HEATER)
+    // Wait for bed to heat back up between probing points
+    if (axis == Z_AXIS && distance < 0 && thermalManager.isHeatingBed()) {
+      serialprintPGM(msg_wait_for_bed_heating);
+      LCD_MESSAGEPGM(MSG_BED_HEATING);
+      while (thermalManager.isHeatingBed()) safe_delay(200);
+      lcd_reset_status();
+    }
+  #endif
+
+  // Only do some things when moving towards an endstop
+  const int8_t Joint_home_dir =
+    #if ENABLED(DUAL_X_CARRIAGE)
+      (axis == X_AXIS) ? x_home_dir(active_extruder) :
+    #endif
+    home_dir_Joint(axis);
+  const bool is_home_dir = (Joint_home_dir > 0) == (distance > 0);
+
+  if (is_home_dir) {
+
+    #if HOMING_Z_WITH_PROBE && QUIET_PROBING
+      if (axis == Z_AXIS) probing_pause(true);
+    #endif
+
+    // Disable stealthChop if used. Enable diag1 pin on driver.
+    #if ENABLED(SENSORLESS_HOMING)
+      sensorless_homing_per_axis(axis);
+    #endif
+  }
+
+  // Tell the planner the axis is at 0
+  current_position_Joint[axis] = 0;
+
+  // Do the move, which is required to hit an endstop
+  #if IS_SCARA
+    SYNC_PLAN_POSITION_KINEMATIC();
+    current_position[axis] = distance;
+    inverse_kinematics(current_position);
+    planner.buffer_line(delta[A_AXIS], delta[B_AXIS], delta[C_AXIS], current_position[E_CART], fr_mm_s ? fr_mm_s : homing_feedrate(axis), active_extruder);
+  #elif ENABLED(HANGPRINTER) // TODO: Hangprinter homing is not finished (Jan 7, 2018)
+    SYNC_PLAN_POSITION_KINEMATIC();
+    current_position[axis] = distance;
+    inverse_kinematics(current_position);
+    planner.buffer_line(line_lengths[A_AXIS], line_lengths[B_AXIS], line_lengths[C_AXIS], line_lengths[D_AXIS], current_position[E_CART], fr_mm_s ? fr_mm_s : homing_feedrate(axis), active_extruder);
+  #else
+    sync_plan_position_Joint();
+    current_position_Joint[axis] = distance; // Set delta/cartesian axes directly
+    planner.buffer_line_joint(0,0,0,current_position_Joint[Joint1_AXIS], current_position_Joint[Joint2_AXIS], current_position_Joint[Joint3_AXIS], current_position_Joint[Joint4_AXIS], current_position_Joint[Joint5_AXIS],0, fr_mm_s ? fr_mm_s : homing_feedrate_Joint(axis), active_extruder);
+  #endif
+
+  planner.synchronize();
+
+  if (is_home_dir) {
+
+    #if HOMING_Z_WITH_PROBE && QUIET_PROBING
+      if (axis == Z_AXIS) probing_pause(false);
+    #endif
+
+    endstops.validate_homing_move();
+
+    // Re-enable stealthChop if used. Disable diag1 pin on driver.
+    #if ENABLED(SENSORLESS_HOMING)
+      sensorless_homing_per_axis(axis, false);
+    #endif
+  }
+
+  #if ENABLED(DEBUG_LEVELING_FEATURE)
+    if (DEBUGGING(LEVELING)) {
+      SERIAL_ECHOPAIR("<<< do_homing_move(", axis_codes[axis]);
+      SERIAL_CHAR(')');
+      SERIAL_EOL();
+    }
+  #endif
+}
+
 /**
  * Home an individual "raw axis" to its endstop.
  * This applies to XYZ on Cartesian and Core robots, and
@@ -3428,6 +3762,172 @@ static void homeaxis(const AxisEnum axis) {
     stepper.set_homing_dual_axis(false);
   #endif
 
+  
+  // For cartesian/core machines,
+  // set the axis to its home position
+  set_axis_is_at_home(axis);
+  sync_plan_position();
+  destination[axis] = current_position[axis];
+
+  #if ENABLED(DEBUG_LEVELING_FEATURE)
+    if (DEBUGGING(LEVELING)) DEBUG_POS("> AFTER set_axis_is_at_home", current_position);
+  #endif
+
+  // Put away the Z probe
+  #if HOMING_Z_WITH_PROBE
+    if (axis == Z_AXIS && STOW_PROBE()) return;
+  #endif
+
+  // Clear retracted status if homing the Z axis
+  #if ENABLED(FWRETRACT)
+    if (axis == Z_AXIS) fwretract.hop_amount = 0.0;
+  #endif
+
+  #if ENABLED(DEBUG_LEVELING_FEATURE)
+    if (DEBUGGING(LEVELING)) {
+      SERIAL_ECHOPAIR("<<< homeaxis(", axis_codes[axis]);
+      SERIAL_CHAR(')');
+      SERIAL_EOL();
+    }
+  #endif
+} // homeaxis()
+
+static void homeJoint(const JointEnum axis) {
+  #define CAN_HOME(A) \
+    (axis == _AXIS(A) && ((A##_MIN_PIN > -1 && A##_HOME_DIR < 0) || (A##_MAX_PIN > -1 && A##_HOME_DIR > 0)))
+  if (!CAN_HOME(Joint1) && !CAN_HOME(Joint2) && !CAN_HOME(Joint3) && !CAN_HOME(Joint4) && !CAN_HOME(Joint5)) return; 
+ 
+
+  #if ENABLED(DEBUG_LEVELING_FEATURE)
+    if (DEBUGGING(LEVELING)) {
+      SERIAL_ECHOPAIR(">>> homeaxis(", Joint_codes[axis]);
+      SERIAL_CHAR(')');
+      SERIAL_EOL();
+    }
+  #endif
+
+  const int Joint_home_dir = (  
+    home_dir_Joint(axis)
+  );
+
+  // Homing Z towards the bed? Deploy the Z probe or endstop.
+  #if HOMING_Z_WITH_PROBE
+    if (axis == Z_AXIS && DEPLOY_PROBE()) return;
+  #endif
+
+  // Set flags for X, Y, Z motor locking
+  #if ENABLED(X_DUAL_ENDSTOPS) || ENABLED(Y_DUAL_ENDSTOPS) || ENABLED(Z_DUAL_ENDSTOPS)
+    switch (axis) {
+      #if ENABLED(X_DUAL_ENDSTOPS)
+        case X_AXIS:
+      #endif
+      #if ENABLED(Y_DUAL_ENDSTOPS)
+        case Y_AXIS:
+      #endif
+      #if ENABLED(Z_DUAL_ENDSTOPS)
+        case Z_AXIS:
+      #endif
+      stepper.set_homing_dual_axis(true);
+      default: break;
+    }
+  #endif
+
+  // Fast move towards endstop until triggered
+  #if ENABLED(DEBUG_LEVELING_FEATURE)
+    if (DEBUGGING(LEVELING)) SERIAL_ECHOLNPGM("Home 1 Fast:");
+  #endif
+
+  #if HOMING_Z_WITH_PROBE && ENABLED(BLTOUCH)
+    // BLTOUCH needs to be deployed every time
+    if (axis == Z_AXIS && set_bltouch_deployed(true)) return;
+  #endif
+
+  do_homing_move_Joint(axis, 1.5f * max_length_Joint(axis) * Joint_home_dir);
+
+  #if HOMING_Z_WITH_PROBE && ENABLED(BLTOUCH)
+    // BLTOUCH needs to be stowed after trigger to rearm itself
+    if (axis == Z_AXIS) set_bltouch_deployed(false);
+  #endif
+
+  // When homing Z with probe respect probe clearance
+  const float bump = Joint_home_dir * (
+    #if HOMING_Z_WITH_PROBE
+      (axis == Z_AXIS && (Z_HOME_BUMP_MM)) ? MAX(Z_CLEARANCE_BETWEEN_PROBES, Z_HOME_BUMP_MM) :
+    #endif
+    home_bump_mm_Joint(axis)
+  );
+
+  // If a second homing move is configured...
+  if (bump) {
+    // Move away from the endstop by the axis HOME_BUMP_MM
+    #if ENABLED(DEBUG_LEVELING_FEATURE)
+      if (DEBUGGING(LEVELING)) SERIAL_ECHOLNPGM("Move Away:");
+    #endif
+    do_homing_move_Joint(axis, -bump
+      #if HOMING_Z_WITH_PROBE
+        , axis == Z_AXIS ? MMM_TO_MMS(Z_PROBE_SPEED_FAST) : 0.00
+      #endif
+    );
+
+    // Slow move towards endstop until triggered
+    #if ENABLED(DEBUG_LEVELING_FEATURE)
+      if (DEBUGGING(LEVELING)) SERIAL_ECHOLNPGM("Home 2 Slow:");
+    #endif
+
+    #if HOMING_Z_WITH_PROBE && ENABLED(BLTOUCH)
+      // BLTOUCH needs to be deployed every time
+      if (axis == Z_AXIS && set_bltouch_deployed(true)) return;
+    #endif
+
+    do_homing_move_Joint(axis, 2 * bump, get_homing_bump_feedrate_Joint(axis));
+
+    #if HOMING_Z_WITH_PROBE && ENABLED(BLTOUCH)
+      // BLTOUCH needs to be stowed after trigger to rearm itself
+      if (axis == Z_AXIS) set_bltouch_deployed(false);
+    #endif
+  }
+
+  /**
+   * Home axes that have dual endstops... differently
+   */
+  #if ENABLED(X_DUAL_ENDSTOPS) || ENABLED(Y_DUAL_ENDSTOPS) || ENABLED(Z_DUAL_ENDSTOPS)
+    const bool pos_dir = Joint_home_dir > 0;
+    #if ENABLED(X_DUAL_ENDSTOPS)
+      if (axis == X_AXIS) {
+        const float adj = ABS(endstops.x_endstop_adj);
+        if (adj) {
+          if (pos_dir ? (endstops.x_endstop_adj > 0) : (endstops.x_endstop_adj < 0)) stepper.set_x_lock(true); else stepper.set_x2_lock(true);
+          do_homing_move(axis, pos_dir ? -adj : adj);
+          stepper.set_x_lock(false);
+          stepper.set_x2_lock(false);
+        }
+      }
+    #endif
+    #if ENABLED(Y_DUAL_ENDSTOPS)
+      if (axis == Y_AXIS) {
+        const float adj = ABS(endstops.y_endstop_adj);
+        if (adj) {
+          if (pos_dir ? (endstops.y_endstop_adj > 0) : (endstops.y_endstop_adj < 0)) stepper.set_y_lock(true); else stepper.set_y2_lock(true);
+          do_homing_move(axis, pos_dir ? -adj : adj);
+          stepper.set_y_lock(false);
+          stepper.set_y2_lock(false);
+        }
+      }
+    #endif
+    #if ENABLED(Z_DUAL_ENDSTOPS)
+      if (axis == Z_AXIS) {
+        const float adj = ABS(endstops.z_endstop_adj);
+        if (adj) {
+          if (pos_dir ? (endstops.z_endstop_adj > 0) : (endstops.z_endstop_adj < 0)) stepper.set_z_lock(true); else stepper.set_z2_lock(true);
+          do_homing_move(axis, pos_dir ? -adj : adj);
+          stepper.set_z_lock(false);
+          stepper.set_z2_lock(false);
+        }
+      }
+    #endif
+    stepper.set_homing_dual_axis(false);
+  #endif
+
   #if IS_SCARA
 
     set_axis_is_at_home(axis);
@@ -3451,10 +3951,10 @@ static void homeaxis(const AxisEnum axis) {
 
     // For cartesian/core machines,
     // set the axis to its home position
-    set_axis_is_at_home(axis);
-    sync_plan_position();
+    set_Joint_is_at_home(axis);
+    sync_plan_position_Joint();
 
-    destination[axis] = current_position[axis];
+    destination_Joint[axis] = current_position_Joint[axis];
 
     #if ENABLED(DEBUG_LEVELING_FEATURE)
       if (DEBUGGING(LEVELING)) DEBUG_POS("> AFTER set_axis_is_at_home", current_position);
@@ -3474,12 +3974,12 @@ static void homeaxis(const AxisEnum axis) {
 
   #if ENABLED(DEBUG_LEVELING_FEATURE)
     if (DEBUGGING(LEVELING)) {
-      SERIAL_ECHOPAIR("<<< homeaxis(", axis_codes[axis]);
+      SERIAL_ECHOPAIR("<<< homeaxis(", Joint_codes[axis]);
       SERIAL_CHAR(')');
       SERIAL_EOL();
     }
   #endif
-} // homeaxis()
+} // homeJoint()
 
 #if ENABLED(MIXING_EXTRUDER)
 
@@ -4529,7 +5029,12 @@ inline void gcode_G28(const bool always_home_all) {
     const bool homeX = always_home_all || parser.seen('X'),
                homeY = always_home_all || parser.seen('Y'),
                homeZ = always_home_all || parser.seen('Z'),
-               home_all = (!homeX && !homeY && !homeZ) || (homeX && homeY && homeZ);
+               homeJ = always_home_all || parser.seen('J'),
+               homeA = always_home_all || parser.seen('A'),
+               homeB = always_home_all || parser.seen('B'),
+               homeC = always_home_all || parser.seen('C'),
+               homeD = always_home_all || parser.seen('D'),
+               home_all = (!homeX && !homeY && !homeZ && !homeJ && !homeA && !homeB && !homeC && !homeD) || (homeX && homeY && homeZ && homeJ && homeA && homeB && homeC && homeD);
 
     set_destination_from_current();
 
@@ -4629,6 +5134,12 @@ inline void gcode_G28(const bool always_home_all) {
 
       } // home_all || homeZ
     #endif // Z_HOME_DIR < 0
+
+    if(home_all || homeJ)homeJoint(Joint1_AXIS);
+    if(home_all || homeA)homeJoint(Joint2_AXIS);
+    if(home_all || homeB)homeJoint(Joint3_AXIS);
+    if(home_all || homeC)homeJoint(Joint4_AXIS);
+    if(home_all || homeD)homeJoint(Joint5_AXIS);
 
     SYNC_PLAN_POSITION_KINEMATIC();
 

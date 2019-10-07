@@ -892,6 +892,13 @@
 #define Y_HOME_DIR -1
 #define Z_HOME_DIR -1
 
+//joint
+#define Joint1_HOME_DIR -1
+#define Joint2_HOME_DIR -1
+#define Joint3_HOME_DIR -1
+#define Joint4_HOME_DIR -1
+#define Joint5_HOME_DIR -1
+
 // @section machine
 
 // The size of the print bed
@@ -905,6 +912,20 @@
 #define X_MAX_POS X_BED_SIZE
 #define Y_MAX_POS Y_BED_SIZE
 #define Z_MAX_POS 200
+
+//joint
+#define Joint1_MIN_POS 0 
+#define Joint2_MIN_POS 0 
+#define Joint3_MIN_POS 0 
+#define Joint4_MIN_POS 0 
+#define Joint5_MIN_POS 0 
+
+//joint
+#define Joint1_MAX_POS 2000 
+#define Joint2_MAX_POS 2000 
+#define Joint3_MAX_POS 2000
+#define Joint4_MAX_POS 2000
+#define Joint5_MAX_POS 2000
 
 /**
  * Software Endstops
@@ -1006,7 +1027,7 @@
  * Turn on with the command 'M111 S32'.
  * NOTE: Requires a lot of PROGMEM!
  */
-//#define DEBUG_LEVELING_FEATURE
+#define DEBUG_LEVELING_FEATURE
 
 #if ENABLED(MESH_BED_LEVELING) || ENABLED(AUTO_BED_LEVELING_BILINEAR) || ENABLED(AUTO_BED_LEVELING_UBL)
   // Gradually reduce leveling correction until a set height is reached,
@@ -1168,6 +1189,7 @@
 // Homing speeds (mm/m)
 #define HOMING_FEEDRATE_XY (50*60)
 #define HOMING_FEEDRATE_Z  (4*60)
+#define HOMING_FEEDRATE_Joint (5*60)
 
 // @section calibrate
 

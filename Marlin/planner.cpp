@@ -3884,6 +3884,29 @@ void Planner::_set_position_mm(const float &a, const float &b, const float &c
     );
 }
 
+void Planner::_set_position_mm_Joint(const uint32_t &j1, const uint32_t &j2, const uint32_t &j3, const uint32_t &j4, const uint32_t &j5)
+{
+  position_joint[Joint1_AXIS]=j1;
+  position_joint[Joint2_AXIS]=j2;
+  position_joint[Joint3_AXIS]=j3;
+  position_joint[Joint4_AXIS]=j4;
+  position_joint[Joint5_AXIS]=j5;
+
+  if (has_blocks_queued()) {
+    //previous_nominal_speed_sqr = 0.0; // Reset planner junction speeds. Assume start from rest.
+    //ZERO(previous_speed);
+    buffer_sync_block();
+  }
+
+ stepper.set_position(position[A_AXIS], position[B_AXIS], position[C_AXIS],
+      #if ENABLED(HANGPRINTER)
+        position[D_AXIS],
+      #endif
+        position[E_AXIS]
+        ,position_joint[0],position_joint[1],position_joint[2],position_joint[3],position_joint[4]
+  );
+}
+
 void Planner::set_position_mm_kinematic(const float (&cart)[XYZE]) {
   #if PLANNER_LEVELING
     float raw[XYZ] = { cart[X_AXIS], cart[Y_AXIS], cart[Z_AXIS] };

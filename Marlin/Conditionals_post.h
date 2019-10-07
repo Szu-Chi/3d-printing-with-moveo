@@ -40,6 +40,13 @@
 #define Y_MAX_LENGTH (Y_MAX_POS - (Y_MIN_POS))
 #define Z_MAX_LENGTH (Z_MAX_POS - (Z_MIN_POS))
 
+//joint
+#define Joint1_MAX_LENGTH (Joint1_MAX_POS - (Joint1_MIN_POS))
+#define Joint2_MAX_LENGTH (Joint2_MAX_POS - (Joint2_MIN_POS))
+#define Joint3_MAX_LENGTH (Joint3_MAX_POS - (Joint3_MIN_POS))
+#define Joint4_MAX_LENGTH (Joint4_MAX_POS - (Joint4_MIN_POS))
+#define Joint5_MAX_LENGTH (Joint5_MAX_POS - (Joint5_MIN_POS))
+
 // Defined only if the sanity-check is bypassed
 #ifndef X_BED_SIZE
   #define X_BED_SIZE X_MAX_LENGTH
@@ -164,6 +171,12 @@
 #else
   #define Z_HOME_POS (Z_HOME_DIR < 0 ? Z_MIN_POS : Z_MAX_POS)
 #endif
+
+#define Joint1_HOME_POS (Joint1_HOME_DIR < 0 ? Joint1_MIN_POS : Joint1_MAX_POS)
+#define Joint2_HOME_POS (Joint2_HOME_DIR < 0 ? Joint2_MIN_POS : Joint2_MAX_POS)
+#define Joint3_HOME_POS (Joint3_HOME_DIR < 0 ? Joint3_MIN_POS : Joint3_MAX_POS)
+#define Joint4_HOME_POS (Joint4_HOME_DIR < 0 ? Joint4_MIN_POS : Joint4_MAX_POS)
+#define Joint5_HOME_POS (Joint4_HOME_DIR < 0 ? Joint5_MIN_POS : Joint5_MAX_POS)
 
 /**
  * If DELTA_HEIGHT isn't defined use the old setting
