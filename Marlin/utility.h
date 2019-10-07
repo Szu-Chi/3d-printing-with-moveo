@@ -60,6 +60,9 @@ void safe_delay(millis_t ms);
   // Convert unsigned float to rj string with 12345 format
   char* ftostr5rj(const float &x);
 
+  // Convert unsigned float to sign string with 12345 format
+  char* ftostr5sign(const float &f);
+
   // Convert signed float to string with +1234.5 format
   char* ftostr51sign(const float &x);
 

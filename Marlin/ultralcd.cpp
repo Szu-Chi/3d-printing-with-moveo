@@ -34,6 +34,7 @@
 #include "configuration_store.h"
 #include "utility.h"
 #include "parser.h"
+#include <avr/wdt.h>
 
 #if HAS_BUZZER && DISABLED(LCD_USE_I2C_BUZZER)
   #include "buzzer.h"
@@ -2952,12 +2953,13 @@ void lcd_quick_feedback(const bool clear_buttons) {
     if (processing_manual_move) return;
 
     if (manual_move_joint != (int8_t)NO_AXIS && ELAPSED(millis(), manual_move_start_time) && !planner.is_full()) {
-        stepper.set_position_Joint_manual(current_position_Joint[Joint1_AXIS],
-                                          current_position_Joint[Joint2_AXIS],
-                                          current_position_Joint[Joint3_AXIS],
-                                          current_position_Joint[Joint4_AXIS],
-                                          current_position_Joint[Joint5_AXIS]
-                                        );
+      
+      stepper.set_position_Joint_manual(current_position_Joint[Joint1_AXIS],
+                                        current_position_Joint[Joint2_AXIS],
+                                        current_position_Joint[Joint3_AXIS],
+                                        current_position_Joint[Joint4_AXIS],
+                                        current_position_Joint[Joint5_AXIS]
+                                      );
         //planner.buffer_line_kinematic_joint(current_position_Joint, MMM_TO_MMS(manual_feedrate_mm_m_joint[manual_move_joint]), 0);
         manual_move_joint = (int8_t)NO_AXIS;
     }
@@ -3190,7 +3192,7 @@ void lcd_quick_feedback(const bool clear_buttons) {
           + manual_move_offset
         #endif
       , axis);
-      lcd_implementation_drawedit(name, ftostr5rj(pos));
+      lcd_implementation_drawedit(name, ftostr5sign(pos));
     }
   }
 

@@ -688,6 +688,7 @@ class Planner {
       #else
         const float (&raw)[XYZE] = cart;
       #endif
+      
       #if IS_KINEMATIC
         inverse_kinematics(raw);
         return buffer_segment(
