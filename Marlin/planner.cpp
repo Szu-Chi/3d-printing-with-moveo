@@ -2863,14 +2863,25 @@ bool Planner::_populate_block_joint(block_t * const block, bool split_move,
   delta_mm[B_AXIS] = db * steps_to_mm[B_AXIS];
   delta_mm[C_AXIS] = dc * steps_to_mm[C_AXIS];
   delta_mm[E_AXIS] = esteps_float * steps_to_mm[E_AXIS_N];
+  
+  long delta_joint_step[Joint_All];
+  delta_joint_step[Joint1_AXIS] = d0;
+  delta_joint_step[Joint2_AXIS] = d1;
+  delta_joint_step[Joint3_AXIS] = d2;
+  delta_joint_step[Joint4_AXIS] = d3;
+  delta_joint_step[Joint5_AXIS] = d4;
 
-  if (block->steps[A_AXIS] < MIN_STEPS_PER_SEGMENT && block->steps[B_AXIS] < MIN_STEPS_PER_SEGMENT && block->steps[C_AXIS] < MIN_STEPS_PER_SEGMENT) {
+  if (block->step_Joint[Joint1_AXIS] < MIN_STEPS_PER_SEGMENT && 
+      block->step_Joint[Joint2_AXIS] < MIN_STEPS_PER_SEGMENT && 
+      block->step_Joint[Joint3_AXIS] < MIN_STEPS_PER_SEGMENT &&
+      block->step_Joint[Joint4_AXIS] < MIN_STEPS_PER_SEGMENT &&
+      block->step_Joint[Joint5_AXIS] < MIN_STEPS_PER_SEGMENT &&
+    ) {
     block->millimeters = ABS(delta_mm[E_AXIS]);
   }
   else if (!millimeters) {
-    block->millimeters = SQRT(
-      sq(delta_mm[X_AXIS]) + sq(delta_mm[Y_AXIS]) + sq(delta_mm[Z_AXIS])
-    );
+    block->millimeters = MAX6(delta_joint_step[Joint1_AXIS],delta_joint_step[Joint2_AXIS],delta_joint_step[Joint3_AXIS]
+                              ,delta_joint_step[Joint4_AXIS],delta_joint_step[Joint5_AXIS]);
   }
   else {
     block->millimeters = millimeters;

@@ -92,12 +92,12 @@ typedef struct {
     struct {
       // Fields used by the Bresenham algorithm for tracing the line
       uint32_t steps[NUM_AXIS];             // Step count along each axis
-      uint32_t step_Joint[5];
+      uint32_t step_Joint[Joint_All];
     };
     // Data used by all sync blocks
     struct {
       int32_t position[NUM_AXIS];           // New position to force when this sync block is executed
-      int32_t position_Joint[5];
+      int32_t position_Joint[Joint_All];
     };
   };
   uint32_t step_event_count;                // The number of step events required to complete this block
