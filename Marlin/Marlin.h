@@ -360,6 +360,7 @@ extern long int current_position_Joint[Joint_All], destination_Joint[Joint_All];
 
 // Software Endstops
 extern float soft_endstop_min[XYZ], soft_endstop_max[XYZ];
+extern long  soft_endstop_joint_min[Joint_All], soft_endstop_joint_max[Joint_All];
 
 #if HAS_SOFTWARE_ENDSTOPS
   extern bool soft_endstops_enabled;

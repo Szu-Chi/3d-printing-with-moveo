@@ -485,6 +485,10 @@ bool axis_relative_modes[XYZE] = AXIS_RELATIVE_MODES;
 // Software Endstops are based on the configured limits.
 float soft_endstop_min[XYZ] = { X_MIN_BED, Y_MIN_BED, Z_MIN_POS },
       soft_endstop_max[XYZ] = { X_MAX_BED, Y_MAX_BED, Z_MAX_POS };
+
+long  soft_endstop_joint_min[Joint_All] = {J_MIN_POS_step,A_MIN_POS_step,B_MIN_POS_step,C_MIN_POS_step,D_MIN_POS_step},
+      soft_endstop_joint_max[Joint_All] = {J_MAX_POS_step,A_MAX_POS_step,B_MAX_POS_step,C_MAX_POS_step,D_MAX_POS_step};
+
 #if HAS_SOFTWARE_ENDSTOPS
   bool soft_endstops_enabled = true;
   #if IS_KINEMATIC

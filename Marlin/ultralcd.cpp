@@ -3128,7 +3128,7 @@ void lcd_quick_feedback(const bool clear_buttons) {
     ENCODER_DIRECTION_NORMAL();
     if (encoderPosition && !processing_manual_move) {
 
-      /*
+      
       // Start with no limits to movement
       float min = current_position[axis] - 1000,
             max = current_position[axis] + 1000;
@@ -3136,51 +3136,59 @@ void lcd_quick_feedback(const bool clear_buttons) {
       // Limit to software endstops, if enabled
       #if ENABLED(MIN_SOFTWARE_ENDSTOPS) || ENABLED(MAX_SOFTWARE_ENDSTOPS)
         if (soft_endstops_enabled) switch (axis) {
-          case X_AXIS:
-            #if ENABLED(MIN_SOFTWARE_ENDSTOP_X)
-              min = soft_endstop_min[X_AXIS];
+          case Joint1_AXIS:
+            #if ENABLED(MIN_SOFTWARE_ENDSTOP_J)
+              min = soft_endstop_joint_min[Joint1_AXIS];
             #endif
-            #if ENABLED(MAX_SOFTWARE_ENDSTOP_X)
-              max = soft_endstop_max[X_AXIS];
-            #endif
-            break;
-          case Y_AXIS:
-            #if ENABLED(MIN_SOFTWARE_ENDSTOP_Y)
-              min = soft_endstop_min[Y_AXIS];
-            #endif
-            #if ENABLED(MAX_SOFTWARE_ENDSTOP_Y)
-              max = soft_endstop_max[Y_AXIS];
+            #if ENABLED(MAX_SOFTWARE_ENDSTOP_J)
+              max = soft_endstop_joint_max[Joint1_AXIS];
             #endif
             break;
-          case Z_AXIS:
-            #if ENABLED(MIN_SOFTWARE_ENDSTOP_Z)
-              min = soft_endstop_min[Z_AXIS];
+          case Joint2_AXIS:
+            #if ENABLED(MIN_SOFTWARE_ENDSTOP_A)
+              min = soft_endstop_joint_min[Joint2_AXIS];
             #endif
-            #if ENABLED(MAX_SOFTWARE_ENDSTOP_Z)
-              max = soft_endstop_max[Z_AXIS];
+            #if ENABLED(MAX_SOFTWARE_ENDSTOP_A)
+              max = soft_endstop_joint_max[Joint2_AXIS];
             #endif
+            break;
+          case Joint3_AXIS:
+            #if ENABLED(MIN_SOFTWARE_ENDSTOP_B)
+              min = soft_endstop_joint_min[Joint3_AXIS];
+            #endif
+            #if ENABLED(MAX_SOFTWARE_ENDSTOP_B)
+              max = soft_endstop_joint_max[Joint3_AXIS];
+            #endif
+            break;
+          case Joint4_AXIS:
+            #if ENABLED(MIN_SOFTWARE_ENDSTOP_C)
+              min = soft_endstop_joint_min[Joint4_AXIS];
+            #endif
+            #if ENABLED(MAX_SOFTWARE_ENDSTOP_C)
+              max = soft_endstop_joint_max[Joint4_AXIS];
+            #endif
+            break;
+          case Joint5_AXIS:
+            #if ENABLED(MIN_SOFTWARE_ENDSTOP_D)
+              min = soft_endstop_joint_min[Joint5_AXIS];
+            #endif
+            #if ENABLED(MAX_SOFTWARE_ENDSTOP_D)
+              max = soft_endstop_joint_max[Joint5_AXIS];
+            #endif
+            break;
           default: break;
         }
       #endif // MIN_SOFTWARE_ENDSTOPS || MAX_SOFTWARE_ENDSTOPS
-      */
-
-      // Delta limits XY based on the current offset from center
-      // This assumes the center is 0,0
-      #if ENABLED(DELTA)
-        if (axis != Z_AXIS) {
-          max = SQRT(sq((float)(DELTA_PRINTABLE_RADIUS)) - sq(current_position[Y_AXIS - axis])); // (Y_AXIS - axis) == the other axis
-          min = -max;
-        }
-      #endif
+      
 
       // Get the new position
       const float diff = float((int32_t)encoderPosition) * move_menu_scale;
       
-        current_position_Joint[axis] += diff;
-      /* if ((int32_t)encoderPosition < 0)
-          NOLESS(current_position_Joint[axis], min);
-        else
-          NOMORE(current_position_Joint[axis], max);*/
+      current_position_Joint[axis] += diff;
+      if ((int32_t)encoderPosition < 0)
+        NOLESS(current_position_Joint[axis], min);
+      else
+        NOMORE(current_position_Joint[axis], max);
     
       manual_move_to_current_Joint(axis);
       lcdDrawUpdate = LCDVIEW_REDRAW_NOW;

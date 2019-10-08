@@ -2667,39 +2667,15 @@ bool Planner::_populate_block_joint(block_t * const block, bool split_move,
   // Compute direction bit-mask for this block
   uint8_t dm = 0, djm = 0;
     
-  #if CORE_IS_XY
-    if (da < 0) SBI(dm, X_HEAD);                // Save the real Extruder (head) direction in X Axis
-    if (db < 0) SBI(dm, Y_HEAD);                // ...and Y
-    if (dc < 0) SBI(dm, Z_AXIS);
-    if (da + db < 0) SBI(dm, A_AXIS);           // Motor A direction
-    if (CORESIGN(da - db) < 0) SBI(dm, B_AXIS); // Motor B direction
-  #elif CORE_IS_XZ
-    if (da < 0) SBI(dm, X_HEAD);                // Save the real Extruder (head) direction in X Axis
-    if (db < 0) SBI(dm, Y_AXIS);
-    if (dc < 0) SBI(dm, Z_HEAD);                // ...and Z
-    if (da + dc < 0) SBI(dm, A_AXIS);           // Motor A direction
-    if (CORESIGN(da - dc) < 0) SBI(dm, C_AXIS); // Motor C direction
-  #elif CORE_IS_YZ
-    if (da < 0) SBI(dm, X_AXIS);
-    if (db < 0) SBI(dm, Y_HEAD);                // Save the real Extruder (head) direction in Y Axis
-    if (dc < 0) SBI(dm, Z_HEAD);                // ...and Z
-    if (db + dc < 0) SBI(dm, B_AXIS);           // Motor B direction
-    if (CORESIGN(db - dc) < 0) SBI(dm, C_AXIS); // Motor C direction
-  #elif ENABLED(HANGPRINTER)
-    if (da < 0) SBI(dm, A_AXIS);
-    if (db < 0) SBI(dm, B_AXIS);
-    if (dc < 0) SBI(dm, C_AXIS);
-    if (dd < 0) SBI(dm, D_AXIS);
-  #else
-    if (da < 0) SBI(dm, X_AXIS);
-    if (db < 0) SBI(dm, Y_AXIS);
-    if (dc < 0) SBI(dm, Z_AXIS);
-    if (d0 < 0) SBI(djm, Joint1_AXIS);
-    if (d1 < 0) SBI(djm, Joint2_AXIS);
-    if (d2 < 0) SBI(djm, Joint3_AXIS);
-    if (d3 < 0) SBI(djm, Joint4_AXIS);
-    if (d4 < 0) SBI(djm, Joint5_AXIS);
-  #endif
+  if (da < 0) SBI(dm, X_AXIS);
+  if (db < 0) SBI(dm, Y_AXIS);
+  if (dc < 0) SBI(dm, Z_AXIS);
+  if (d0 < 0) SBI(djm, Joint1_AXIS);
+  if (d1 < 0) SBI(djm, Joint2_AXIS);
+  if (d2 < 0) SBI(djm, Joint3_AXIS);
+  if (d3 < 0) SBI(djm, Joint4_AXIS);
+  if (d4 < 0) SBI(djm, Joint5_AXIS);
+  
   if (de < 0) SBI(dm, E_AXIS);
 
   const float esteps_float = de * e_factor[extruder];
@@ -2716,51 +2692,24 @@ bool Planner::_populate_block_joint(block_t * const block, bool split_move,
     block->count_it = count_it;
   #endif
 
-  // Number of steps for each axis
-  // See http://www.corexy.com/theory.html
-  #if CORE_IS_XY
-    block->steps[A_AXIS] = ABS(da + db);
-    block->steps[B_AXIS] = ABS(da - db);
-    block->steps[Z_AXIS] = ABS(dc);
-  #elif CORE_IS_XZ
-    block->steps[A_AXIS] = ABS(da + dc);
-    block->steps[Y_AXIS] = ABS(db);
-    block->steps[C_AXIS] = ABS(da - dc);
-  #elif CORE_IS_YZ
-    block->steps[X_AXIS] = ABS(da);
-    block->steps[B_AXIS] = ABS(db + dc);
-    block->steps[C_AXIS] = ABS(db - dc);
-  #elif IS_SCARA
-    block->steps[A_AXIS] = ABS(da);
-    block->steps[B_AXIS] = ABS(db);
-    block->steps[Z_AXIS] = ABS(dc);
-  #elif ENABLED(HANGPRINTER)
-    block->steps[A_AXIS] = ABS(da);
-    block->steps[B_AXIS] = ABS(db);
-    block->steps[C_AXIS] = ABS(dc);
-    block->steps[D_AXIS] = ABS(dd);
-  #else
-    // default non-h-bot planning
-    block->steps[A_AXIS] = ABS(da);
-    block->steps[B_AXIS] = ABS(db);
-    block->steps[C_AXIS] = ABS(dc);
-    block->step_Joint[Joint1_AXIS] = ABS(d0);
-    block->step_Joint[Joint2_AXIS] = ABS(d1);
-    block->step_Joint[Joint3_AXIS] = ABS(d2);
-    block->step_Joint[Joint4_AXIS] = ABS(d3);
-    block->step_Joint[Joint5_AXIS] = ABS(d4);
-  #endif
+  
+  // default non-h-bot planning
+  block->steps[A_AXIS] = ABS(da);
+  block->steps[B_AXIS] = ABS(db);
+  block->steps[C_AXIS] = ABS(dc);
+  block->step_Joint[Joint1_AXIS] = ABS(d0);
+  block->step_Joint[Joint2_AXIS] = ABS(d1);
+  block->step_Joint[Joint3_AXIS] = ABS(d2);
+  block->step_Joint[Joint4_AXIS] = ABS(d3);
+  block->step_Joint[Joint5_AXIS] = ABS(d4);
+  
 
   block->steps[E_AXIS] = esteps;
 
   block->step_event_count = (
-    #if ENABLED(HANGPRINTER)
-      MAX5(block->steps[A_AXIS], block->steps[B_AXIS], block->steps[C_AXIS], block->steps[D_AXIS], esteps)
-    #else
       //MAX4(block->steps[A_AXIS], block->steps[B_AXIS], block->steps[C_AXIS], esteps)
       MAX6(block->step_Joint[Joint1_AXIS], block->step_Joint[Joint2_AXIS], block->step_Joint[Joint3_AXIS],
            block->step_Joint[Joint4_AXIS], block->step_Joint[Joint5_AXIS], esteps)
-    #endif
   );
 
   // Bail if this is a zero-length block
@@ -2786,35 +2735,6 @@ bool Planner::_populate_block_joint(block_t * const block, bool split_move,
   #if ENABLED(AUTO_POWER_CONTROL)
     if (block->steps[X_AXIS] || block->steps[Y_AXIS] || block->steps[Z_AXIS])
       powerManager.power_on();
-  #endif
-
-  // Enable active axes
-  #if CORE_IS_XY
-    if (block->steps[A_AXIS] || block->steps[B_AXIS]) {
-      enable_X();
-      enable_Y();
-    }
-    #if DISABLED(Z_LATE_ENABLE)
-      if (block->steps[Z_AXIS]) enable_Z();
-    #endif
-  #elif CORE_IS_XZ
-    if (block->steps[A_AXIS] || block->steps[C_AXIS]) {
-      enable_X();
-      enable_Z();
-    }
-    if (block->steps[Y_AXIS]) enable_Y();
-  #elif CORE_IS_YZ
-    if (block->steps[B_AXIS] || block->steps[C_AXIS]) {
-      enable_Y();
-      enable_Z();
-    }
-    if (block->steps[X_AXIS]) enable_X();
-  #elif DISABLED(HANGPRINTER) // Hangprinters X, Y, Z, E0 axes should always be enabled anyways
-    if (block->steps[X_AXIS]) enable_X();
-    if (block->steps[Y_AXIS]) enable_Y();
-    #if DISABLED(Z_LATE_ENABLE)
-      if (block->steps[Z_AXIS]) enable_Z();
-    #endif
   #endif
 
   enable_Joint1();
@@ -2937,62 +2857,25 @@ bool Planner::_populate_block_joint(block_t * const block, bool split_move,
    * So we need to create other 2 "AXIS", named X_HEAD and Y_HEAD, meaning the real displacement of the Head.
    * Having the real displacement of the head, we can calculate the total movement length and apply the desired speed.
    */
-  #if IS_CORE
-    float delta_mm[Z_HEAD + 1];
-    #if CORE_IS_XY
-      delta_mm[X_HEAD] = da * steps_to_mm[A_AXIS];
-      delta_mm[Y_HEAD] = db * steps_to_mm[B_AXIS];
-      delta_mm[Z_AXIS] = dc * steps_to_mm[Z_AXIS];
-      delta_mm[A_AXIS] = (da + db) * steps_to_mm[A_AXIS];
-      delta_mm[B_AXIS] = CORESIGN(da - db) * steps_to_mm[B_AXIS];
-    #elif CORE_IS_XZ
-      delta_mm[X_HEAD] = da * steps_to_mm[A_AXIS];
-      delta_mm[Y_AXIS] = db * steps_to_mm[Y_AXIS];
-      delta_mm[Z_HEAD] = dc * steps_to_mm[C_AXIS];
-      delta_mm[A_AXIS] = (da + dc) * steps_to_mm[A_AXIS];
-      delta_mm[C_AXIS] = CORESIGN(da - dc) * steps_to_mm[C_AXIS];
-    #elif CORE_IS_YZ
-      delta_mm[X_AXIS] = da * steps_to_mm[X_AXIS];
-      delta_mm[Y_HEAD] = db * steps_to_mm[B_AXIS];
-      delta_mm[Z_HEAD] = dc * steps_to_mm[C_AXIS];
-      delta_mm[B_AXIS] = (db + dc) * steps_to_mm[B_AXIS];
-      delta_mm[C_AXIS] = CORESIGN(db - dc) * steps_to_mm[C_AXIS];
-    #endif
-  #else
-    float delta_mm[NUM_AXIS];
-    delta_mm[A_AXIS] = da * steps_to_mm[A_AXIS];
-    delta_mm[B_AXIS] = db * steps_to_mm[B_AXIS];
-    delta_mm[C_AXIS] = dc * steps_to_mm[C_AXIS];
-    #if ENABLED(HANGPRINTER)
-      delta_mm[D_AXIS] = dd * steps_to_mm[D_AXIS];
-    #endif
-  #endif
+  
+  float delta_mm[NUM_AXIS];
+  delta_mm[A_AXIS] = da * steps_to_mm[A_AXIS];
+  delta_mm[B_AXIS] = db * steps_to_mm[B_AXIS];
+  delta_mm[C_AXIS] = dc * steps_to_mm[C_AXIS];
   delta_mm[E_AXIS] = esteps_float * steps_to_mm[E_AXIS_N];
 
-  if (block->steps[A_AXIS] < MIN_STEPS_PER_SEGMENT && block->steps[B_AXIS] < MIN_STEPS_PER_SEGMENT && block->steps[C_AXIS] < MIN_STEPS_PER_SEGMENT
-    #if ENABLED(HANGPRINTER)
-      && block->steps[D_AXIS] < MIN_STEPS_PER_SEGMENT
-    #endif
-  ) {
+  if (block->steps[A_AXIS] < MIN_STEPS_PER_SEGMENT && block->steps[B_AXIS] < MIN_STEPS_PER_SEGMENT && block->steps[C_AXIS] < MIN_STEPS_PER_SEGMENT) {
     block->millimeters = ABS(delta_mm[E_AXIS]);
   }
   else if (!millimeters) {
     block->millimeters = SQRT(
-      #if CORE_IS_XY
-        sq(delta_mm[X_HEAD]) + sq(delta_mm[Y_HEAD]) + sq(delta_mm[Z_AXIS])
-      #elif CORE_IS_XZ
-        sq(delta_mm[X_HEAD]) + sq(delta_mm[Y_AXIS]) + sq(delta_mm[Z_HEAD])
-      #elif CORE_IS_YZ
-        sq(delta_mm[X_AXIS]) + sq(delta_mm[Y_HEAD]) + sq(delta_mm[Z_HEAD])
-      #elif ENABLED(HANGPRINTER)
-        sq(delta_mm[A_AXIS]) + sq(delta_mm[B_AXIS]) + sq(delta_mm[C_AXIS]) + sq(delta_mm[D_AXIS])
-      #else
-        sq(delta_mm[X_AXIS]) + sq(delta_mm[Y_AXIS]) + sq(delta_mm[Z_AXIS])
-      #endif
+      sq(delta_mm[X_AXIS]) + sq(delta_mm[Y_AXIS]) + sq(delta_mm[Z_AXIS])
     );
   }
-  else
+  else {
     block->millimeters = millimeters;
+  }
+    
 
   const float inverse_millimeters = 1.0f / block->millimeters;  // Inverse millimeters to remove multiple divides
 
@@ -3035,39 +2918,7 @@ bool Planner::_populate_block_joint(block_t * const block, bool split_move,
   block->nominal_speed_sqr = sq(block->millimeters * inverse_secs);   //   (mm/sec)^2 Always > 0
   block->nominal_rate = CEIL(block->step_event_count * inverse_secs); // (step/sec) Always > 0
 
-  #if ENABLED(FILAMENT_WIDTH_SENSOR)
-    static float filwidth_e_count = 0, filwidth_delay_dist = 0;
-
-    //FMM update ring buffer used for delay with filament measurements
-    if (extruder == FILAMENT_SENSOR_EXTRUDER_NUM && filwidth_delay_index[1] >= 0) {  //only for extruder with filament sensor and if ring buffer is initialized
-
-      constexpr int MMD_CM = MAX_MEASUREMENT_DELAY + 1, MMD_MM = MMD_CM * 10;
-
-      // increment counters with next move in e axis
-      filwidth_e_count += delta_mm[E_AXIS];
-      filwidth_delay_dist += delta_mm[E_AXIS];
-
-      // Only get new measurements on forward E movement
-      if (!UNEAR_ZERO(filwidth_e_count)) {
-
-        // Loop the delay distance counter (modulus by the mm length)
-        while (filwidth_delay_dist >= MMD_MM) filwidth_delay_dist -= MMD_MM;
-
-        // Convert into an index into the measurement array
-        filwidth_delay_index[0] = int8_t(filwidth_delay_dist * 0.1f);
-
-        // If the index has changed (must have gone forward)...
-        if (filwidth_delay_index[0] != filwidth_delay_index[1]) {
-          filwidth_e_count = 0; // Reset the E movement counter
-          const int8_t meas_sample = thermalManager.widthFil_to_size_ratio();
-          do {
-            filwidth_delay_index[1] = (filwidth_delay_index[1] + 1) % MMD_CM; // The next unused slot
-            measurement_delay[filwidth_delay_index[1]] = meas_sample;         // Store the measurement
-          } while (filwidth_delay_index[0] != filwidth_delay_index[1]);       // More slots to fill?
-        }
-      }
-    }
-  #endif
+  
 
   // Calculate and limit speed in mm/sec for each axis
   float current_speed[NUM_AXIS], speed_factor = 1.0f; // factor <1 decreases speed
@@ -3079,44 +2930,7 @@ bool Planner::_populate_block_joint(block_t * const block, bool split_move,
     if (cs > max_feedrate_mm_s[i]) NOMORE(speed_factor, max_feedrate_mm_s[i] / cs);
   }
 
-  // Max segment time in µs.
-  #ifdef XY_FREQUENCY_LIMIT
-
-    // Check and limit the xy direction change frequency
-    const unsigned char direction_change = block->direction_bits ^ old_direction_bits;
-    old_direction_bits = block->direction_bits;
-    segment_time_us = LROUND((float)segment_time_us / speed_factor);
-
-    uint32_t xs0 = axis_segment_time_us[X_AXIS][0],
-             xs1 = axis_segment_time_us[X_AXIS][1],
-             xs2 = axis_segment_time_us[X_AXIS][2],
-             ys0 = axis_segment_time_us[Y_AXIS][0],
-             ys1 = axis_segment_time_us[Y_AXIS][1],
-             ys2 = axis_segment_time_us[Y_AXIS][2];
-
-    if (TEST(direction_change, X_AXIS)) {
-      xs2 = axis_segment_time_us[X_AXIS][2] = xs1;
-      xs1 = axis_segment_time_us[X_AXIS][1] = xs0;
-      xs0 = 0;
-    }
-    xs0 = axis_segment_time_us[X_AXIS][0] = xs0 + segment_time_us;
-
-    if (TEST(direction_change, Y_AXIS)) {
-      ys2 = axis_segment_time_us[Y_AXIS][2] = axis_segment_time_us[Y_AXIS][1];
-      ys1 = axis_segment_time_us[Y_AXIS][1] = axis_segment_time_us[Y_AXIS][0];
-      ys0 = 0;
-    }
-    ys0 = axis_segment_time_us[Y_AXIS][0] = ys0 + segment_time_us;
-
-    const uint32_t max_x_segment_time = MAX3(xs0, xs1, xs2),
-                   max_y_segment_time = MAX3(ys0, ys1, ys2),
-                   min_xy_segment_time = MIN(max_x_segment_time, max_y_segment_time);
-    if (min_xy_segment_time < MAX_FREQ_TIME_US) {
-      const float low_sf = speed_factor * min_xy_segment_time / (MAX_FREQ_TIME_US);
-      NOMORE(speed_factor, low_sf);
-    }
-  #endif // XY_FREQUENCY_LIMIT
-
+  
   // Correct the speed
   if (speed_factor < 1.0f) {
     LOOP_NUM_AXIS(i) current_speed[i] *= speed_factor;
@@ -3127,11 +2941,7 @@ bool Planner::_populate_block_joint(block_t * const block, bool split_move,
   // Compute and limit the acceleration rate for the trapezoid generator.
   const float steps_per_mm = block->step_event_count * inverse_millimeters;
   uint32_t accel;
-  if (!block->steps[A_AXIS] && !block->steps[B_AXIS] && !block->steps[C_AXIS]
-    #if ENABLED(HANGPRINTER)
-      && !block->steps[D_AXIS]
-    #endif
-  ) {
+  if (!block->steps[A_AXIS] && !block->steps[B_AXIS] && !block->steps[C_AXIS]) {
     // convert to: acceleration steps/sec^2
     accel = CEIL(retract_acceleration * steps_per_mm);
     #if ENABLED(LIN_ADVANCE)
@@ -3476,7 +3286,7 @@ bool Planner::_populate_block_joint(block_t * const block, bool split_move,
   
   // Movement was accepted
   return true;
-} // _populate_block()
+} // _populate_block_joint()
 
 
 

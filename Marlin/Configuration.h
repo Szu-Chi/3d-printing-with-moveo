@@ -906,6 +906,18 @@
 #define Y_MAX_POS Y_BED_SIZE
 #define Z_MAX_POS 200
 
+#define J_MIN_POS_step -24800
+#define A_MIN_POS_step -5500
+#define B_MIN_POS_step -24700
+#define C_MIN_POS_step -6400
+#define D_MIN_POS_step -8700
+#define J_MAX_POS_step  24800
+#define A_MAX_POS_step  5650
+#define B_MAX_POS_step  24000
+#define C_MAX_POS_step  6400
+#define D_MAX_POS_step  7650
+
+
 /**
  * Software Endstops
  *
@@ -921,6 +933,11 @@
   #define MIN_SOFTWARE_ENDSTOP_X
   #define MIN_SOFTWARE_ENDSTOP_Y
   #define MIN_SOFTWARE_ENDSTOP_Z
+  #define MIN_SOFTWARE_ENDSTOP_J
+  #define MIN_SOFTWARE_ENDSTOP_A
+  #define MIN_SOFTWARE_ENDSTOP_B
+  #define MIN_SOFTWARE_ENDSTOP_C
+  #define MIN_SOFTWARE_ENDSTOP_D
 #endif
 
 // Max software endstops constrain movement within maximum coordinate bounds
@@ -929,6 +946,11 @@
   #define MAX_SOFTWARE_ENDSTOP_X
   #define MAX_SOFTWARE_ENDSTOP_Y
   #define MAX_SOFTWARE_ENDSTOP_Z
+  #define MAX_SOFTWARE_ENDSTOP_J
+  #define MAX_SOFTWARE_ENDSTOP_A
+  #define MAX_SOFTWARE_ENDSTOP_B
+  #define MAX_SOFTWARE_ENDSTOP_C
+  #define MAX_SOFTWARE_ENDSTOP_D
 #endif
 
 #if ENABLED(MIN_SOFTWARE_ENDSTOPS) || ENABLED(MAX_SOFTWARE_ENDSTOPS)
