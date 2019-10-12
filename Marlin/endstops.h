@@ -47,6 +47,19 @@ enum EndstopEnum : char {
   Z2_MAX
 };
 
+enum EndstopEnum_Joint : char {
+  Joint1_MIN,
+  Joint2_MIN,
+  Joint3_MIN,
+  Joint4_MIN,
+  Joint5_MIN,
+  Joint1_MAX,
+  Joint2_MAX,
+  Joint3_MAX,
+  Joint4_MAX,
+  Joint5_MAX
+};
+
 class Endstops {
 
   public:
@@ -70,11 +83,15 @@ class Endstops {
 
   private:
     static esbits_t live_state;
+    static esbits_t live_state_Joint;
     static volatile uint8_t hit_state;      // Use X_MIN, Y_MIN, Z_MIN and Z_MIN_PROBE as BIT index
+    static volatile uint16_t hit_state_Joint;
 
     #if ENABLED(ENDSTOP_NOISE_FILTER)
       static esbits_t validated_live_state;
+      static esbits_t validated_live_state_Joint;
       static uint8_t endstop_poll_count;    // Countdown from threshold for polling
+      static uint8_t endstop_poll_count_Joint;
     #endif
 
   public:
@@ -112,6 +129,7 @@ class Endstops {
      * Get Endstop hit state.
      */
     FORCE_INLINE static uint8_t trigger_state() { return hit_state; }
+    FORCE_INLINE static uint8_t trigger_state_Joint() { return hit_state_Joint; }
 
     /**
      * Get current endstops state
@@ -122,6 +140,16 @@ class Endstops {
           validated_live_state
         #else
           live_state
+        #endif
+      ;
+    }
+
+     FORCE_INLINE static esbits_t state_Joint() {
+      return
+        #if ENABLED(ENDSTOP_NOISE_FILTER)
+          validated_live_state_Joint
+        #else
+          live_state_Joint
         #endif
       ;
     }
@@ -148,12 +176,14 @@ class Endstops {
     #if ENABLED(VALIDATE_HOMING_ENDSTOPS)
       // If the last move failed to trigger an endstop, call kill
       static void validate_homing_move();
+      static void validate_homing_move_Joint();
     #else
       FORCE_INLINE static void validate_homing_move() { hit_on_purpose(); }
     #endif
 
     // Clear endstops (i.e., they were hit intentionally) to suppress the report
     FORCE_INLINE static void hit_on_purpose() { hit_state = 0; }
+    FORCE_INLINE static void hit_on_purpose_Joint() { hit_state_Joint = 0; }
 
     // Enable / disable endstop z-probe checking
     #if HAS_BED_PROBE

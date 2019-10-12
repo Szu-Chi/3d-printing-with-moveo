@@ -655,6 +655,16 @@ class Planner {
       #endif
       const float &e, const float &fr_mm_s, const uint8_t extruder, const float millimeters = 0.0
     ) {
+      /*
+      SERIAL_ECHOLNPGM(">>buffer_line_joint");
+      SERIAL_ECHOPAIR("feedrate_mm_s:",feedrate_mm_s);
+      SERIAL_ECHOPAIR(" J1:",j1); 
+      SERIAL_ECHOPAIR(" J2:",j2); 
+      SERIAL_ECHOPAIR(" J3:",j3); 
+      SERIAL_ECHOPAIR(" J4:",j4); 
+      SERIAL_ECHOLNPAIR(" J5:",j5);
+      //*/ 
+
       #if PLANNER_LEVELING && IS_CARTESIAN
         apply_leveling(rx, ry, rz);
       #endif
@@ -664,12 +674,7 @@ class Planner {
         #endif
         e, fr_mm_s, extruder, millimeters
       );
-      //SERIAL_ECHOLNPAIR("feedrate_mm_s:",feedrate_mm_s);
-      //SERIAL_ECHOLNPAIR("J1",j1); 
-      //SERIAL_ECHOLNPAIR("J2",j2); 
-      //SERIAL_ECHOLNPAIR("J3",j3); 
-      //SERIAL_ECHOLNPAIR("J4",j4); 
-      //SERIAL_ECHOLNPAIR("J5",j5); 
+      
     }
 
 
@@ -789,9 +794,11 @@ class Planner {
 
     // Called when an endstop is triggered. Causes the machine to stop inmediately
     static void endstop_triggered(const AxisEnum axis);
+    static void endstop_triggered_Joint(const JointEnum axis);
 
     // Triggered position of an axis in mm (not core-savvy)
     static float triggered_position_mm(const AxisEnum axis);
+    static int32_t triggered_position_mm_Joint(const JointEnum axis);
 
     // Block until all buffered steps are executed / cleaned
     static void synchronize();

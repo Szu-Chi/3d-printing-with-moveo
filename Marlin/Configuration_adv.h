@@ -387,11 +387,11 @@
 #define Z_HOME_BUMP_MM 2
 
 //joint
-#define Joint1_HOME_BUMP_MM 2
-#define Joint2_HOME_BUMP_MM 2
-#define Joint3_HOME_BUMP_MM 2
-#define Joint4_HOME_BUMP_MM 2
-#define Joint5_HOME_BUMP_MM 2
+#define Joint1_HOME_BUMP_MM 200
+#define Joint2_HOME_BUMP_MM 200
+#define Joint3_HOME_BUMP_MM 200
+#define Joint4_HOME_BUMP_MM 200
+#define Joint5_HOME_BUMP_MM 200
 
 #define HOMING_BUMP_DIVISOR { 2, 2, 4 }  // Re-Bump Speed Divisor (Divides the Homing Feedrate)
 
@@ -1510,7 +1510,7 @@
 /**
  * M43 - display pin status, watch pins for changes, watch endstops & toggle LED, Z servo probe test, toggle pins
  */
-//#define PINS_DEBUGGING
+#define PINS_DEBUGGING
 
 /**
  * Auto-report temperatures with M155 S<seconds>

@@ -1504,8 +1504,17 @@ void Planner::endstop_triggered(const AxisEnum axis) {
   stepper.endstop_triggered(axis);
 }
 
+void Planner::endstop_triggered_Joint(const JointEnum axis) {
+  // Record stepper position and discard the current block
+  stepper.endstop_triggered_Joint(axis);
+}
+
 float Planner::triggered_position_mm(const AxisEnum axis) {
   return stepper.triggered_position(axis) * steps_to_mm[axis];
+}
+
+int32_t Planner::triggered_position_mm_Joint(const JointEnum axis) {
+  return stepper.triggered_position_Joint(axis);
 }
 
 void Planner::finish_and_disable() {
@@ -2601,7 +2610,7 @@ bool Planner::_populate_block_joint(block_t * const block, bool split_move,
   position_joint[Joint5_AXIS]=joint[Joint5_AXIS];
 
   /* <-- add a slash to enable
-    SERIAL_ECHOPAIR("  _populate_block FR:", fr_mm_s);
+    SERIAL_ECHOPAIR("  _populate_block_Joint FR:", fr_mm_s);
     SERIAL_ECHOPAIR(" A:", target[A_AXIS]);
     SERIAL_ECHOPAIR(" (", da);
     SERIAL_ECHOPAIR(" steps) B:", target[B_AXIS]);

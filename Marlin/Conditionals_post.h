@@ -681,6 +681,23 @@
   #if ENABLED(USE_ZMIN_PLUG)
     #define ENDSTOPPULLUP_ZMIN
   #endif
+
+  //joint
+  #if ENABLED(USE_Joint1MIN_PLUG)
+    #define ENDSTOPPULLUP_Joint1MIN
+  #endif
+  #if ENABLED(USE_Joint2MIN_PLUG)
+    #define ENDSTOPPULLUP_Joint2MIN
+  #endif
+  #if ENABLED(USE_Joint3MIN_PLUG)
+    #define ENDSTOPPULLUP_Joint3MIN
+  #endif
+  #if ENABLED(USE_Joint4MIN_PLUG)
+    #define ENDSTOPPULLUP_Joint4MIN
+  #endif
+  #if ENABLED(USE_Joint5MIN_PLUG)
+    #define ENDSTOPPULLUP_Joint5MIN
+  #endif  
 #endif
 
 /**
@@ -823,6 +840,12 @@
 #define HAS_Z2_MIN (PIN_EXISTS(Z2_MIN))
 #define HAS_Z2_MAX (PIN_EXISTS(Z2_MAX))
 #define HAS_Z_MIN_PROBE_PIN (PIN_EXISTS(Z_MIN_PROBE))
+
+#define HAS_Joint1_MIN (PIN_EXISTS(Joint1_MIN))
+#define HAS_Joint2_MIN (PIN_EXISTS(Joint2_MIN))
+#define HAS_Joint3_MIN (PIN_EXISTS(Joint3_MIN))
+#define HAS_Joint4_MIN (PIN_EXISTS(Joint4_MIN))
+#define HAS_Joint5_MIN (PIN_EXISTS(Joint5_MIN))
 
 // ADC Temp Sensors (Thermistor or Thermocouple with amplifier ADC interface)
 #define HAS_ADC_TEST(P) (PIN_EXISTS(TEMP_##P) && TEMP_SENSOR_##P != 0 && DISABLED(HEATER_##P##_USES_MAX6675))

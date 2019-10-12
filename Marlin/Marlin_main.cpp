@@ -814,12 +814,31 @@ void report_current_position_detail();
     if (suffix) serialprintPGM(suffix); else SERIAL_EOL();
   }
 
-  void print_xyz(const char* prefix, const char* suffix, const float xyz[]) {
+  void print_Joint(const char* prefix, const char* suffix,const long j1,const long j2,const long j3,const long j4,const long j5) {
+    serialprintPGM(prefix);
+    SERIAL_CHAR('(');
+    SERIAL_ECHO(j1);
+    SERIAL_ECHOPAIR(", ", j2);
+    SERIAL_ECHOPAIR(", ", j3);
+    SERIAL_ECHOPAIR(", ", j4);
+    SERIAL_ECHOPAIR(", ", j5);
+    SERIAL_CHAR(')');
+    if (suffix) serialprintPGM(suffix); else SERIAL_EOL();
+  }
+
+  void print_xyz(const char* prefix, const char* suffix, const float xyz[4]) {
     print_xyz(prefix, suffix, xyz[X_AXIS], xyz[Y_AXIS], xyz[Z_AXIS]);
+  }
+
+  void print_Joint(const char* prefix, const char* suffix, const long Joint_POS[5]) {
+    print_Joint(prefix, suffix, Joint_POS[Joint1_AXIS], Joint_POS[Joint2_AXIS], Joint_POS[Joint3_AXIS],Joint_POS[Joint4_AXIS],Joint_POS[Joint5_AXIS]);
   }
 
   #define DEBUG_POS(SUFFIX,VAR) do { \
     print_xyz(PSTR("  " STRINGIFY(VAR) "="), PSTR(" : " SUFFIX "\n"), VAR); }while(0)
+  
+  #define DEBUG_POS_Joint(SUFFIX,VAR) do { \
+    print_Joint(PSTR("  " STRINGIFY(VAR) "="), PSTR(" : " SUFFIX "\n"), VAR); }while(0)
 #endif
 
 /**
@@ -842,7 +861,7 @@ void sync_plan_position() {
 void sync_plan_position_Joint() {
   #if DISABLED(HANGPRINTER)
     #if ENABLED(DEBUG_LEVELING_FEATURE)
-      if (DEBUGGING(LEVELING)) DEBUG_POS("sync_plan_position", current_position);
+      if (DEBUGGING(LEVELING)) DEBUG_POS_Joint("sync_plan_position_Joint", current_position_Joint);
     #endif
     planner.set_position_mm_Joint(current_position_Joint[Joint1_AXIS], current_position_Joint[Joint2_AXIS], current_position_Joint[Joint3_AXIS], current_position_Joint[Joint4_AXIS], current_position_Joint[Joint5_AXIS]);
   #endif
@@ -1773,9 +1792,9 @@ static void set_Joint_is_at_home(const JointEnum axis) {
     if (DEBUGGING(LEVELING)) {
       #if HAS_HOME_OFFSET
         SERIAL_ECHOPAIR("> home_offset[", Joint_codes[axis]);
-        SERIAL_ECHOLNPAIR("] = ", home_offset[axis]);
+        SERIAL_ECHOLNPAIR("] = ", home_offset_Joint[axis]);
       #endif
-      DEBUG_POS("", current_position);
+      DEBUG_POS_Joint("", current_position_Joint);
       SERIAL_ECHOPAIR("<<< set_Joint_is_at_home(", Joint_codes[axis]);
       SERIAL_CHAR(')');
       SERIAL_EOL();
@@ -1850,9 +1869,9 @@ inline void buffer_line_to_destination(const float &fr_mm_s) {
     UNUSED(fr_mm_s);
   #else
   planner.buffer_line_joint(destination[X_AXIS], destination[Y_AXIS], destination[Z_AXIS], 
-                        destination_Joint[Joint1_AXIS], destination_Joint[Joint2_AXIS], destination_Joint[Joint3_AXIS], 
-                        destination_Joint[Joint4_AXIS], destination_Joint[Joint5_AXIS],
-                        destination[E_CART], fr_mm_s, active_extruder);
+                            destination_Joint[Joint1_AXIS], destination_Joint[Joint2_AXIS], destination_Joint[Joint3_AXIS], 
+                            destination_Joint[Joint4_AXIS], destination_Joint[Joint5_AXIS],
+                            destination[E_CART], fr_mm_s, active_extruder);
   //SERIAL_ECHOLNPAIR("feedrate_mm_s:",fr_mm_s);
   #endif
 }
@@ -2026,6 +2045,7 @@ void do_blocking_move_to_xy(const float &rx, const float &ry, const float &fr_mm
 void setup_for_endstop_or_probe_move() {
   #if ENABLED(DEBUG_LEVELING_FEATURE)
     if (DEBUGGING(LEVELING)) DEBUG_POS("setup_for_endstop_or_probe_move", current_position);
+    if (DEBUGGING(LEVELING)) DEBUG_POS_Joint("setup_for_endstop_or_probe_move_Joint", current_position_Joint);
   #endif
   saved_feedrate_mm_s = feedrate_mm_s;
   saved_feedrate_percentage = feedrate_percentage;
@@ -2035,6 +2055,7 @@ void setup_for_endstop_or_probe_move() {
 void clean_up_after_endstop_or_probe_move() {
   #if ENABLED(DEBUG_LEVELING_FEATURE)
     if (DEBUGGING(LEVELING)) DEBUG_POS("clean_up_after_endstop_or_probe_move", current_position);
+    if (DEBUGGING(LEVELING)) DEBUG_POS_Joint("setup_for_endstop_or_probe_move_Joint", current_position_Joint);
   #endif
   feedrate_mm_s = saved_feedrate_mm_s;
   feedrate_percentage = saved_feedrate_percentage;
@@ -3498,7 +3519,7 @@ static void do_homing_move(const AxisEnum axis, const float distance, const floa
       if (axis == Z_AXIS) probing_pause(false);
     #endif
 
-    endstops.validate_homing_move();
+    endstops.validate_homing_move();   
 
     // Re-enable stealthChop if used. Disable diag1 pin on driver.
     #if ENABLED(SENSORLESS_HOMING)
@@ -3516,10 +3537,9 @@ static void do_homing_move(const AxisEnum axis, const float distance, const floa
 }
 
 static void do_homing_move_Joint(const JointEnum axis, const float distance, const float fr_mm_s=0) {
-
   #if ENABLED(DEBUG_LEVELING_FEATURE)
     if (DEBUGGING(LEVELING)) {
-      SERIAL_ECHOPAIR(">>> do_homing_move(", Joint_codes[axis]);
+      SERIAL_ECHOPAIR(">>> do_homing_move_Joint(", Joint_codes[axis]);
       SERIAL_ECHOPAIR(", ", distance);
       SERIAL_ECHOPGM(", ");
       if (fr_mm_s)
@@ -3579,7 +3599,8 @@ static void do_homing_move_Joint(const JointEnum axis, const float distance, con
   #else
     sync_plan_position_Joint();
     current_position_Joint[axis] = distance; // Set delta/cartesian axes directly
-    planner.buffer_line_joint(0,0,0,current_position_Joint[Joint1_AXIS], current_position_Joint[Joint2_AXIS], current_position_Joint[Joint3_AXIS], current_position_Joint[Joint4_AXIS], current_position_Joint[Joint5_AXIS],0, fr_mm_s ? fr_mm_s : homing_feedrate_Joint(axis), active_extruder);
+    planner.buffer_line_joint(0,0,0,current_position_Joint[Joint1_AXIS], current_position_Joint[Joint2_AXIS],
+      current_position_Joint[Joint3_AXIS], current_position_Joint[Joint4_AXIS], current_position_Joint[Joint5_AXIS],0, fr_mm_s ? fr_mm_s : homing_feedrate_Joint(axis), active_extruder);
   #endif
 
   planner.synchronize();
@@ -3590,7 +3611,8 @@ static void do_homing_move_Joint(const JointEnum axis, const float distance, con
       if (axis == Z_AXIS) probing_pause(false);
     #endif
 
-    endstops.validate_homing_move();
+    //endstops.validate_homing_move();
+    endstops.validate_homing_move_Joint();
 
     // Re-enable stealthChop if used. Disable diag1 pin on driver.
     #if ENABLED(SENSORLESS_HOMING)
@@ -3600,7 +3622,7 @@ static void do_homing_move_Joint(const JointEnum axis, const float distance, con
 
   #if ENABLED(DEBUG_LEVELING_FEATURE)
     if (DEBUGGING(LEVELING)) {
-      SERIAL_ECHOPAIR("<<< do_homing_move(", axis_codes[axis]);
+      SERIAL_ECHOPAIR("<<< do_homing_move_Joint(", axis_codes[axis]);
       SERIAL_CHAR(')');
       SERIAL_EOL();
     }
@@ -3800,7 +3822,7 @@ static void homeJoint(const JointEnum axis) {
 
   #if ENABLED(DEBUG_LEVELING_FEATURE)
     if (DEBUGGING(LEVELING)) {
-      SERIAL_ECHOPAIR(">>> homeaxis(", Joint_codes[axis]);
+      SERIAL_ECHOPAIR(">>> homeJoint(", Joint_codes[axis]);
       SERIAL_CHAR(')');
       SERIAL_EOL();
     }
@@ -3879,7 +3901,7 @@ static void homeJoint(const JointEnum axis) {
       if (axis == Z_AXIS && set_bltouch_deployed(true)) return;
     #endif
 
-    do_homing_move_Joint(axis, 2 * bump, get_homing_bump_feedrate_Joint(axis));
+    do_homing_move_Joint(axis, 2 * bump , get_homing_bump_feedrate_Joint(axis));
 
     #if HOMING_Z_WITH_PROBE && ENABLED(BLTOUCH)
       // BLTOUCH needs to be stowed after trigger to rearm itself
@@ -3957,7 +3979,7 @@ static void homeJoint(const JointEnum axis) {
     destination_Joint[axis] = current_position_Joint[axis];
 
     #if ENABLED(DEBUG_LEVELING_FEATURE)
-      if (DEBUGGING(LEVELING)) DEBUG_POS("> AFTER set_axis_is_at_home", current_position);
+      if (DEBUGGING(LEVELING)) DEBUG_POS_Joint("> AFTER set_Joint_is_at_home", current_position_Joint);
     #endif
 
   #endif
@@ -3974,7 +3996,7 @@ static void homeJoint(const JointEnum axis) {
 
   #if ENABLED(DEBUG_LEVELING_FEATURE)
     if (DEBUGGING(LEVELING)) {
-      SERIAL_ECHOPAIR("<<< homeaxis(", Joint_codes[axis]);
+      SERIAL_ECHOPAIR("<<< homeJoint(", Joint_codes[axis]);
       SERIAL_CHAR(')');
       SERIAL_EOL();
     }
@@ -5026,6 +5048,7 @@ inline void gcode_G28(const bool always_home_all) {
 
   #else // NOT Delta or Hangprinter
 
+    /*
     const bool homeX = always_home_all || parser.seen('X'),
                homeY = always_home_all || parser.seen('Y'),
                homeZ = always_home_all || parser.seen('Z'),
@@ -5035,6 +5058,22 @@ inline void gcode_G28(const bool always_home_all) {
                homeC = always_home_all || parser.seen('C'),
                homeD = always_home_all || parser.seen('D'),
                home_all = (!homeX && !homeY && !homeZ && !homeJ && !homeA && !homeB && !homeC && !homeD) || (homeX && homeY && homeZ && homeJ && homeA && homeB && homeC && homeD);
+    
+    //*/
+
+    const bool homeJ = always_home_all || parser.seen('J'),
+               homeA = always_home_all || parser.seen('A'),
+               homeB = always_home_all || parser.seen('B'),
+               homeC = always_home_all || parser.seen('C'),
+               homeD = always_home_all || parser.seen('D'),
+               home_all = (!homeJ && !homeA && !homeB && !homeC && !homeD) || (homeJ && homeA && homeB && homeC && homeD);
+
+    SERIAL_ECHOPAIR("home_all:",home_all);
+    SERIAL_ECHOPAIR(" homeJ:",homeJ);
+    SERIAL_ECHOPAIR(" homeA:",homeA);
+    SERIAL_ECHOPAIR(" homeB:",homeB);
+    SERIAL_ECHOPAIR(" homeC:",homeC);
+    SERIAL_ECHOLNPAIR(" homeD:",homeD);
 
     set_destination_from_current();
 
@@ -5051,7 +5090,9 @@ inline void gcode_G28(const bool always_home_all) {
           (parser.seenval('R') ? parser.value_linear_units() : Z_HOMING_HEIGHT)
     );
 
-    if (z_homing_height && (home_all || homeX || homeY)) {
+    /* test
+    //if (z_homing_height && (home_all || homeX || homeY)) {
+    if (z_homing_height && (home_all || homeJ || homeA || homeB || homeC || homeD)) {
       // Raise Z before homing any other axes and z is not already high enough (never lower z)
       destination[Z_AXIS] = z_homing_height;
       if (destination[Z_AXIS] > current_position[Z_AXIS]) {
@@ -5064,6 +5105,7 @@ inline void gcode_G28(const bool always_home_all) {
         do_blocking_move_to_z(destination[Z_AXIS]);
       }
     }
+    //*/
 
     #if ENABLED(QUICK_HOME)
 
@@ -5071,6 +5113,7 @@ inline void gcode_G28(const bool always_home_all) {
 
     #endif
 
+    /*No axis
     // Home Y (before X)
     #if ENABLED(HOME_Y_BEFORE_X)
 
@@ -5134,6 +5177,7 @@ inline void gcode_G28(const bool always_home_all) {
 
       } // home_all || homeZ
     #endif // Z_HOME_DIR < 0
+    //*/
 
     if(home_all || homeJ)homeJoint(Joint1_AXIS);
     if(home_all || homeA)homeJoint(Joint2_AXIS);
