@@ -318,7 +318,7 @@ extern volatile bool wait_for_heatup;
 #endif
 
 extern float current_position[XYZE], destination[XYZE];
-extern long int current_position_Joint[Joint_All], destination_Joint[Joint_All];
+extern int32_t current_position_Joint[Joint_All], destination_Joint[Joint_All];
 
 
 

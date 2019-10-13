@@ -385,7 +385,7 @@ uint8_t marlin_debug_flags = DEBUG_NONE;
  *   Used by 'SYNC_PLAN_POSITION_KINEMATIC' to update 'planner.position'.
  */
 float current_position[XYZE] = { 0 };
-long int current_position_Joint[Joint_All] = { 0 };
+int32_t current_position_Joint[Joint_All] = { 0 };
 
 /**
  * Cartesian Destination
@@ -394,7 +394,7 @@ long int current_position_Joint[Joint_All] = { 0 };
  *   Set with 'gcode_get_destination' or 'set_destination_from_current'.
  */
 float destination[XYZE] = { 0 };
-long int destination_Joint[Joint_All] = { 0 };
+int32_t destination_Joint[Joint_All] = { 0 };
 
 /**
  * axis_homed

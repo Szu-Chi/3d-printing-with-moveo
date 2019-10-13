@@ -596,7 +596,7 @@ class Planner {
     );
 
     static bool buffer_segment_joint(const float &a, const float &b, const float &c, 
-      const long &j1, const long &j2, const long &j3, const long &j4, const long &j5,
+      const int32_t &j1, const int32_t &j2, const int32_t &j3, const int32_t &j4, const int32_t &j5,
       #if ENABLED(HANGPRINTER)
         const float &d,
       #endif
@@ -647,7 +647,7 @@ class Planner {
 
 
     FORCE_INLINE static bool buffer_line_joint(ARG_X, ARG_Y, ARG_Z,
-      const long &j1, const long &j2, const long &j3, const long &j4, const long &j5,
+      const int32_t &j1, const int32_t &j2, const int32_t &j3, const int32_t &j4, const int32_t &j5,
       #if ENABLED(HANGPRINTER)
         ARG_E1,
       #endif

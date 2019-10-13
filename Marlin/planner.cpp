@@ -2578,13 +2578,13 @@ bool Planner::_populate_block_joint(block_t * const block, bool split_move,
   #endif
 ) {
 
-  const int32_t da = target[A_AXIS] - position[A_AXIS],
+  /*const int32_t da = target[A_AXIS] - position[A_AXIS],
                 db = target[B_AXIS] - position[B_AXIS],
                 dc = target[C_AXIS] - position[C_AXIS]
                 #if ENABLED(HANGPRINTER)
                   , dd = target[D_AXIS] - position[D_AXIS]
                 #endif
-              ;
+              ;*/
 
   const int32_t d0 = joint[Joint1_AXIS] - position_joint[Joint1_AXIS],
                 d1 = joint[Joint2_AXIS] - position_joint[Joint2_AXIS],
@@ -2594,12 +2594,9 @@ bool Planner::_populate_block_joint(block_t * const block, bool split_move,
   
   int32_t de = target[E_AXIS] - position[E_AXIS];
 
-  position_joint[Joint1_AXIS]=joint[Joint1_AXIS];
-  position_joint[Joint2_AXIS]=joint[Joint2_AXIS];
-  position_joint[Joint3_AXIS]=joint[Joint3_AXIS];
-  position_joint[Joint4_AXIS]=joint[Joint4_AXIS];
-  position_joint[Joint5_AXIS]=joint[Joint5_AXIS];
-
+  const int32_t da = MAX5(abs(d0),abs(d1),abs(d2),abs(d3),abs(d4)),
+                db,
+                dc;
   /* <-- add a slash to enable
     SERIAL_ECHOPAIR("  _populate_block FR:", fr_mm_s);
     SERIAL_ECHOPAIR(" A:", target[A_AXIS]);
@@ -2630,8 +2627,12 @@ bool Planner::_populate_block_joint(block_t * const block, bool split_move,
 
     SERIAL_ECHOPAIR(" J5:", joint[Joint5_AXIS]);
     SERIAL_ECHOPAIR(" (", d4);
-    SERIAL_ECHOLNPGM(" steps)");   
-  //*/
+    SERIAL_ECHOPGM(" steps)");   
+    SERIAL_ECHOLNPAIR(", djm",djm);
+//*/
+    
+  
+
 
   #if ENABLED(PREVENT_COLD_EXTRUSION) || ENABLED(PREVENT_LENGTHY_EXTRUDE)
     if (de) {
@@ -2681,6 +2682,10 @@ bool Planner::_populate_block_joint(block_t * const block, bool split_move,
   const float esteps_float = de * e_factor[extruder];
   const uint32_t esteps = ABS(esteps_float) + 0.5f;
 
+  //Bail if this is a zero-length block
+  if (MAX6(ABS(d0),ABS(d1),ABS(d2),ABS(d3),ABS(d4),esteps) < MIN_STEPS_PER_SEGMENT) return false;
+
+
   // Clear all flags, including the "busy" bit
   block->flag = 0x00;
 
@@ -2707,13 +2712,12 @@ bool Planner::_populate_block_joint(block_t * const block, bool split_move,
   block->steps[E_AXIS] = esteps;
 
   block->step_event_count = (
-      //MAX4(block->steps[A_AXIS], block->steps[B_AXIS], block->steps[C_AXIS], esteps)
       MAX6(block->step_Joint[Joint1_AXIS], block->step_Joint[Joint2_AXIS], block->step_Joint[Joint3_AXIS],
            block->step_Joint[Joint4_AXIS], block->step_Joint[Joint5_AXIS], esteps)
   );
 
   // Bail if this is a zero-length block
-  if (block->step_event_count < MIN_STEPS_PER_SEGMENT) return false;
+  //if (block->step_event_count < MIN_STEPS_PER_SEGMENT) return false;
 
   // For a mixing extruder, get a magnified esteps for each
   #if ENABLED(MIXING_EXTRUDER)
@@ -2864,24 +2868,20 @@ bool Planner::_populate_block_joint(block_t * const block, bool split_move,
   delta_mm[C_AXIS] = dc * steps_to_mm[C_AXIS];
   delta_mm[E_AXIS] = esteps_float * steps_to_mm[E_AXIS_N];
   
-  long delta_joint_step[Joint_All];
-  delta_joint_step[Joint1_AXIS] = d0;
-  delta_joint_step[Joint2_AXIS] = d1;
-  delta_joint_step[Joint3_AXIS] = d2;
-  delta_joint_step[Joint4_AXIS] = d3;
-  delta_joint_step[Joint5_AXIS] = d4;
+  float delta_joint_mm[Joint_All];
+  delta_joint_mm[Joint1_AXIS] = d0*(1/80);
+  delta_joint_mm[Joint2_AXIS] = d1*(1/80);
+  delta_joint_mm[Joint3_AXIS] = d2*(1/80);
+  delta_joint_mm[Joint4_AXIS] = d3*(1/80);
+  delta_joint_mm[Joint5_AXIS] = d4*(1/80);
 
-  if (block->step_Joint[Joint1_AXIS] < MIN_STEPS_PER_SEGMENT && 
-      block->step_Joint[Joint2_AXIS] < MIN_STEPS_PER_SEGMENT && 
-      block->step_Joint[Joint3_AXIS] < MIN_STEPS_PER_SEGMENT &&
-      block->step_Joint[Joint4_AXIS] < MIN_STEPS_PER_SEGMENT &&
-      block->step_Joint[Joint5_AXIS] < MIN_STEPS_PER_SEGMENT &&
-    ) {
+  if (block->steps[A_AXIS] < MIN_STEPS_PER_SEGMENT && block->steps[B_AXIS] < MIN_STEPS_PER_SEGMENT && block->steps[C_AXIS] < MIN_STEPS_PER_SEGMENT) {
     block->millimeters = ABS(delta_mm[E_AXIS]);
   }
   else if (!millimeters) {
-    block->millimeters = MAX6(delta_joint_step[Joint1_AXIS],delta_joint_step[Joint2_AXIS],delta_joint_step[Joint3_AXIS]
-                              ,delta_joint_step[Joint4_AXIS],delta_joint_step[Joint5_AXIS]);
+    block->millimeters = SQRT(
+      sq(delta_mm[X_AXIS]) + sq(delta_mm[Y_AXIS]) + sq(delta_mm[Z_AXIS])
+    );
   }
   else {
     block->millimeters = millimeters;
@@ -3274,6 +3274,19 @@ bool Planner::_populate_block_joint(block_t * const block, bool split_move,
   // the maximum junction speed and may always be ignored for any speed reduction checks.
   block->flag |= block->nominal_speed_sqr <= v_allowable_sqr ? BLOCK_FLAG_RECALCULATE | BLOCK_FLAG_NOMINAL_LENGTH : BLOCK_FLAG_RECALCULATE;
 
+  //SERIAL_ECHOLNPAIR("acceleration_rate : ", block->acceleration_rate);
+  //SERIAL_ECHOLNPAIR("accelerate_until : ", block->accelerate_until);
+  //SERIAL_ECHOLNPAIR("decelerate_after : ", block->decelerate_after);
+  //SERIAL_ECHOLNPAIR("initial_rate : ", block->initial_rate);
+  //SERIAL_ECHOLNPAIR("nominal_rate : ", block->nominal_rate);
+  //SERIAL_ECHOLNPAIR("final_rate : ", block->final_rate);
+  //SERIAL_ECHOLNPAIR("flag : ", block->flag);
+  //SERIAL_ECHOLNPAIR("step_event_count : ", block->step_event_count);
+  //SERIAL_ECHOLNPAIR("position : ", block->position);
+  //SERIAL_ECHOLNPAIR("steps : ", block->steps);
+  //SERIAL_ECHOLNPAIR("position_joint : ", block->position_Joint);
+  //SERIAL_ECHOLNPAIR("step_Joint : ", block->step_Joint);
+  //SERIAL_ECHOLNPAIR("direction_bits_joint : ", block->direction_bits_joint);
   // Update previous path unit_vector and nominal speed
   COPY(previous_speed, current_speed);
   previous_nominal_speed_sqr = block->nominal_speed_sqr;
@@ -3290,6 +3303,7 @@ bool Planner::_populate_block_joint(block_t * const block, bool split_move,
 
   if (COUNT_MOVE) {
     COPY(position, target);
+    COPY(position_joint, joint);
     #if HAS_POSITION_FLOAT
       COPY(position_float, target_float);
     #endif
@@ -3490,7 +3504,7 @@ bool Planner::buffer_segment(const float &a, const float &b, const float &c
 
 
 bool Planner::buffer_segment_joint(const float &a, const float &b, const float &c,
-  const long &j1, const long &j2, const long &j3, const long &j4, const long &j5
+  const int32_t &j1, const int32_t &j2, const int32_t &j3, const int32_t &j4, const int32_t &j5
   #if ENABLED(HANGPRINTER)
     , const float &d
   #endif

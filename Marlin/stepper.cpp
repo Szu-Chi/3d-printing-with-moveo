@@ -1344,11 +1344,14 @@ void Stepper::stepper_pulse_phase_isr() {
       current_block = NULL;
       planner.discard_current_block();
     }
+    //SERIAL_ECHOLNPGM("abort_current_block");
   }
-
+  
   // If there is no current block, do nothing
-  if (!current_block) return;
-
+  if (!current_block) {
+    //SERIAL_ECHOLNPAIR("current_block : ",current_block);
+    return;
+  }
   // Count of pending loops and events for this iteration
   const uint32_t pending_events = step_event_count - step_events_completed;
   uint8_t events_to_do = MIN(pending_events, steps_per_isr);
@@ -1441,7 +1444,7 @@ void Stepper::stepper_pulse_phase_isr() {
     #if HAS_Joint5_STEP
         PULSE_START_Joint(Joint5);
     #endif
-
+   
     // SERIAL_ECHOPAIR(" ",count_position_Joint[Joint1_AXIS]);
     // SERIAL_ECHOPAIR(" ",count_position_Joint[Joint2_AXIS]);
     // SERIAL_ECHOPAIR(" ",count_position_Joint[Joint3_AXIS]);
@@ -1924,6 +1927,7 @@ uint32_t Stepper::stepper_block_phase_isr() {
       if (current_block->direction_bits_joint != last_direction_bits_joint) {
         last_direction_bits_joint = current_block->direction_bits_joint;
         set_directions_Joint();
+        //SERIAL_ECHOLNPAIR("djm : ",last_direction_bits_joint); 
       }
 
       // SERIAL_ECHOPAIR(" ",last_direction_bits_joint);
@@ -2486,7 +2490,7 @@ void Stepper::endstop_triggered(const AxisEnum axis) {
   #endif // !COREXY && !COREXZ && !COREYZ
 
   // Discard the rest of the move if there is a current block
-  quick_stop();
+  //quick_stop();
 
   if (was_enabled) ENABLE_STEPPER_DRIVER_INTERRUPT();
 }
