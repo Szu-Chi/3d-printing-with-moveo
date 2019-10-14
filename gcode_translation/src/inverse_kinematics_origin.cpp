@@ -69,23 +69,11 @@ int main(int argc, char **argv)
   //ROS_INFO_STREAM("eps :" << eps);
   KDL::Chain chain;
   KDL::JntArray ll, ul; //lower joint limits, upper joint limits
-  TRAC_IK::TRAC_IK tracik_solver (chain_start, chain_end, urdf_param, 0.15, eps, TRAC_IK::Distance);
-  TRAC_IK::TRAC_IK tracik_solver2 (chain_start, chain_end, urdf_param, 0.15, eps, TRAC_IK::Distance);
-  TRAC_IK::TRAC_IK tracik_solver3 (chain_start, chain_end, urdf_param, 0.15, eps, TRAC_IK::Distance);
-  TRAC_IK::TRAC_IK tracik_solver4 (chain_start, chain_end, urdf_param, 0.15, eps, TRAC_IK::Distance);
-  TRAC_IK::TRAC_IK tracik_solver5 (chain_start, chain_end, urdf_param, 0.15, eps, TRAC_IK::Distance);
-  TRAC_IK::TRAC_IK tracik_solver6 (chain_start, chain_end, urdf_param, 0.15, eps, TRAC_IK::Distance);
-  TRAC_IK::TRAC_IK tracik_solver7 (chain_start, chain_end, urdf_param, 0.15, eps, TRAC_IK::Distance);
-  TRAC_IK::TRAC_IK tracik_solver8 (chain_start, chain_end, urdf_param, 0.15, eps, TRAC_IK::Distance);
-  
-  if(!check_trac_ik_valid(tracik_solver, chain, ll, ul)) return -1;
-  if(!check_trac_ik_valid(tracik_solver2, chain, ll, ul)) return -1;
-  if(!check_trac_ik_valid(tracik_solver3, chain, ll, ul)) return -1;
-  if(!check_trac_ik_valid(tracik_solver4, chain, ll, ul)) return -1;
-  if(!check_trac_ik_valid(tracik_solver5, chain, ll, ul)) return -1;
-  if(!check_trac_ik_valid(tracik_solver6, chain, ll, ul)) return -1;
-  if(!check_trac_ik_valid(tracik_solver7, chain, ll, ul)) return -1;
-  if(!check_trac_ik_valid(tracik_solver8, chain, ll, ul)) return -1;
+  TRAC_IK::TRAC_IK** tracik_solver = new TRAC_IK::TRAC_IK*[num_threads];
+  for(int i = 0; i < num_threads; i++){
+    tracik_solver[i] = new TRAC_IK::TRAC_IK(chain_start, chain_end, urdf_param, timeout, eps, TRAC_IK::Distance);
+    if(!check_trac_ik_valid(*tracik_solver[i], chain, ll, ul)) return -1;
+  }
 
   assert(chain.getNrOfJoints() == ll.data.size());
   assert(chain.getNrOfJoints() == ul.data.size());
@@ -160,34 +148,12 @@ int main(int argc, char **argv)
       #pragma omp parallel for
       for(int j = 0;j < save_place.size();j++){
         int rc = 0;
+        int thread_num = omp_get_thread_num();
         KDL::Frame end_effector_pose(end_effector_target_rot, find_end_effector_target_vol[j]);
-        if(omp_get_thread_num()== 0){
-          rc = tracik_solver.CartToJnt(nominal, end_effector_pose, result, target_bounds);
-        }
-        else if(omp_get_thread_num()== 1){
-          rc = tracik_solver2.CartToJnt(nominal, end_effector_pose, result, target_bounds);
-        }
-        else if(omp_get_thread_num()== 2){
-          rc = tracik_solver3.CartToJnt(nominal, end_effector_pose, result, target_bounds);
-        }
-        else if(omp_get_thread_num()== 3){
-          rc = tracik_solver4.CartToJnt(nominal, end_effector_pose, result, target_bounds);  
-        }
-        else if(omp_get_thread_num()== 4){
-          rc = tracik_solver5.CartToJnt(nominal, end_effector_pose, result, target_bounds);
-        }
-        else if(omp_get_thread_num()== 5){
-          rc = tracik_solver6.CartToJnt(nominal, end_effector_pose, result, target_bounds);  
-        }
-        else if(omp_get_thread_num()== 6){
-          rc = tracik_solver7.CartToJnt(nominal, end_effector_pose, result, target_bounds);
-        }
-        else if(omp_get_thread_num()== 7){
-          rc = tracik_solver8.CartToJnt(nominal, end_effector_pose, result, target_bounds);  
-        }
-        ROS_INFO_STREAM("thread: " << omp_get_thread_num());
+        ROS_INFO_STREAM("thread: " << thread_num);
+        rc = tracik_solver[thread_num]->CartToJnt(nominal, end_effector_pose, result, target_bounds);
         if(rc < 0){
-          ROS_ERROR_STREAM("ERROR thread: " << omp_get_thread_num());
+          ROS_ERROR_STREAM("ERROR thread: " << thread_num);
           ros::shutdown();
         }
         motor_setep_convert(result.data);
@@ -224,6 +190,10 @@ int main(int argc, char **argv)
   end_ = ros::WallTime::now();
   double execution_time = (end_ - start_).toNSec() * 1e-9;
   ROS_INFO_STREAM("Exectution time (ms): " << execution_time);
+  for(int i = 0; i < num_threads; i++){
+    delete tracik_solver[i];
+  }
+  delete tracik_solver;
   //ROS_INFO_STREAM("second_execution: " << second_execution);
   //ROS_INFO_STREAM("third_execution: " << third_execution);
   ros::shutdown();

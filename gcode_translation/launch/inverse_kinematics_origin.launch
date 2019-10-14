@@ -2,9 +2,9 @@
 <launch>
   <arg name="chain_start" default="base_link" />
   <arg name="chain_end" default="moveo_nozzle_link" />
-  <arg name="timeout" default="0.003" />
+  <arg name="timeout" default="0.03" />
   <arg name="eps" default="1e-5"/>
-  <arg name="num_threads" default="8"/>
+  <arg name="num_threads" default="3"/>
   <arg name="model" default="$(find moveo_urdf)/urdf/moveo_urdf.urdf"/>
   <param name="robot_description" textfile="$(arg model)" />
   
