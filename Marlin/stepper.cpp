@@ -1205,7 +1205,7 @@ HAL_STEP_TIMER_ISR {
 #define STEP_MULTIPLY(A,B) MultiU24X32toH16(A, B)
 
 void Stepper::isr() {
-  wdt_reset();
+  //wdt_reset();
   DISABLE_ISRS();
   // Program timer compare for the maximum period, so it does NOT
   // flag an interrupt while this ISR is running - So changes from small
@@ -2490,7 +2490,7 @@ void Stepper::endstop_triggered(const AxisEnum axis) {
   #endif // !COREXY && !COREXZ && !COREYZ
 
   // Discard the rest of the move if there is a current block
-  //quick_stop();
+  quick_stop();
 
   if (was_enabled) ENABLE_STEPPER_DRIVER_INTERRUPT();
 }

@@ -565,6 +565,16 @@ class Planner {
       #endif
     );
 
+    static bool _populate_block_joint_self(block_t * const block, bool split_move,
+        const int32_t (&target)[NUM_AXIS], const int32_t (&joint)[Joint_All]
+      #if HAS_POSITION_FLOAT
+        , const float (&target_float)[NUM_AXIS]
+      #endif
+      , float fr_mm_s, const uint8_t extruder, const float &millimeters=0.0
+      #if ENABLED(UNREGISTERED_MOVE_SUPPORT)
+        , const bool count_it=true
+      #endif
+    );
     /**
      * Planner::buffer_sync_block
      * Add a block to the buffer that just updates the position
