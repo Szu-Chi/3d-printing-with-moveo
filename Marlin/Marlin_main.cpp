@@ -834,6 +834,7 @@ void report_current_position_detail();
     print_Joint(prefix, suffix, Joint_POS[Joint1_AXIS], Joint_POS[Joint2_AXIS], Joint_POS[Joint3_AXIS],Joint_POS[Joint4_AXIS],Joint_POS[Joint5_AXIS]);
   }
 
+
   #define DEBUG_POS(SUFFIX,VAR) do { \
     print_xyz(PSTR("  " STRINGIFY(VAR) "="), PSTR(" : " SUFFIX "\n"), VAR); }while(0)
   
@@ -1839,7 +1840,6 @@ inline float get_homing_bump_feedrate_Joint(const JointEnum axis) {
   }
   return homing_feedrate_Joint(axis) / hbd;
 }
-
 
 /**
  * Some planner shorthand inline functions
@@ -5068,12 +5068,14 @@ inline void gcode_G28(const bool always_home_all) {
                homeD = always_home_all || parser.seen('D'),
                home_all = (!homeJ && !homeA && !homeB && !homeC && !homeD) || (homeJ && homeA && homeB && homeC && homeD);
 
+    /*
     SERIAL_ECHOPAIR("home_all:",home_all);
     SERIAL_ECHOPAIR(" homeJ:",homeJ);
     SERIAL_ECHOPAIR(" homeA:",homeA);
     SERIAL_ECHOPAIR(" homeB:",homeB);
     SERIAL_ECHOPAIR(" homeC:",homeC);
     SERIAL_ECHOLNPAIR(" homeD:",homeD);
+    //*/
 
     set_destination_from_current();
 
