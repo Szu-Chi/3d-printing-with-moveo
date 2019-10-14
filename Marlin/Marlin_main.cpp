@@ -1523,8 +1523,8 @@ void update_software_endstops_Joint(const JointEnum axis) {
       #endif
       : base_max_pos(axis);
     #else
-      soft_endstop_min_Joint[axis] = base_min_pos_Joint(axis);
-      soft_endstop_max_Joint[axis] = base_max_pos_Joint(axis);
+      soft_endstop_joint_min[axis] = base_min_pos_Joint(axis);
+      soft_endstop_joint_max[axis] = base_max_pos_Joint(axis);
     #endif
 
     #if ENABLED(DEBUG_LEVELING_FEATURE)
