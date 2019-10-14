@@ -32,8 +32,12 @@ int main(int argc, char **argv)
   std::ifstream input_file(gcode_in);
   if(!input_file.is_open())ROS_ERROR_STREAM("Can't open " <<gcode_in);
   moveit_msgs::RobotTrajectory trajectory;
+  moveit_msgs::RobotTrajectory trajectory_path;
   std::string line;
   int first = 0;
+  double Z = 0;
+  double pre_Z = 0;
+  bool draw = 0;
   while(input_file){
     std::getline(input_file, line);
     if(!line.compare(0,2,"G0")){
@@ -63,23 +67,48 @@ int main(int argc, char **argv)
         if(colon_pos_D < 100){
           target_joints.at(4) = double(stod(line.substr(colon_pos_D+1))*(2*M_PI)/28800);
         }
-        move_group.setJointValueTarget(target_joints);
-        if(first++ > 2){
-          moveit::planning_interface::MoveGroupInterface::Plan my_plan;
-          move_group.plan(my_plan);
-          trajectory.joint_trajectory.joint_names = my_plan.trajectory_.joint_trajectory.joint_names;
-          joint_model_group = start_state->getJointModelGroup(move_group.getName());
-          start_state->setJointGroupPositions(joint_model_group, target_joints);
-          move_group.setStartState(*start_state);
-          for(int j = 0; j < my_plan.trajectory_.joint_trajectory.points.size(); j++){
-            trajectory.joint_trajectory.points.push_back(my_plan.trajectory_.joint_trajectory.points[j]);
+        size_t colon_pos_Z = line.find('Z');
+        if(colon_pos_Z < 100){
+          Z = stod(line.substr(colon_pos_Z+1));
+        }
+        if(Z != pre_Z){
+          draw = 1;
+          pre_Z = Z;
+        }
+        if(draw == 1){
+          draw = 0;
+          moveit::planning_interface::MoveGroupInterface::Plan joinedPlan;
+          robot_trajectory::RobotTrajectory rt(move_group.getCurrentState()->getRobotModel(), "arm");
+          rt.setRobotTrajectoryMsg(*move_group.getCurrentState(),trajectory);
+          trajectory_processing::IterativeParabolicTimeParameterization iptp;
+          iptp.computeTimeStamps(rt);
+          rt.getRobotTrajectoryMsg(trajectory);
+          //std::cout << trajectory;
+          joinedPlan.trajectory_ = trajectory;
+          if(!move_group.execute(joinedPlan)){
+            ROS_ERROR("Failed to execute plan");
+            return false;
           }
+          trajectory.joint_trajectory.points.clear();
+        }
+        move_group.setJointValueTarget(target_joints);
+        if(first++ > 1){
+          moveit::planning_interface::MoveGroupInterface::Plan my_plan;
+          move_group.setPlanningTime(0.05);
+          move_group.plan(my_plan);
           size_t colon_pos_E = line.find('E');
           if(colon_pos_E < 100){
             if(stod(line.substr(colon_pos_E+1)) > 0){
               visual_tools.publishTrajectoryLine(my_plan.trajectory_, joint_model_group);
               visual_tools.trigger();
             }
+          }
+          trajectory.joint_trajectory.joint_names = my_plan.trajectory_.joint_trajectory.joint_names;
+          joint_model_group = start_state->getJointModelGroup(move_group.getName());
+          start_state->setJointGroupPositions(joint_model_group, target_joints);
+          move_group.setStartState(*start_state);
+          for(int j = 0; j < my_plan.trajectory_.joint_trajectory.points.size(); j++){
+            trajectory.joint_trajectory.points.push_back(my_plan.trajectory_.joint_trajectory.points[j]);
           }
         }
         else{
@@ -90,18 +119,6 @@ int main(int argc, char **argv)
         }
       }
     }
-  }
-  moveit::planning_interface::MoveGroupInterface::Plan joinedPlan;
-  robot_trajectory::RobotTrajectory rt(move_group.getCurrentState()->getRobotModel(), "arm");
-  rt.setRobotTrajectoryMsg(*move_group.getCurrentState(),trajectory);
-  trajectory_processing::IterativeParabolicTimeParameterization iptp;
-  iptp.computeTimeStamps(rt);
-  rt.getRobotTrajectoryMsg(trajectory);
-  std::cout << trajectory;
-  joinedPlan.trajectory_ = trajectory;
-  if(!move_group.execute(joinedPlan)){
-    ROS_ERROR("Failed to execute plan");
-    return false;
   }
   end_ = ros::WallTime::now();
   double execution_time = (end_ - start_).toNSec() * 1e-9;

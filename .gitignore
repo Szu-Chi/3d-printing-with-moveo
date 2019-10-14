@@ -1,1 +1,2 @@
 gcode_translation/gcode/*.gcode
+.vscode/*.json
