@@ -188,8 +188,8 @@ int main(int argc, char **argv)
       for(int i = 0; i < chain.getNrOfJoints(); i++){
         target_joints.at(i) = result.data(i);
       }
-      move_group.setJointValueTarget(target_joints);
-      move_group.move();
+      //move_group.setJointValueTarget(target_joints);
+      //move_group.move();
     }
     
     if (int((double)i / num_samples * 100) % 10 == 0)

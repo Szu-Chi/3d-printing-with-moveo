@@ -65,7 +65,7 @@ int main(int argc, char **argv)
   node_handle.param("timeout", timeout, 0.005);
   node_handle.param("urdf_param", urdf_param, std::string("/robot_description"));
   node_handle.param("eps", eps, 1e-5);
-  node_handle.param("num_threads", num_threads, 8);
+  node_handle.param("num_threads", num_threads, omp_get_num_procs()*2);
   //ROS_INFO_STREAM("eps :" << eps);
   KDL::Chain chain;
   KDL::JntArray ll, ul; //lower joint limits, upper joint limits
@@ -113,8 +113,6 @@ int main(int argc, char **argv)
   find_end_effector_target_vol.reserve(1000);
   std::vector<int> save_place;
   save_place.reserve(1000);
-  int coreNum = omp_get_num_procs();
-  ROS_INFO_STREAM("coreNum: " << coreNum);
   while(input_file){
     std::getline(input_file, line);
     save.push_back(line);
@@ -150,7 +148,7 @@ int main(int argc, char **argv)
         int rc = 0;
         int thread_num = omp_get_thread_num();
         KDL::Frame end_effector_pose(end_effector_target_rot, find_end_effector_target_vol[j]);
-        ROS_INFO_STREAM("thread: " << thread_num);
+        //ROS_INFO_STREAM("thread: " << thread_num);
         rc = tracik_solver[thread_num]->CartToJnt(nominal, end_effector_pose, result, target_bounds);
         if(rc < 0){
           ROS_ERROR_STREAM("ERROR thread: " << thread_num);
@@ -177,13 +175,11 @@ int main(int argc, char **argv)
         else{
           output_file << line << std::endl;
         }
-        if(k == 999){
-          save.clear();
-          find_end_effector_target_vol.clear();
-          save_place.clear();
-          save_result.clear();
-        }
       }
+      save.clear();
+      find_end_effector_target_vol.clear();
+      save_place.clear();
+      save_result.clear();
       save_times++;
     }
   }
