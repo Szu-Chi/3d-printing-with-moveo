@@ -514,6 +514,18 @@
 //#define USE_YMAX_PLUG
 //#define USE_ZMAX_PLUG
 
+#define USE_Joint1MIN_PLUG
+#define USE_Joint2MIN_PLUG
+#define USE_Joint3MIN_PLUG
+#define USE_Joint4MIN_PLUG
+#define USE_Joint5MIN_PLUG
+
+#define USE_Joint1MAX_PLUG
+#define USE_Joint2MAX_PLUG
+#define USE_Joint3MAX_PLUG
+#define USE_Joint4MAX_PLUG
+#define USE_Joint5MAX_PLUG
+
 // Enable pullup for all endstops to prevent a floating state
 #define ENDSTOPPULLUPS
 #if DISABLED(ENDSTOPPULLUPS)
@@ -524,7 +536,12 @@
   //#define ENDSTOPPULLUP_XMIN
   //#define ENDSTOPPULLUP_YMIN
   //#define ENDSTOPPULLUP_ZMIN
-  //#define ENDSTOPPULLUP_ZMIN_PROBE
+  #define ENDSTOPPULLUP_ZMIN_PROBE
+  #define ENDSTOPPULLUP_Joint1MIN 
+  #define ENDSTOPPULLUP_Joint2MIN
+  #define ENDSTOPPULLUP_Joint3MIN
+  #define ENDSTOPPULLUP_Joint4MIN
+  #define ENDSTOPPULLUP_Joint5MIN
 #endif
 
 // Mechanical endstop with COM to ground and NC to Signal uses "false" here (most common setup).
@@ -535,6 +552,19 @@
 #define Y_MAX_ENDSTOP_INVERTING false // set to true to invert the logic of the endstop.
 #define Z_MAX_ENDSTOP_INVERTING false // set to true to invert the logic of the endstop.
 #define Z_MIN_PROBE_ENDSTOP_INVERTING false // set to true to invert the logic of the probe.
+
+//joint
+#define Joint1_MIN_ENDSTOP_INVERTING true
+#define Joint2_MIN_ENDSTOP_INVERTING true
+#define Joint3_MIN_ENDSTOP_INVERTING true
+#define Joint4_MIN_ENDSTOP_INVERTING true
+#define Joint5_MIN_ENDSTOP_INVERTING true
+
+#define Joint1_MAX_ENDSTOP_INVERTING false
+#define Joint2_MAX_ENDSTOP_INVERTING false
+#define Joint3_MAX_ENDSTOP_INVERTING false
+#define Joint4_MAX_ENDSTOP_INVERTING false
+#define Joint5_MAX_ENDSTOP_INVERTING false
 
 /**
  * Stepper Drivers
@@ -581,7 +611,7 @@
  * (This feature is not required for common micro-switches mounted on PCBs
  * based on the Makerbot design, since they already include the 100nF capacitor.)
  */
-//#define ENDSTOP_NOISE_FILTER
+//  #define ENDSTOP_NOISE_FILTER
 
 //=============================================================================
 //============================== Movement Settings ============================
@@ -892,6 +922,13 @@
 #define Y_HOME_DIR -1
 #define Z_HOME_DIR -1
 
+//joint
+#define Joint1_HOME_DIR -1
+#define Joint2_HOME_DIR -1
+#define Joint3_HOME_DIR -1
+#define Joint4_HOME_DIR -1
+#define Joint5_HOME_DIR -1
+
 // @section machine
 
 // The size of the print bed
@@ -916,6 +953,21 @@
 #define B_MAX_POS_step  24000
 #define C_MAX_POS_step  6400
 #define D_MAX_POS_step  7650
+
+
+//joint
+#define Joint1_MIN_POS -3000 
+#define Joint2_MIN_POS -3000
+#define Joint3_MIN_POS -3000 
+#define Joint4_MIN_POS -3000 
+#define Joint5_MIN_POS -3000 
+
+//joint
+#define Joint1_MAX_POS 2000 
+#define Joint2_MAX_POS 2000 
+#define Joint3_MAX_POS 2000
+#define Joint4_MAX_POS 2000
+#define Joint5_MAX_POS 2000
 
 
 /**
@@ -1028,7 +1080,7 @@
  * Turn on with the command 'M111 S32'.
  * NOTE: Requires a lot of PROGMEM!
  */
-//#define DEBUG_LEVELING_FEATURE
+#define DEBUG_LEVELING_FEATURE
 
 #if ENABLED(MESH_BED_LEVELING) || ENABLED(AUTO_BED_LEVELING_BILINEAR) || ENABLED(AUTO_BED_LEVELING_UBL)
   // Gradually reduce leveling correction until a set height is reached,
@@ -1190,6 +1242,7 @@
 // Homing speeds (mm/m)
 #define HOMING_FEEDRATE_XY (50*60)
 #define HOMING_FEEDRATE_Z  (4*60)
+#define HOMING_FEEDRATE_Joint (5*60)
 
 // @section calibrate
 

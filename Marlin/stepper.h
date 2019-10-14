@@ -249,7 +249,8 @@ class Stepper {
 
     static uint8_t last_direction_bits,     // The next stepping-bits to be output
                    last_direction_bits_joint,
-                   axis_did_move;           // Last Movement in the given direction is not null, as computed when the last movement was fetched from planner
+                   axis_did_move,           // Last Movement in the given direction is not null, as computed when the last movement was fetched from planner
+                   axis_did_move_Joint;
 
     static bool abort_current_block;        // Signals to the stepper that current block should be aborted
 
@@ -322,6 +323,7 @@ class Stepper {
     #endif
 
     static volatile int32_t endstops_trigsteps[XYZ];
+    static volatile int32_t endstops_trigsteps_Joint[Joint_All];
 
     //
     // Positions of stepper motors, in step units
@@ -386,6 +388,7 @@ class Stepper {
 
     // The last movement direction was not null on the specified axis. Note that motor direction is not necessarily the same.
     FORCE_INLINE static bool axis_is_moving(const AxisEnum axis) { return TEST(axis_did_move, axis); }
+    FORCE_INLINE static bool axis_is_moving_Joint(const JointEnum axis) { return TEST(axis_did_move_Joint, axis); }
 
     // The extruder associated to the last movement
     FORCE_INLINE static uint8_t movement_extruder() {
@@ -400,9 +403,11 @@ class Stepper {
 
     // Handle a triggered endstop
     static void endstop_triggered(const AxisEnum axis);
+    static void endstop_triggered_Joint(const JointEnum axis);
 
     // Triggered position of an axis in steps
     static int32_t triggered_position(const AxisEnum axis);
+    static int32_t triggered_position_Joint(const JointEnum axis);
 
     #if HAS_DIGIPOTSS || HAS_MOTOR_CURRENT_PWM
       static void digitalPotWrite(const int16_t address, const int16_t value);
@@ -456,7 +461,7 @@ class Stepper {
         #endif
         , e
       );
-       _set_position_Joint(J1,J2,J3,J4,J5);       
+      _set_position_Joint(J1,J2,J3,J4,J5);       
       if (was_enabled) ENABLE_STEPPER_DRIVER_INTERRUPT();
     }
 
@@ -471,7 +476,7 @@ class Stepper {
       if (was_enabled) ENABLE_STEPPER_DRIVER_INTERRUPT();
     }
 
-    inline static void _Joint(const JointEnum a, const int32_t &v) {
+    inline static void set_position_Joint(const JointEnum a, const int32_t &v) {
       planner.synchronize();
 
       const bool was_enabled = STEPPER_ISR_ENABLED();

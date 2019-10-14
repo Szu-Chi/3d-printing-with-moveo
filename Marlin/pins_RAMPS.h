@@ -69,14 +69,14 @@
 //
 // Limit Switches
 //
-#define X_MIN_PIN           3
+#define X_MIN_PIN           -1//3
 #ifndef X_MAX_PIN
-  #define X_MAX_PIN         2
+  #define X_MAX_PIN         -1//2
 #endif
-#define Y_MIN_PIN          14
-#define Y_MAX_PIN          15
-#define Z_MIN_PIN          18
-#define Z_MAX_PIN          19
+#define Y_MIN_PIN          -1//14
+#define Y_MAX_PIN          -1//15
+#define Z_MIN_PIN          -1//18
+#define Z_MAX_PIN          -1//19
 
 //
 // Z Probe (when not Z_MIN_PIN)
@@ -127,26 +127,32 @@
 #define Joint1_STEP_PIN    36//36
 #define Joint1_DIR_PIN     34//34
 #define Joint1_ENABLE_PIN  30
+#define Joint1_MIN_PIN     3
+#define Joint1_MAX_PIN     -1
 // Joint 2
 #define Joint2_STEP_PIN    46
 #define Joint2_DIR_PIN     48
 #define Joint2_ENABLE_PIN  62
-#define Joint2_MIN_PIN     18
+#define Joint2_MIN_PIN     18//18
 #define Joint2_MAX_PIN     19
 // Joint 3
 #define Joint3_STEP_PIN    60
 #define Joint3_DIR_PIN     61 
 #define Joint3_ENABLE_PIN  56
-#define Joint3_MIN_PIN     14
+#define Joint3_MIN_PIN     14//14
 #define Joint3_MAX_PIN     15
 // Joint 4
 #define Joint4_STEP_PIN    54
 #define Joint4_DIR_PIN     55
 #define Joint4_ENABLE_PIN  38
+#define Joint4_MIN_PIN     2
+#define Joint4_MAX_PIN     -1
 // Joint 5 
 #define Joint5_STEP_PIN    26
 #define Joint5_DIR_PIN     28
 #define Joint5_ENABLE_PIN  24
+#define Joint5_MIN_PIN     15
+#define Joint5_MAX_PIN     -1
 
 /**
  * Default pins for TMC software SPI

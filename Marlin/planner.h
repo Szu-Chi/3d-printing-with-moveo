@@ -624,6 +624,8 @@ class Planner {
       const float &e
     );
 
+    static void _set_position_mm_Joint(const uint32_t &j1, const uint32_t &j2, const uint32_t &j3, const uint32_t &j4, const uint32_t &j5);
+
     /**
      * Add a new linear movement to the buffer.
      * The target is NOT translated to delta/scara
@@ -663,6 +665,16 @@ class Planner {
       #endif
       const float &e, const float &fr_mm_s, const uint8_t extruder, const float millimeters = 0.0
     ) {
+      /*
+      SERIAL_ECHOLNPGM(">>buffer_line_joint");
+      SERIAL_ECHOPAIR("feedrate_mm_s:",feedrate_mm_s);
+      SERIAL_ECHOPAIR(" J1:",j1); 
+      SERIAL_ECHOPAIR(" J2:",j2); 
+      SERIAL_ECHOPAIR(" J3:",j3); 
+      SERIAL_ECHOPAIR(" J4:",j4); 
+      SERIAL_ECHOLNPAIR(" J5:",j5);
+      //*/ 
+
       #if PLANNER_LEVELING && IS_CARTESIAN
         apply_leveling(rx, ry, rz);
       #endif
@@ -672,12 +684,7 @@ class Planner {
         #endif
         e, fr_mm_s, extruder, millimeters
       );
-      //SERIAL_ECHOLNPAIR("feedrate_mm_s:",feedrate_mm_s);
-      //SERIAL_ECHOLNPAIR("J1",j1); 
-      //SERIAL_ECHOLNPAIR("J2",j2); 
-      //SERIAL_ECHOLNPAIR("J3",j3); 
-      //SERIAL_ECHOLNPAIR("J4",j4); 
-      //SERIAL_ECHOLNPAIR("J5",j5); 
+      
     }
 
 
@@ -772,8 +779,13 @@ class Planner {
         e
       );
     }
+    FORCE_INLINE static void set_position_mm_Joint(int32_t &j1, int32_t &j2, int32_t &j3,int32_t &j4,int32_t &j5) {
+       _set_position_mm_Joint(j1,j2,j3,j4,j5);
+    }
+
     static void set_position_mm_kinematic(const float (&cart)[XYZE]);
     static void set_position_mm(const AxisEnum axis, const float &v);
+    static void set_position_mm_Joint(const JointEnum axis, const float &v);
     FORCE_INLINE static void set_z_position_mm(const float &z) { set_position_mm(Z_AXIS, z); }
     FORCE_INLINE static void set_e_position_mm(const float &e) { set_position_mm(E_AXIS, e); }
 
@@ -794,9 +806,11 @@ class Planner {
 
     // Called when an endstop is triggered. Causes the machine to stop inmediately
     static void endstop_triggered(const AxisEnum axis);
+    static void endstop_triggered_Joint(const JointEnum axis);
 
     // Triggered position of an axis in mm (not core-savvy)
     static float triggered_position_mm(const AxisEnum axis);
+    static int32_t triggered_position_mm_Joint(const JointEnum axis);
 
     // Block until all buffered steps are executed / cleaned
     static void synchronize();

@@ -110,7 +110,8 @@ block_t* Stepper::current_block = NULL; // A pointer to the block currently bein
 
 uint8_t Stepper::last_direction_bits = 0,
         Stepper::last_direction_bits_joint = 0,
-        Stepper::axis_did_move;
+        Stepper::axis_did_move,
+        Stepper::axis_did_move_Joint;
 
 bool Stepper::abort_current_block;
 
@@ -188,6 +189,7 @@ int32_t Stepper::ticks_nominal = -1;
 #endif
 
 volatile int32_t Stepper::endstops_trigsteps[XYZ],
+                 Stepper::endstops_trigsteps_Joint[Joint_All],
                  Stepper::count_position[NUM_AXIS] = { 0 },
                  Stepper::count_position_Joint[Joint_All] = { 0 },
                  Stepper::count_position_Joint_manual[Joint_All] = { 0 };
@@ -1341,6 +1343,7 @@ void Stepper::stepper_pulse_phase_isr() {
     abort_current_block = false;
     if (current_block) {
       axis_did_move = 0;
+      axis_did_move_Joint = 0;
       current_block = NULL;
       planner.discard_current_block();
     }
@@ -1608,6 +1611,7 @@ uint32_t Stepper::stepper_block_phase_isr() {
     // If current block is finished, reset pointer
     if (step_events_completed >= step_event_count) {
       axis_did_move = 0;
+      axis_did_move_Joint = 0;
       current_block = NULL;
       planner.discard_current_block();
     }
@@ -1806,15 +1810,29 @@ uint32_t Stepper::stepper_block_phase_isr() {
         #define Z_MOVE_TEST !!current_block->steps[C_AXIS]
       #endif
 
+      #define Joint1_MOVE_TEST !!current_block->step_Joint[Joint1_AXIS]
+      #define Joint2_MOVE_TEST !!current_block->step_Joint[Joint2_AXIS]
+      #define Joint3_MOVE_TEST !!current_block->step_Joint[Joint3_AXIS]
+      #define Joint4_MOVE_TEST !!current_block->step_Joint[Joint4_AXIS]
+      #define Joint5_MOVE_TEST !!current_block->step_Joint[Joint5_AXIS]
+
       uint8_t axis_bits = 0;
+      uint8_t axis_bits_Joint = 0;
       if (X_MOVE_TEST) SBI(axis_bits, A_AXIS);
       if (Y_MOVE_TEST) SBI(axis_bits, B_AXIS);
       if (Z_MOVE_TEST) SBI(axis_bits, C_AXIS);
+
+      if(Joint1_MOVE_TEST)SBI(axis_bits_Joint, Joint1_AXIS);
+      if(Joint2_MOVE_TEST)SBI(axis_bits_Joint, Joint2_AXIS);
+      if(Joint3_MOVE_TEST)SBI(axis_bits_Joint, Joint3_AXIS);
+      if(Joint4_MOVE_TEST)SBI(axis_bits_Joint, Joint4_AXIS);
+      if(Joint5_MOVE_TEST)SBI(axis_bits_Joint, Joint5_AXIS);
       //if (!!current_block->steps[E_AXIS]) SBI(axis_bits, E_AXIS);
       //if (!!current_block->steps[A_AXIS]) SBI(axis_bits, X_HEAD);
       //if (!!current_block->steps[B_AXIS]) SBI(axis_bits, Y_HEAD);
       //if (!!current_block->steps[C_AXIS]) SBI(axis_bits, Z_HEAD);
       axis_did_move = axis_bits;
+      axis_did_move_Joint = axis_bits_Joint;
 
       // No acceleration / deceleration time elapsed so far
       acceleration_time = deceleration_time = 0;
@@ -2495,11 +2513,33 @@ void Stepper::endstop_triggered(const AxisEnum axis) {
   if (was_enabled) ENABLE_STEPPER_DRIVER_INTERRUPT();
 }
 
+void Stepper::endstop_triggered_Joint(const JointEnum axis) {
+
+  const bool was_enabled = STEPPER_ISR_ENABLED();
+  if (was_enabled) DISABLE_STEPPER_DRIVER_INTERRUPT();
+    endstops_trigsteps_Joint[axis] = count_position_Joint[axis];
+  // Discard the rest of the move if there is a current block
+  quick_stop();
+
+  if (was_enabled) ENABLE_STEPPER_DRIVER_INTERRUPT();
+}
+
 int32_t Stepper::triggered_position(const AxisEnum axis) {
   const bool was_enabled = STEPPER_ISR_ENABLED();
   if (was_enabled) DISABLE_STEPPER_DRIVER_INTERRUPT();
 
   const int32_t v = endstops_trigsteps[axis];
+
+  if (was_enabled) ENABLE_STEPPER_DRIVER_INTERRUPT();
+
+  return v;
+}
+
+int32_t Stepper::triggered_position_Joint(const JointEnum axis) {
+  const bool was_enabled = STEPPER_ISR_ENABLED();
+  if (was_enabled) DISABLE_STEPPER_DRIVER_INTERRUPT();
+
+  const int32_t v = endstops_trigsteps_Joint[axis];
 
   if (was_enabled) ENABLE_STEPPER_DRIVER_INTERRUPT();
 

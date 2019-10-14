@@ -385,7 +385,19 @@
 #define X_HOME_BUMP_MM 5
 #define Y_HOME_BUMP_MM 5
 #define Z_HOME_BUMP_MM 2
+
+//joint
+#define Joint1_HOME_BUMP_MM 200
+#define Joint2_HOME_BUMP_MM 200
+#define Joint3_HOME_BUMP_MM 200
+#define Joint4_HOME_BUMP_MM 200
+#define Joint5_HOME_BUMP_MM 200
+
 #define HOMING_BUMP_DIVISOR { 2, 2, 4 }  // Re-Bump Speed Divisor (Divides the Homing Feedrate)
+
+//joint
+#define HOMING_BUMP_DIVISOR_Joint { 200, 200, 200 ,200,200}  
+
 //#define QUICK_HOME                     // If homing includes X and Y, do a diagonal move initially
 
 // When G28 is called, this option will make Y home before X
@@ -1498,7 +1510,7 @@
 /**
  * M43 - display pin status, watch pins for changes, watch endstops & toggle LED, Z servo probe test, toggle pins
  */
-//#define PINS_DEBUGGING
+#define PINS_DEBUGGING
 
 /**
  * Auto-report temperatures with M155 S<seconds>
