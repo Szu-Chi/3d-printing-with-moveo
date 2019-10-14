@@ -396,7 +396,7 @@
 #define HOMING_BUMP_DIVISOR { 2, 2, 4 }  // Re-Bump Speed Divisor (Divides the Homing Feedrate)
 
 //joint
-#define HOMING_BUMP_DIVISOR_Joint { 2, 2, 2 ,2,2}  
+#define HOMING_BUMP_DIVISOR_Joint { 200, 200, 200 ,200,200}  
 
 //#define QUICK_HOME                     // If homing includes X and Y, do a diagonal move initially
 

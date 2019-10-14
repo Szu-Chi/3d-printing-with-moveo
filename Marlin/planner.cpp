@@ -3887,9 +3887,8 @@ void Planner::_set_position_mm(const float &a, const float &b, const float &c
     stepper.set_position(position[A_AXIS], position[B_AXIS], position[C_AXIS],
       #if ENABLED(HANGPRINTER)
         position[D_AXIS],
-      #endif
-        position[E_AXIS]
-        ,position_joint[0],position_joint[1],position_joint[2],position_joint[3],position_joint[4]
+      #endif     
+        position_joint[0],position_joint[1],position_joint[2],position_joint[3],position_joint[4], position[E_AXIS]
     );
 }
 
@@ -3908,11 +3907,7 @@ void Planner::_set_position_mm_Joint(const uint32_t &j1, const uint32_t &j2, con
   }
 
  stepper.set_position(position[A_AXIS], position[B_AXIS], position[C_AXIS],
-      #if ENABLED(HANGPRINTER)
-        position[D_AXIS],
-      #endif
-        position[E_AXIS]
-        ,position_joint[0],position_joint[1],position_joint[2],position_joint[3],position_joint[4]
+         position_joint[0],position_joint[1],position_joint[2],position_joint[3],position_joint[4], position[E_AXIS]
   );
 }
 
@@ -3960,6 +3955,16 @@ void Planner::set_position_mm(const AxisEnum axis, const float &v) {
     buffer_sync_block();
   else
     stepper.set_position(axis, position[axis]);
+}
+
+void Planner::set_position_mm_Joint(const JointEnum axis, const float &v) {
+  const uint8_t axis_index = axis;
+  
+  position[axis] = v;  
+  if (has_blocks_queued())
+    buffer_sync_block();
+  else
+    stepper.set_position_Joint(axis, position_joint[axis]);
 }
 
 // Recalculate the steps/s^2 acceleration rates, based on the mm/s^2

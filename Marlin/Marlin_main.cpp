@@ -772,7 +772,7 @@ XYZ_CONSTS_FROM_CONFIG(signed char, home_dir, HOME_DIR);
 
 Joint_CONSTS_FROM_CONFIG(float, base_min_pos_Joint,   MIN_POS); 
 Joint_CONSTS_FROM_CONFIG(float, base_max_pos_Joint,   MAX_POS); 
-Joint_CONSTS_FROM_CONFIG(float, base_home_pos_Joint,  HOME_POS); 
+Joint_CONSTS_FROM_CONFIG(float, base_home_pos_Joint,  HOME_POS);
 Joint_CONSTS_FROM_CONFIG(float, max_length_Joint,     MAX_LENGTH);
 Joint_CONSTS_FROM_CONFIG(float, home_bump_mm_Joint,   HOME_BUMP_MM);
 Joint_CONSTS_FROM_CONFIG(signed char, home_dir_Joint, HOME_DIR); 
@@ -853,20 +853,25 @@ void report_current_position_detail();
 void sync_plan_position() {
   #if DISABLED(HANGPRINTER)
     #if ENABLED(DEBUG_LEVELING_FEATURE)
-      if (DEBUGGING(LEVELING)) DEBUG_POS("sync_plan_position", current_position);
+      if (DEBUGGING(LEVELING))
+      {
+        DEBUG_POS("sync_plan_position", current_position);
+        DEBUG_POS_Joint("sync_plan_position_Joint", current_position_Joint);      
+      } 
     #endif
     planner.set_position_mm(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_CART]);
+    planner.set_position_mm_Joint(current_position_Joint[Joint1_AXIS], current_position_Joint[Joint2_AXIS], current_position_Joint[Joint3_AXIS], current_position_Joint[Joint4_AXIS], current_position_Joint[Joint5_AXIS]);
   #endif
 }
 
-void sync_plan_position_Joint() {
+/*void sync_plan_position_Joint() {
   #if DISABLED(HANGPRINTER)
     #if ENABLED(DEBUG_LEVELING_FEATURE)
       if (DEBUGGING(LEVELING)) DEBUG_POS_Joint("sync_plan_position_Joint", current_position_Joint);
     #endif
     planner.set_position_mm_Joint(current_position_Joint[Joint1_AXIS], current_position_Joint[Joint2_AXIS], current_position_Joint[Joint3_AXIS], current_position_Joint[Joint4_AXIS], current_position_Joint[Joint5_AXIS]);
   #endif
-}
+}*/
 void sync_plan_position_e() { planner.set_e_position_mm(current_position[E_CART]); }
 
 #if IS_KINEMATIC
@@ -3597,7 +3602,7 @@ static void do_homing_move_Joint(const JointEnum axis, const float distance, con
     inverse_kinematics(current_position);
     planner.buffer_line(line_lengths[A_AXIS], line_lengths[B_AXIS], line_lengths[C_AXIS], line_lengths[D_AXIS], current_position[E_CART], fr_mm_s ? fr_mm_s : homing_feedrate(axis), active_extruder);
   #else
-    sync_plan_position_Joint();
+    sync_plan_position();
     current_position_Joint[axis] = distance; // Set delta/cartesian axes directly
     planner.buffer_line_joint(0,0,0,current_position_Joint[Joint1_AXIS], current_position_Joint[Joint2_AXIS],
       current_position_Joint[Joint3_AXIS], current_position_Joint[Joint4_AXIS], current_position_Joint[Joint5_AXIS],0, fr_mm_s ? fr_mm_s : homing_feedrate_Joint(axis), active_extruder);
@@ -3622,7 +3627,7 @@ static void do_homing_move_Joint(const JointEnum axis, const float distance, con
 
   #if ENABLED(DEBUG_LEVELING_FEATURE)
     if (DEBUGGING(LEVELING)) {
-      SERIAL_ECHOPAIR("<<< do_homing_move_Joint(", axis_codes[axis]);
+      SERIAL_ECHOPAIR("<<< do_homing_move_Joint(", Joint_codes[axis]);
       SERIAL_CHAR(')');
       SERIAL_EOL();
     }
@@ -3974,7 +3979,7 @@ static void homeJoint(const JointEnum axis) {
     // For cartesian/core machines,
     // set the axis to its home position
     set_Joint_is_at_home(axis);
-    sync_plan_position_Joint();
+    sync_plan_position();
 
     destination_Joint[axis] = current_position_Joint[axis];
 
@@ -5201,7 +5206,9 @@ inline void gcode_G28(const bool always_home_all) {
   #if ENABLED(RESTORE_LEVELING_AFTER_G28)
     set_bed_leveling_enabled(leveling_was_active);
   #endif
-
+  /*
+  report_current_position();
+  //*/
   clean_up_after_endstop_or_probe_move();
 
   // Restore the active tool after homing
