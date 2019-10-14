@@ -23,7 +23,12 @@ find_package(catkin REQUIRED
     moveit_visual_tools
     trac_ik_lib
 )
-
+find_package(OpenMP)
+if (OPENMP_FOUND)
+    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+    set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
+endif()
 
 find_package(Boost REQUIRED system filesystem date_time thread)
 
@@ -61,10 +66,29 @@ link_directories(${catkin_LIBRARY_DIRS})
 
 ## Declare a C++ executable
 add_executable(read_file src/read_file.cpp)
+add_executable(gcode_point_split src/gcode_point_split.cpp)
+add_executable(inverse_kinematics src/inverse_kinematics.cpp)
+add_executable(inverse_kinematics_origin src/inverse_kinematics_origin.cpp)
+add_executable(inverse_kinematics_test src/inverse_kinematics_test.cpp)
 
+## Specify libraries to link a library or executable target against
+target_link_libraries(gcode_point_split
+  ${catkin_LIBRARIES}
+)
 ## Specify libraries to link a library or executable target against
 target_link_libraries(read_file
   ${catkin_LIBRARIES}
 )
+## Specify libraries to link a library or executable target against
+target_link_libraries(inverse_kinematics
+  ${catkin_LIBRARIES}
+)
+## Specify libraries to link a library or executable target against
+target_link_libraries(inverse_kinematics_origin
+  ${catkin_LIBRARIES}
+)
 
-
+## Specify libraries to link a library or executable target against
+target_link_libraries(inverse_kinematics_test
+  ${catkin_LIBRARIES}
+)
