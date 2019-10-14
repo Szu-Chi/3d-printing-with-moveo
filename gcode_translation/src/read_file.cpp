@@ -101,11 +101,11 @@ int main(int argc, char **argv)
 
   std::ofstream output_file(gcode_out);
   if(!output_file.is_open())ROS_ERROR_STREAM("Can't open " <<gcode_out);
+
   std::string line;
   bool check = 0;
   bool check_distance = 0;
   int second_execution = 0;
-  
   double E_out = 0;
   double pre_E_out = 0;
   while(input_file){
@@ -182,10 +182,6 @@ int main(int argc, char **argv)
               return 0;
             }
           }
-          for(int j = 2;j < line.length(); j++){
-            output_file << line[j];
-          }
-          output_file << std::endl;
         }
         KDL::Frame end_effector_pose(end_effector_target_rot, end_effector_target_vol);
         rc = tracik_solver.CartToJnt(nominal, end_effector_pose, result, target_bounds);
@@ -223,9 +219,6 @@ int main(int argc, char **argv)
         output_file << line << std::endl;
       }
       check_distance = 1;
-    }
-    else{
-      output_file << line << std::endl;
     }
     else{
       output_file << line << std::endl;

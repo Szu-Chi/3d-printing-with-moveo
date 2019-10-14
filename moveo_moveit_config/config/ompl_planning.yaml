@@ -147,7 +147,7 @@ nozzle:
     - SPARS
     - SPARStwo
 arm:
-  default_planner_config: LazyPRM
+  default_planner_config: None
   planner_configs:
     - SBL
     - EST
