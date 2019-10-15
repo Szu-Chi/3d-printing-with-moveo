@@ -116,39 +116,58 @@ int main(int argc, char **argv)
     JointList.push_back(q);
   }
 
-  uint success = 0;
-
+  
   ROS_INFO_STREAM("*** Testing TRAC-IK with " << num_samples << " random samples");
-  double totle_time = 0, max_time = 0, min_time = 10;
-  omp_set_num_threads(num_threads);
-  #pragma omp parallel for
-  for (uint i = 0; i < num_samples; i++)
-  {
-    int thread_num = omp_get_thread_num();
-    KDL::Frame end_effector_pose;
-    KDL::JntArray result;
-    int rc;
-    KDL::ChainFkSolverPos_recursive fk_solver(chain); // Forward kin. solver
-    fk_solver.JntToCart(JointList[i], end_effector_pose);
-    ros::WallTime start_, end_;
-    start_ = ros::WallTime::now();
-    rc = tracik_solver[thread_num]->CartToJnt(nominal, end_effector_pose, result);
-    end_ = ros::WallTime::now();
-    double execution_time = (end_ - start_).toNSec() * 1e-6;
-    //ROS_INFO_STREAM("Exectution time (ms): " << execution_time);
-    totle_time += execution_time;
-    max_time = (execution_time > max_time)?execution_time:max_time;
-    min_time = (execution_time < min_time)?execution_time:min_time;
-    
-    if (rc >= 0){
-      success++;
+  ros::WallTime start, end;
+  for(int k = 1; k <= num_threads; k++){
+    std::string ofile_name;
+    ofile_name = "use_" + std::to_string(k) + "_threads";
+    std::ofstream fout(ofile_name);
+    if(!fout.is_open())ROS_ERROR_STREAM("Can't open " << ofile_name);
+    double totle_time = 0, max_time = 0, min_time = 10;
+    uint success = 0;
+    omp_set_num_threads(k);
+    start = ros::WallTime::now();
+    #pragma omp parallel for
+    for (uint i = 0; i < num_samples; i++)
+    {
+      int thread_num = omp_get_thread_num();
+      KDL::Frame end_effector_pose;
+      KDL::JntArray result;
+      int rc;
+      KDL::ChainFkSolverPos_recursive fk_solver(chain); // Forward kin. solver
+      fk_solver.JntToCart(JointList[i], end_effector_pose);
+      ros::WallTime start_, end_;
+      start_ = ros::WallTime::now();
+      rc = tracik_solver[thread_num]->CartToJnt(nominal, end_effector_pose, result);
+      end_ = ros::WallTime::now();
+      double execution_time = (end_ - start_).toNSec() * 1e-6;
+      //ROS_INFO_STREAM("Exectution time (ms): " << execution_time);
+      fout << execution_time << std::endl;
+      totle_time += execution_time;
+      max_time = (execution_time > max_time)?execution_time:max_time;
+      min_time = (execution_time < min_time)?execution_time:min_time;
+      
+      if (rc >= 0){
+        success++;
+      }
     }
+    end = ros::WallTime::now();
+    double execution_time = (end - start).toNSec() * 1e-6;
+    ROS_INFO_STREAM("threads num : " << k);
+    ROS_INFO_STREAM("TRAC-IK found " << success << " solutions (" << 100.0 * success / num_samples << "\%)");
+    ROS_INFO_STREAM("totle_time (ms): " << execution_time);
+    ROS_INFO_STREAM("avg_time (ms): " << totle_time/num_samples);
+    ROS_INFO_STREAM("max_time (ms): " << max_time);
+    ROS_INFO_STREAM("min_time (ms): " << min_time << std::endl << std::endl);
+    fout << "threads num : " << k << std::endl;
+    fout << "TRAC-IK found " << success << " solutions (" << 100.0 * success / num_samples << "\%)" << std::endl;
+    fout << "totle_time (ms): " << execution_time << std::endl;
+    fout << "avg_time (ms): " << totle_time/num_samples << std::endl;
+    fout << "max_time (ms): " << max_time << std::endl;
+    fout << "min_time (ms): " << min_time << std::endl;
+    fout.close();
   }
-  ROS_INFO_STREAM("TRAC-IK found " << success << " solutions (" << 100.0 * success / num_samples << "\%)");
-  ROS_INFO_STREAM("totle_time (ms): " << totle_time);
-  ROS_INFO_STREAM("avg_time (ms): " << totle_time/num_samples);
-  ROS_INFO_STREAM("max_time (ms): " << max_time);
-  ROS_INFO_STREAM("min_time (ms): " << min_time);
   
   ros::shutdown();  
   return 0;
