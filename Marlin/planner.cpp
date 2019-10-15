@@ -3324,7 +3324,7 @@ bool Planner::_populate_block_joint_self(block_t * const block, bool split_move,
   
   int32_t de = target[E_AXIS] - position[E_AXIS];
 
-  const int32_t da = MAX5(abs(d0),abs(d1),abs(d2),abs(d3),abs(d4)),
+  const int32_t da = MAX5(ABS(d0),ABS(d1),ABS(d2),ABS(d3),ABS(d4)),
                 db,
                 dc;
   /* <-- add a slash to enable
@@ -4016,7 +4016,7 @@ bool Planner::_populate_block_joint_self(block_t * const block, bool split_move,
   //SERIAL_ECHOLNPAIR("steps : ", block->steps);
   //SERIAL_ECHOLNPAIR("position_joint : ", block->position_Joint);
   //SERIAL_ECHOLNPAIR("step_Joint : ", block->step_Joint);
-  //SERIAL_ECHOLNPAIR("direction_bits_joint : ", block->direction_bits_joint);
+  SERIAL_ECHOLNPAIR("direction_bits_joint : ", block->direction_bits_joint);
   // Update previous path unit_vector and nominal speed
   COPY(previous_speed, current_speed);
   previous_nominal_speed_sqr = block->nominal_speed_sqr;
