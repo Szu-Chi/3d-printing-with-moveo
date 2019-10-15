@@ -87,7 +87,7 @@
 #include "cardreader.h"
 #include "speed_lookuptable.h"
 #include "delay.h"
-
+#include <avr/wdt.h>
 #if HAS_DIGIPOTSS
   #include <SPI.h>
 #endif
@@ -1207,8 +1207,8 @@ HAL_STEP_TIMER_ISR {
 #define STEP_MULTIPLY(A,B) MultiU24X32toH16(A, B)
 
 void Stepper::isr() {
+  //wdt_reset();
   DISABLE_ISRS();
-
   // Program timer compare for the maximum period, so it does NOT
   // flag an interrupt while this ISR is running - So changes from small
   // periods to big periods are respected and the timer does not reset to 0
@@ -1347,11 +1347,14 @@ void Stepper::stepper_pulse_phase_isr() {
       current_block = NULL;
       planner.discard_current_block();
     }
+    //SERIAL_ECHOLNPGM("abort_current_block");
   }
-
+  
   // If there is no current block, do nothing
-  if (!current_block) return;
-
+  if (!current_block) {
+    //SERIAL_ECHOLNPAIR("current_block : ",current_block);
+    return;
+  }
   // Count of pending loops and events for this iteration
   const uint32_t pending_events = step_event_count - step_events_completed;
   uint8_t events_to_do = MIN(pending_events, steps_per_isr);
@@ -1444,7 +1447,7 @@ void Stepper::stepper_pulse_phase_isr() {
     #if HAS_Joint5_STEP
         PULSE_START_Joint(Joint5);
     #endif
-
+   
     // SERIAL_ECHOPAIR(" ",count_position_Joint[Joint1_AXIS]);
     // SERIAL_ECHOPAIR(" ",count_position_Joint[Joint2_AXIS]);
     // SERIAL_ECHOPAIR(" ",count_position_Joint[Joint3_AXIS]);
@@ -1942,6 +1945,7 @@ uint32_t Stepper::stepper_block_phase_isr() {
       if (current_block->direction_bits_joint != last_direction_bits_joint) {
         last_direction_bits_joint = current_block->direction_bits_joint;
         set_directions_Joint();
+        //SERIAL_ECHOLNPAIR("djm : ",last_direction_bits_joint); 
       }
 
       // SERIAL_ECHOPAIR(" ",last_direction_bits_joint);
@@ -2410,6 +2414,12 @@ void Stepper::set_position_Joint_manual(const int32_t &J1, const int32_t &J2, co
                 d2 = J3 - count_position_Joint_manual[Joint3_AXIS],
                 d3 = J4 - count_position_Joint_manual[Joint4_AXIS],
                 d4 = J5 - count_position_Joint_manual[Joint5_AXIS];
+                
+  count_position_Joint_manual[Joint1_AXIS] = J1;
+  count_position_Joint_manual[Joint2_AXIS] = J2;
+  count_position_Joint_manual[Joint3_AXIS] = J3;
+  count_position_Joint_manual[Joint4_AXIS] = J4;
+  count_position_Joint_manual[Joint5_AXIS] = J5;
 
   if(d0<0) SET_DIR_Joint(Joint1); else RESET_DIR_Joint(Joint1);
   if(d1<0) SET_DIR_Joint(Joint2); else RESET_DIR_Joint(Joint2);
@@ -2426,44 +2436,40 @@ void Stepper::set_position_Joint_manual(const int32_t &J1, const int32_t &J2, co
       {
         case Joint1_AXIS:
           _APPLY_STEP(Joint1)(!_INVERT_STEP_PIN(Joint1), 0);
-          delayMicroseconds(1000);
+          _delay_us(1500);
           _APPLY_STEP(Joint1)(_INVERT_STEP_PIN(Joint1), 0);
-          delayMicroseconds(1000);
+          _delay_us(1500);
           break;
         case Joint2_AXIS:
           _APPLY_STEP(Joint2)(!_INVERT_STEP_PIN(Joint2), 0);
-          delayMicroseconds(1000);
+          _delay_us(1500);
           _APPLY_STEP(Joint2)(_INVERT_STEP_PIN(Joint2), 0);
-          delayMicroseconds(1000);
+          _delay_us(1500);
           break;
         case Joint3_AXIS:
           _APPLY_STEP(Joint3)(!_INVERT_STEP_PIN(Joint3), 0);
-          delayMicroseconds(1000);
+          _delay_us(1500);
           _APPLY_STEP(Joint3)(_INVERT_STEP_PIN(Joint3), 0);
-          delayMicroseconds(1000);
+          _delay_us(1500);
           break;
         case Joint4_AXIS:
           _APPLY_STEP(Joint4)(!_INVERT_STEP_PIN(Joint4), 0);
-          delayMicroseconds(1000);
+          _delay_us(1500);
           _APPLY_STEP(Joint4)(_INVERT_STEP_PIN(Joint4), 0);
-          delayMicroseconds(1000);
+          _delay_us(1500);
           break;
         case Joint5_AXIS:
           _APPLY_STEP(Joint5)(!_INVERT_STEP_PIN(Joint5), 0);
-          delayMicroseconds(1000);
+          _delay_us(1500);
           _APPLY_STEP(Joint5)(_INVERT_STEP_PIN(Joint5), 0);
-          delayMicroseconds(1000);
+          _delay_us(1500);
           break;
       }
     }
   }
   
 
-  count_position_Joint_manual[Joint1_AXIS] = J1;
-  count_position_Joint_manual[Joint2_AXIS] = J2;
-  count_position_Joint_manual[Joint3_AXIS] = J3;
-  count_position_Joint_manual[Joint4_AXIS] = J4;
-  count_position_Joint_manual[Joint5_AXIS] = J5;
+  
 
 }
 

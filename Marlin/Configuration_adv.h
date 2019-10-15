@@ -396,7 +396,7 @@
 #define HOMING_BUMP_DIVISOR { 2, 2, 4 }  // Re-Bump Speed Divisor (Divides the Homing Feedrate)
 
 //joint
-#define HOMING_BUMP_DIVISOR_Joint { 200, 200, 200 ,200,200}  
+#define HOMING_BUMP_DIVISOR_Joint { 200, 200, 200 , 200, 200}  
 
 //#define QUICK_HOME                     // If homing includes X and Y, do a diagonal move initially
 
@@ -504,7 +504,7 @@
 
 #if ENABLED(ULTIPANEL)
   #define MANUAL_FEEDRATE {50*60, 50*60, 4*60, 60} // Feedrates for manual moves along X, Y, Z, E from panel
-  #define MANUAL1_FEEDRATE {50*60, 50*60, 50*60, 50*60,50*60}
+  #define MANUAL1_FEEDRATE {250, 250, 250, 250,250}
   #define ULTIPANEL_FEEDMULTIPLY  // Comment to disable setting feedrate multiplier via encoder
 #endif
 
@@ -894,7 +894,7 @@
 #endif
 
 // Moves (or segments) with fewer steps than this will be joined with the next move
-#define MIN_STEPS_PER_SEGMENT 6
+#define MIN_STEPS_PER_SEGMENT 1
 
 /**
  * Minimum delay after setting the stepper DIR (in ns)

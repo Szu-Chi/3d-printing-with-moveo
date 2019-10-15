@@ -385,7 +385,7 @@ uint8_t marlin_debug_flags = DEBUG_NONE;
  *   Used by 'SYNC_PLAN_POSITION_KINEMATIC' to update 'planner.position'.
  */
 float current_position[XYZE] = { 0 };
-long int current_position_Joint[Joint_All] = { 0 };
+int32_t current_position_Joint[Joint_All] = { 0 };
 
 /**
  * Cartesian Destination
@@ -394,7 +394,7 @@ long int current_position_Joint[Joint_All] = { 0 };
  *   Set with 'gcode_get_destination' or 'set_destination_from_current'.
  */
 float destination[XYZE] = { 0 };
-long int destination_Joint[Joint_All] = { 0 };
+int32_t destination_Joint[Joint_All] = { 0 };
 
 /**
  * axis_homed
@@ -498,9 +498,10 @@ bool axis_relative_modes[XYZE] = AXIS_RELATIVE_MODES;
 // Software Endstops are based on the configured limits.
 float soft_endstop_min[XYZ] = { X_MIN_BED, Y_MIN_BED, Z_MIN_POS },
       soft_endstop_max[XYZ] = { X_MAX_BED, Y_MAX_BED, Z_MAX_POS };
-//joint
-float soft_endstop_min_Joint[Joint_All] = { Joint1_MIN_POS, Joint2_MIN_POS, Joint3_MIN_POS, Joint4_MIN_POS, Joint5_MIN_POS},
-      soft_endstop_max_Joint[Joint_All] = { Joint1_MAX_POS, Joint2_MAX_POS, Joint3_MAX_POS, Joint4_MAX_POS, Joint5_MAX_POS};
+
+long  soft_endstop_joint_min[Joint_All] = {J_MIN_POS_step,A_MIN_POS_step,B_MIN_POS_step,C_MIN_POS_step,D_MIN_POS_step},
+      soft_endstop_joint_max[Joint_All] = {J_MAX_POS_step,A_MAX_POS_step,B_MAX_POS_step,C_MAX_POS_step,D_MAX_POS_step};
+
 #if HAS_SOFTWARE_ENDSTOPS
   bool soft_endstops_enabled = true;
   #if IS_KINEMATIC
@@ -773,7 +774,7 @@ XYZ_CONSTS_FROM_CONFIG(signed char, home_dir, HOME_DIR);
 Joint_CONSTS_FROM_CONFIG(float, base_min_pos_Joint,   MIN_POS); 
 Joint_CONSTS_FROM_CONFIG(float, base_max_pos_Joint,   MAX_POS); 
 Joint_CONSTS_FROM_CONFIG(float, base_home_pos_Joint,  HOME_POS);
-Joint_CONSTS_FROM_CONFIG(float, max_length_Joint,     MAX_LENGTH);
+Joint_CONSTS_FROM_CONFIG(float, max_length_Joint,     MAX_LENGTH);  
 Joint_CONSTS_FROM_CONFIG(float, home_bump_mm_Joint,   HOME_BUMP_MM);
 Joint_CONSTS_FROM_CONFIG(signed char, home_dir_Joint, HOME_DIR); 
 
@@ -1522,8 +1523,8 @@ void update_software_endstops_Joint(const JointEnum axis) {
       #endif
       : base_max_pos(axis);
     #else
-      soft_endstop_min_Joint[axis] = base_min_pos_Joint(axis);
-      soft_endstop_max_Joint[axis] = base_max_pos_Joint(axis);
+      soft_endstop_joint_min[axis] = base_min_pos_Joint(axis);
+      soft_endstop_joint_max[axis] = base_max_pos_Joint(axis);
     #endif
 
     #if ENABLED(DEBUG_LEVELING_FEATURE)
@@ -3869,7 +3870,33 @@ static void homeJoint(const JointEnum axis) {
     if (axis == Z_AXIS && set_bltouch_deployed(true)) return;
   #endif
 
-  do_homing_move_Joint(axis, 1.5f * max_length_Joint(axis) * Joint_home_dir);
+  //*
+  SERIAL_ECHOLNPAIR("Joint_home_dir:",Joint_home_dir);
+  SERIAL_ECHOPAIR("max_length_Joint(",Joint_codes[axis]);
+  SERIAL_ECHOLNPAIR("):",max_length_Joint(axis));
+
+  SERIAL_ECHOPAIR("Joint1_MIN_POS:",Joint1_MIN_POS);
+  SERIAL_ECHOPAIR(", Joint2_MIN_POS:",Joint2_MIN_POS);
+  SERIAL_ECHOPAIR(", Joint3_MIN_POS:",Joint3_MIN_POS);
+  SERIAL_ECHOPAIR(", Joint4_MIN_POS:",Joint4_MIN_POS);
+  SERIAL_ECHOLNPAIR(", Joint5_MIN_POS:",Joint5_MIN_POS);
+
+  SERIAL_ECHOPAIR("Joint1_MAX_POS:",Joint1_MAX_POS);
+  SERIAL_ECHOPAIR(", Joint2_MAX_POS:",Joint2_MAX_POS);
+  SERIAL_ECHOPAIR(", Joint3_MAX_POS:",Joint3_MAX_POS);
+  SERIAL_ECHOPAIR(", Joint4_MAX_POS:",Joint4_MAX_POS);
+  SERIAL_ECHOLNPAIR(", Joint5_MAX_POS:",Joint5_MAX_POS);
+
+
+  SERIAL_ECHOPAIR("Joint1_MAX_LENGTH:",base_max_pos_Joint(0)-base_min_pos_Joint(0));
+  SERIAL_ECHOPAIR(", Joint2_MAX_LENGTH:",base_max_pos_Joint(1)-base_min_pos_Joint(1));
+  SERIAL_ECHOPAIR(", Joint3_MAX_LENGTH:",base_max_pos_Joint(2)-base_min_pos_Joint(2));
+  SERIAL_ECHOPAIR(", Joint4_MAX_LENGTH:",base_max_pos_Joint(3)-base_min_pos_Joint(3));
+  SERIAL_ECHOLNPAIR(", Joint5_MAX_LENGTH:",base_max_pos_Joint(4)-base_min_pos_Joint(4));
+  //*/
+
+  // do_homing_move_Joint(axis, 1.5f * max_length_Joint(axis) * Joint_home_dir);
+  do_homing_move_Joint(axis, 1.5f * (base_max_pos_Joint(axis)-base_min_pos_Joint(axis)) * Joint_home_dir);
 
   #if HOMING_Z_WITH_PROBE && ENABLED(BLTOUCH)
     // BLTOUCH needs to be stowed after trigger to rearm itself

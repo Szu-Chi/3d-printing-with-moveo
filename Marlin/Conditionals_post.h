@@ -42,8 +42,10 @@
 
 //joint
 #define Joint1_MAX_LENGTH (Joint1_MAX_POS - (Joint1_MIN_POS))
+// const float   Joint1_MAX_LENGTH = (Joint1_MAX_POS - (Joint1_MIN_POS));
 #define Joint2_MAX_LENGTH (Joint2_MAX_POS - (Joint2_MIN_POS))
 #define Joint3_MAX_LENGTH (Joint3_MAX_POS - (Joint3_MIN_POS))
+// const float   Joint3_MAX_LENGTH = (Joint3_MAX_POS - (Joint3_MIN_POS));
 #define Joint4_MAX_LENGTH (Joint4_MAX_POS - (Joint4_MIN_POS))
 #define Joint5_MAX_LENGTH (Joint5_MAX_POS - (Joint5_MIN_POS))
 

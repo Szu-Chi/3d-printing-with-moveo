@@ -92,12 +92,12 @@ typedef struct {
     struct {
       // Fields used by the Bresenham algorithm for tracing the line
       uint32_t steps[NUM_AXIS];             // Step count along each axis
-      uint32_t step_Joint[5];
+      uint32_t step_Joint[Joint_All];
     };
     // Data used by all sync blocks
     struct {
       int32_t position[NUM_AXIS];           // New position to force when this sync block is executed
-      int32_t position_Joint[5];
+      int32_t position_Joint[Joint_All];
     };
   };
   uint32_t step_event_count;                // The number of step events required to complete this block
@@ -565,6 +565,16 @@ class Planner {
       #endif
     );
 
+    static bool _populate_block_joint_self(block_t * const block, bool split_move,
+        const int32_t (&target)[NUM_AXIS], const int32_t (&joint)[Joint_All]
+      #if HAS_POSITION_FLOAT
+        , const float (&target_float)[NUM_AXIS]
+      #endif
+      , float fr_mm_s, const uint8_t extruder, const float &millimeters=0.0
+      #if ENABLED(UNREGISTERED_MOVE_SUPPORT)
+        , const bool count_it=true
+      #endif
+    );
     /**
      * Planner::buffer_sync_block
      * Add a block to the buffer that just updates the position
@@ -596,7 +606,7 @@ class Planner {
     );
 
     static bool buffer_segment_joint(const float &a, const float &b, const float &c, 
-      const long &j1, const long &j2, const long &j3, const long &j4, const long &j5,
+      const int32_t &j1, const int32_t &j2, const int32_t &j3, const int32_t &j4, const int32_t &j5,
       #if ENABLED(HANGPRINTER)
         const float &d,
       #endif
@@ -649,7 +659,7 @@ class Planner {
 
 
     FORCE_INLINE static bool buffer_line_joint(ARG_X, ARG_Y, ARG_Z,
-      const long &j1, const long &j2, const long &j3, const long &j4, const long &j5,
+      const int32_t &j1, const int32_t &j2, const int32_t &j3, const int32_t &j4, const int32_t &j5,
       #if ENABLED(HANGPRINTER)
         ARG_E1,
       #endif
@@ -695,6 +705,7 @@ class Planner {
       #else
         const float (&raw)[XYZE] = cart;
       #endif
+      
       #if IS_KINEMATIC
         inverse_kinematics(raw);
         return buffer_segment(
