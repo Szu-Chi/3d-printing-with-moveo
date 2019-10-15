@@ -956,9 +956,10 @@
 
 
 //joint
-#define Joint1_MIN_POS -24800 
+#define Joint1_MIN_POS -24800
 #define Joint2_MIN_POS -5500
-#define Joint3_MIN_POS -24700 
+#define Joint3_MIN_POS -24700
+
 #define Joint4_MIN_POS -6400
 #define Joint5_MIN_POS -8700 
 
