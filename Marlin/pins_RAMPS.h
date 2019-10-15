@@ -109,9 +109,9 @@
   #define Z_CS_PIN         -1//40
 #endif
 
-#define E0_STEP_PIN        20//26
-#define E0_DIR_PIN         21//28
-#define E0_ENABLE_PIN      50//24
+#define E0_STEP_PIN        65//26
+#define E0_DIR_PIN         42//28
+#define E0_ENABLE_PIN      40//24
 #ifndef E0_CS_PIN
   #define E0_CS_PIN        58//42
 #endif
