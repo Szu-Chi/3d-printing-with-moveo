@@ -6,24 +6,24 @@ joint_limits:
     has_velocity_limits: true
     max_velocity: 100
     has_acceleration_limits: true
-    max_acceleration: 20
+    max_acceleration: 5
   moveo_joint2:
     has_velocity_limits: true
     max_velocity: 100
     has_acceleration_limits: true
-    max_acceleration: 20
+    max_acceleration: 5
   moveo_joint3:
     has_velocity_limits: true
     max_velocity: 100
     has_acceleration_limits: true
-    max_acceleration: 20
+    max_acceleration: 5
   moveo_joint4:
     has_velocity_limits: true
     max_velocity: 100
     has_acceleration_limits: true
-    max_acceleration: 20
+    max_acceleration: 5
   moveo_joint5:
     has_velocity_limits: true
     max_velocity: 100
     has_acceleration_limits: true
-    max_acceleration: 20
+    max_acceleration: 5
