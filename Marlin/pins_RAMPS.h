@@ -82,7 +82,7 @@
 // Z Probe (when not Z_MIN_PIN)
 //
 #ifndef Z_MIN_PROBE_PIN
-  #define Z_MIN_PROBE_PIN  32
+  #define Z_MIN_PROBE_PIN  18
 #endif
 
 //
@@ -109,9 +109,9 @@
   #define Z_CS_PIN         -1//40
 #endif
 
-#define E0_STEP_PIN        20//26
-#define E0_DIR_PIN         21//28
-#define E0_ENABLE_PIN      50//24
+#define E0_STEP_PIN        65//26
+#define E0_DIR_PIN         43//28
+#define E0_ENABLE_PIN      40//24
 #ifndef E0_CS_PIN
   #define E0_CS_PIN        58//42
 #endif
@@ -133,14 +133,14 @@
 #define Joint2_STEP_PIN    46
 #define Joint2_DIR_PIN     48
 #define Joint2_ENABLE_PIN  62
-#define Joint2_MIN_PIN     18//18
-#define Joint2_MAX_PIN     19
+#define Joint2_MIN_PIN     19//18
+#define Joint2_MAX_PIN     -1//19
 // Joint 3
 #define Joint3_STEP_PIN    60
 #define Joint3_DIR_PIN     61 
 #define Joint3_ENABLE_PIN  56
 #define Joint3_MIN_PIN     14//14
-#define Joint3_MAX_PIN     15
+#define Joint3_MAX_PIN     -1//15
 // Joint 4
 #define Joint4_STEP_PIN    54
 #define Joint4_DIR_PIN     55

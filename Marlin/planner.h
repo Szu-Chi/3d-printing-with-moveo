@@ -698,9 +698,10 @@ class Planner {
      *  extruder     - target extruder
      *  millimeters  - the length of the movement, if known
      */
-    FORCE_INLINE static bool buffer_line_kinematic(const float (&cart)[XYZE], const float &fr_mm_s, const uint8_t extruder, const float millimeters = 0.0) {
+    FORCE_INLINE static bool buffer_line_kinematic(const float (&cart)[XYZE], const long (&jcart)[Joint_All], const float &fr_mm_s, const uint8_t extruder, const float millimeters = 0.0) {
       #if PLANNER_LEVELING
         float raw[XYZ] = { cart[X_AXIS], cart[Y_AXIS], cart[Z_AXIS] };
+        const long (&jraw)[Joint_All] = jcart;
         apply_leveling(raw);
       #else
         const float (&raw)[XYZE] = cart;
@@ -717,7 +718,8 @@ class Planner {
           , cart[E_CART], fr_mm_s, extruder, millimeters
         );
       #else
-        return buffer_segment(raw[X_AXIS], raw[Y_AXIS], raw[Z_AXIS], cart[E_CART], fr_mm_s, extruder, millimeters);
+        //return buffer_segment(raw[X_AXIS], raw[Y_AXIS], raw[Z_AXIS], cart[E_CART], fr_mm_s, extruder, millimeters);
+        return buffer_segment_joint(raw[X_AXIS],raw[Y_AXIS],raw[Z_AXIS],jraw[Joint1_AXIS], jraw[Joint2_AXIS], jraw[Joint3_AXIS], jraw[Joint4_AXIS], jraw[Joint5_AXIS],0, fr_mm_s, extruder, millimeters);
       #endif
     }
 
@@ -733,12 +735,14 @@ class Planner {
      */
 
     FORCE_INLINE static bool buffer_line_kinematic_joint(const long (&jcart)[Joint_All], const float &fr_mm_s, const uint8_t extruder, const float millimeters = 0.0) {
-      #if PLANNER_LEVELING
-        float raw[XYZ] = { cart[X_AXIS], cart[Y_AXIS], cart[Z_AXIS] };
-        apply_leveling(raw);
+      /*#if PLANNER_LEVELING
+        //float jraw[XYZ] = { jcart[X_AXIS], jcart[Y_AXIS], jcart[Z_AXIS] };
+        const long (&jraw)[Joint_All] = jcart;
+        apply_leveling(jraw);
       #else
         const long (&jraw)[Joint_All] = jcart;
-      #endif
+      #endif*/
+      const long (&jraw)[Joint_All] = jcart;
       #if IS_KINEMATIC
         inverse_kinematics(raw);
         return buffer_segment(
@@ -767,7 +771,7 @@ class Planner {
       #if ENABLED(HANGPRINTER)
         ARG_E1,
       #endif
-      const float &e
+      int32_t &j1, int32_t &j2, int32_t &j3,int32_t &j4,int32_t &j5,const float &e
     ) {
       #if PLANNER_LEVELING && IS_CARTESIAN
         apply_leveling(rx, ry, rz);
@@ -778,10 +782,11 @@ class Planner {
         #endif
         e
       );
+      _set_position_mm_Joint(j1,j2,j3,j4,j5);
     }
-    FORCE_INLINE static void set_position_mm_Joint(int32_t &j1, int32_t &j2, int32_t &j3,int32_t &j4,int32_t &j5) {
+    /*FORCE_INLINE static void set_position_mm_Joint(int32_t &j1, int32_t &j2, int32_t &j3,int32_t &j4,int32_t &j5) {
        _set_position_mm_Joint(j1,j2,j3,j4,j5);
-    }
+    }*/
 
     static void set_position_mm_kinematic(const float (&cart)[XYZE]);
     static void set_position_mm(const AxisEnum axis, const float &v);

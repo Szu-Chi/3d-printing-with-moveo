@@ -860,8 +860,8 @@ void sync_plan_position() {
         DEBUG_POS_Joint("sync_plan_position_Joint", current_position_Joint);      
       } 
     #endif
-    planner.set_position_mm(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_CART]);
-    planner.set_position_mm_Joint(current_position_Joint[Joint1_AXIS], current_position_Joint[Joint2_AXIS], current_position_Joint[Joint3_AXIS], current_position_Joint[Joint4_AXIS], current_position_Joint[Joint5_AXIS]);
+    planner.set_position_mm(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS],current_position_Joint[Joint1_AXIS], current_position_Joint[Joint2_AXIS], current_position_Joint[Joint3_AXIS], current_position_Joint[Joint4_AXIS], current_position_Joint[Joint5_AXIS], current_position[E_CART]);
+    //planner.set_position_mm_Joint(current_position_Joint[Joint1_AXIS], current_position_Joint[Joint2_AXIS], current_position_Joint[Joint3_AXIS], current_position_Joint[Joint4_AXIS], current_position_Joint[Joint5_AXIS]);
   #endif
 }
 
@@ -4100,7 +4100,7 @@ static void homeJoint(const JointEnum axis) {
  *  - Set the feedrate, if included
  */
 void gcode_get_destination() {
-	 char *joint[5]={'J','A','B','C','D'};
+	 char joint[5]={'J','A','B','C','D'};
   	for(int i1=1;i1<6;i1++) {
     	if (parser.seen(joint[i1-1])) {
     		int32_t data = parser.value_axis_units(i1-1);	
@@ -15260,7 +15260,7 @@ void prepare_move_to_destination() {
         if (!planner.buffer_segment(pos[X_AXIS], pos[Y_AXIS], pos[Z_AXIS], raw[E_CART], fr_mm_s, active_extruder, MM_PER_ARC_SEGMENT))
           break;
       #else
-        if (!planner.buffer_line_kinematic(raw, fr_mm_s, active_extruder))
+        if (!planner.buffer_line_kinematic(raw, current_position_Joint, fr_mm_s, active_extruder))
           break;
       #endif
     }
@@ -15284,7 +15284,7 @@ void prepare_move_to_destination() {
       planner.apply_leveling(pos);
       planner.buffer_segment(pos[X_AXIS], pos[Y_AXIS], pos[Z_AXIS], cart[E_CART], fr_mm_s, active_extruder, MM_PER_ARC_SEGMENT);
     #else
-      planner.buffer_line_kinematic(cart, fr_mm_s, active_extruder);
+      planner.buffer_line_kinematic(cart,current_position_Joint, fr_mm_s, active_extruder);
     #endif
 
     COPY(current_position, cart);
