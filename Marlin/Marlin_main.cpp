@@ -2078,8 +2078,14 @@ void clean_up_after_endstop_or_probe_move() {
       const bool xx = x && !TEST(axis_homed, X_AXIS),
                  yy = y && !TEST(axis_homed, Y_AXIS),
                  zz = z && !TEST(axis_homed, Z_AXIS);
+
+      const bool JJ = x && !TEST(Joint_homed, Joint1_AXIS),
+                 AA = y && !TEST(Joint_homed, Joint2_AXIS),
+                 BB = z && !TEST(Joint_homed, Joint3_AXIS),
+                 CC = z && !TEST(Joint_homed, Joint4_AXIS),
+                 DD = z && !TEST(Joint_homed, Joint5_AXIS);
     #endif
-    if (xx || yy || zz) {
+    /*if (xx || yy || zz) {
       SERIAL_ECHO_START();
       SERIAL_ECHOPGM(MSG_HOME " ");
       if (xx) SERIAL_ECHOPGM(MSG_X);
@@ -2089,6 +2095,22 @@ void clean_up_after_endstop_or_probe_move() {
 
       #if ENABLED(ULTRA_LCD)
         lcd_status_printf_P(0, PSTR(MSG_HOME " %s%s%s " MSG_FIRST), xx ? MSG_X : "", yy ? MSG_Y : "", zz ? MSG_Z : "");
+      #endif
+      return true;
+    }*/
+    // if (JJ || AA || BB || CC || DD) {
+    if (JJ){
+      SERIAL_ECHO_START();
+      SERIAL_ECHOPGM(MSG_HOME " ");
+      if (JJ) SERIAL_ECHOPGM(MSG_Joint1);
+      if (AA) SERIAL_ECHOPGM(MSG_Joint2);
+      if (BB) SERIAL_ECHOPGM(MSG_Joint3);
+      if (BB) SERIAL_ECHOPGM(MSG_Joint4);
+      if (BB) SERIAL_ECHOPGM(MSG_Joint5);
+      SERIAL_ECHOLNPGM(" " MSG_FIRST);
+
+      #if ENABLED(ULTRA_LCD)
+        lcd_status_printf_P(0, PSTR(MSG_HOME " %s%s%s%s%s " MSG_FIRST), JJ ? MSG_Joint1 : "", AA ? MSG_Joint2 : "", BB ? MSG_Joint3 : "", CC ? MSG_Joint4 : "", DD ? MSG_Joint5 : "");
       #endif
       return true;
     }
@@ -2612,6 +2634,7 @@ void clean_up_after_endstop_or_probe_move() {
     #if ENABLED(DEBUG_LEVELING_FEATURE)
       if (DEBUGGING(LEVELING)) {
         DEBUG_POS("set_probe_deployed", current_position);
+        DEBUG_POS_Joint("set_probe_deployed", current_position_Joint);
         SERIAL_ECHOLNPAIR("deploy: ", deploy);
       }
     #endif
@@ -2749,6 +2772,9 @@ void clean_up_after_endstop_or_probe_move() {
         Z_MIN_PROBE
       #endif
     );
+
+    /*SERIAL_ECHOPAIR("hit_state:",endstops.trigger_state());
+    SERIAL_ECHOLNPAIR("  probe_triggered:",probe_triggered);*/
 
     #if QUIET_PROBING
       probing_pause(false);

@@ -551,7 +551,7 @@
 #define X_MAX_ENDSTOP_INVERTING false // set to true to invert the logic of the endstop.
 #define Y_MAX_ENDSTOP_INVERTING false // set to true to invert the logic of the endstop.
 #define Z_MAX_ENDSTOP_INVERTING false // set to true to invert the logic of the endstop.
-#define Z_MIN_PROBE_ENDSTOP_INVERTING false // set to true to invert the logic of the probe.
+#define Z_MIN_PROBE_ENDSTOP_INVERTING true // set to true to invert the logic of the probe.
 
 //joint
 #define Joint1_MIN_ENDSTOP_INVERTING true
@@ -822,7 +822,7 @@
 // The number of probes to perform at each point.
 //   Set to 2 for a fast/slow probe, using the second probe result.
 //   Set to 3 or more for slow probes, averaging the results.
-//#define MULTIPLE_PROBING 2
+#define MULTIPLE_PROBING 2
 
 /**
  * Z probes require clearance when deploying, stowing, and moving between

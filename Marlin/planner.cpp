@@ -3326,7 +3326,7 @@ bool Planner::_populate_block_joint_self(block_t * const block, bool split_move,
 
   const int32_t da = MAX5(abs(d0),abs(d1),abs(d2),abs(d3),abs(d4)),
                 db,
-                dc;
+                dc = target[C_AXIS] - position[C_AXIS];
   /* <-- add a slash to enable
     SERIAL_ECHOPAIR("  _populate_block_Joint FR:", fr_mm_s);
     SERIAL_ECHOPAIR(" A:", target[A_AXIS]);
