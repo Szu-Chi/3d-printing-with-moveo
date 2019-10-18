@@ -49,23 +49,23 @@ int main(int argc, char **argv)
       if(!line.compare(0,2,"G0") || !line.compare(0,2,"G1")){
         size_t colon_pos_J = line.find('J');
         if(colon_pos_J < 100){
-          target_joints.at(0) = double(stod(line.substr(colon_pos_J+1))*(2*M_PI)/65600);
+          target_joints.at(0) = double(stod(line.substr(colon_pos_J+1))*(2*M_PI)/(200*32*10.533*0.95));
         }
         size_t colon_pos_A = line.find('A');
         if(colon_pos_A < 100){
-          target_joints.at(1) = double(stod(line.substr(colon_pos_A+1))*(2*M_PI)/18000);
+          target_joints.at(1) = double(stod(line.substr(colon_pos_A+1))*(2*M_PI)/(200*16*5.71428*0.95));
         }
         size_t colon_pos_B = line.find('B');
         if(colon_pos_B < 100){
-          target_joints.at(2) = double(stod(line.substr(colon_pos_B+1))*(2*M_PI)/144000);
+          target_joints.at(2) = double(stod(line.substr(colon_pos_B+1))*(2*M_PI)/(1028.57143*16*4.523809*0.95));
         }
         size_t colon_pos_C = line.find('C');
         if(colon_pos_C < 100){
-          target_joints.at(3) = double(stod(line.substr(colon_pos_C+1))*(2*M_PI)/6560);
+          target_joints.at(3) = double(stod(line.substr(colon_pos_C+1))*(2*M_PI)/(200*32));
         }
         size_t colon_pos_D = line.find('D');
         if(colon_pos_D < 100){
-          target_joints.at(4) = double(stod(line.substr(colon_pos_D+1))*(2*M_PI)/28800);
+          target_joints.at(4) = double(stod(line.substr(colon_pos_D+1))*(2*M_PI)/(200*32*4.666));
         }
         size_t colon_pos_Z = line.find('Z');
         if(colon_pos_Z < 100){

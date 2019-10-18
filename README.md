@@ -11,7 +11,6 @@ ROS packages that can be used to plan and execute motion trajectories for the BC
 ## How to Use:
 
 ### Getting the BCN3D Simulation Working with Motion Planning
-![moveit_screenshot.png](/moveit_screenshot.png)
 
 1. Make sure you have ROS installed correctly with a functioning workspace-- I used ROS Kinetic on Ubuntu 16.04 (if you have a different distro, you may need to change some things).  I currently have 'moveo_ros' in the 'src' folder of my catkin workspace.
 
@@ -75,4 +74,3 @@ Configuration for moveit, a motion planning framework that has a plugin in RVIZ,
 		- (http://wiki.ros.org/rosserial/Tutorials/Adding%20Other%20Messages)
 	
 - Here is my current layout and wiring schematic for reference:
-![aerialRobotSketch.pdf](/aerial_robot_sketch.png)

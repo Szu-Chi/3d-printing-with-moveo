@@ -65,30 +65,14 @@ include_directories(${catkin_INCLUDE_DIRS})
 link_directories(${catkin_LIBRARY_DIRS})
 
 ## Declare a C++ executable
-add_executable(read_file src/read_file.cpp)
 add_executable(gcode_point_split src/gcode_point_split.cpp)
 add_executable(inverse_kinematics src/inverse_kinematics.cpp)
-add_executable(inverse_kinematics_origin src/inverse_kinematics_origin.cpp)
-add_executable(inverse_kinematics_test src/inverse_kinematics_test.cpp)
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(gcode_point_split
   ${catkin_LIBRARIES}
 )
 ## Specify libraries to link a library or executable target against
-target_link_libraries(read_file
-  ${catkin_LIBRARIES}
-)
-## Specify libraries to link a library or executable target against
 target_link_libraries(inverse_kinematics
-  ${catkin_LIBRARIES}
-)
-## Specify libraries to link a library or executable target against
-target_link_libraries(inverse_kinematics_origin
-  ${catkin_LIBRARIES}
-)
-
-## Specify libraries to link a library or executable target against
-target_link_libraries(inverse_kinematics_test
   ${catkin_LIBRARIES}
 )

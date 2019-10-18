@@ -2,7 +2,7 @@
 ;TIME:1918
 ;Filament used: 1.08387m, 0m
 ;Layer height: 0.15
-;MINX:43.1s
+;MINX:43.1
 ;MINY:88.1
 ;MINZ:0.25
 ;MAXX:66.9
