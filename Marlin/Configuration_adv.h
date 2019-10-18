@@ -387,11 +387,11 @@
 #define Z_HOME_BUMP_MM 2
 
 //joint
-#define Joint1_HOME_BUMP_MM 200
-#define Joint2_HOME_BUMP_MM 200
-#define Joint3_HOME_BUMP_MM 200
-#define Joint4_HOME_BUMP_MM 200
-#define Joint5_HOME_BUMP_MM 200
+#define Joint1_HOME_BUMP_MM 1240
+#define Joint2_HOME_BUMP_MM 275
+#define Joint3_HOME_BUMP_MM 1235
+#define Joint4_HOME_BUMP_MM 320
+#define Joint5_HOME_BUMP_MM 435
 
 #define HOMING_BUMP_DIVISOR { 2, 2, 4 }  // Re-Bump Speed Divisor (Divides the Homing Feedrate)
 

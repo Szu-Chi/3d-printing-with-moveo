@@ -176,6 +176,7 @@ uint16_t max_display_update_time = 0;
   void lcd_tune_menu();
   void lcd_prepare_menu();
   void lcd_move_menu();
+  void lcd_home_menu();
   void lcd_control_menu();
   void lcd_control_temperature_menu();
   void lcd_control_motion_menu();
@@ -2705,13 +2706,14 @@ void lcd_quick_feedback(const bool clear_buttons) {
     //
     // Auto Home
     //
-    MENU_ITEM(gcode, MSG_AUTO_HOME, PSTR("G28"));
+    MENU_ITEM(submenu, MSG_AUTO_HOME, lcd_home_menu);
+    /*MENU_ITEM(gcode, MSG_AUTO_HOME, PSTR("G28"));
     #if ENABLED(INDIVIDUAL_AXIS_HOMING_MENU)
       MENU_ITEM(gcode, MSG_AUTO_HOME_X, PSTR("G28 X"));
       MENU_ITEM(gcode, MSG_AUTO_HOME_Y, PSTR("G28 Y"));
       MENU_ITEM(gcode, MSG_AUTO_HOME_Z, PSTR("G28 Z"));
     #endif
-
+    */
     //
     // TMC Z Calibration
     //
@@ -2764,6 +2766,11 @@ void lcd_quick_feedback(const bool clear_buttons) {
     // Disable Steppers
     //
     MENU_ITEM(gcode, MSG_DISABLE_STEPPERS, PSTR("M84"));
+
+    //
+    // Enable Steppers
+    //
+    MENU_ITEM(gcode, MSG_ENABLE_STEPPERS, PSTR("M17"));
 
     //
     // Change filament
@@ -3493,6 +3500,21 @@ void lcd_quick_feedback(const bool clear_buttons) {
 
     #endif
 
+    END_MENU();
+  }
+
+  void lcd_home_menu() {
+    START_MENU();
+    MENU_BACK(MSG_PREPARE); 
+
+    //joint
+    MENU_ITEM(gcode, MSG_HOME_J, PSTR("G28 J"));
+    MENU_ITEM(gcode, MSG_HOME_A, PSTR("G28 A"));
+    MENU_ITEM(gcode, MSG_HOME_B, PSTR("G28 B"));
+    MENU_ITEM(gcode, MSG_HOME_C, PSTR("G28 C"));
+    MENU_ITEM(gcode, MSG_HOME_D, PSTR("G28 D"));
+    MENU_ITEM(gcode, MSG_HOME_ALL, PSTR("G28"));
+          
     END_MENU();
   }
 

@@ -109,7 +109,7 @@ Stepper stepper; // Singleton
 block_t* Stepper::current_block = NULL; // A pointer to the block currently being traced
 
 uint8_t Stepper::last_direction_bits = 0,
-        Stepper::last_direction_bits_joint = 0,
+        Stepper::last_direction_bits_joint = 31,
         Stepper::axis_did_move,
         Stepper::axis_did_move_Joint;
 

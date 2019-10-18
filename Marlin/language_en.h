@@ -67,6 +67,9 @@
 #ifndef MSG_DISABLE_STEPPERS
   #define MSG_DISABLE_STEPPERS                _UxGT("Disable steppers")
 #endif
+#ifndef MSG_ENABLE_STEPPERS
+  #define MSG_ENABLE_STEPPERS                _UxGT("Enable steppers")
+#endif
 #ifndef MSG_DEBUG_MENU
   #define MSG_DEBUG_MENU                      _UxGT("Debug Menu")
 #endif
@@ -460,6 +463,25 @@
 #endif
 #ifndef MSG_MOVE_D
   #define MSG_MOVE_D                          _UxGT("Move D")
+#endif
+
+#ifndef MSG_HOME_J
+  #define MSG_HOME_J                          _UxGT("HOME J")
+#endif
+#ifndef MSG_HOME_A
+  #define MSG_HOME_A                          _UxGT("HOME A")
+#endif
+#ifndef MSG_HOME_B
+  #define MSG_HOME_B                          _UxGT("HOME B")
+#endif
+#ifndef MSG_HOME_C
+  #define MSG_HOME_C                          _UxGT("HOME C")
+#endif
+#ifndef MSG_HOME_D
+  #define MSG_HOME_D                          _UxGT("HOME D")
+#endif
+#ifndef MSG_HOME_ALL
+  #define MSG_HOME_ALL                        _UxGT("HOME ALL")
 #endif
 //end joint
 

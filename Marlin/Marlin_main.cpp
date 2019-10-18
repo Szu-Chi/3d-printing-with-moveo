@@ -387,6 +387,13 @@ uint8_t marlin_debug_flags = DEBUG_NONE;
 float current_position[XYZE] = { 0 };
 int32_t current_position_Joint[Joint_All] = { 0 };
 
+int32_t ZERO_position_Joint[Joint_All]={-948, 4328, 17689, 0, -3064};
+float   ZERO_position[XYZE]={0, 0, 0.25, 0};
+
+int32_t HOME_position_Joint[Joint_All]={0, 0, 0, 0, 0};
+float   HOME_position[XYZE]={-45.484, -10, 0, 0};
+
+
 /**
  * Cartesian Destination
  *   The destination for a move, filled in by G-code movement commands,
@@ -1870,7 +1877,19 @@ inline void buffer_line_to_current_position() {
  * Move the planner to the position stored in the destination array, which is
  * used by G0/G1/G2/G3/G5 and many other functions to set a destination.
  */
-inline void buffer_line_to_destination(const float &fr_mm_s) {
+inline void buffer_line_to_destination_Constant(const float (&Set_Position)[XYZE], const int32_t (&Set_Position_Joint)[Joint_All], const int32_t &fr_mm_s) {
+  #if ENABLED(HANGPRINTER)
+    UNUSED(fr_mm_s);
+  #else
+  planner.buffer_line_joint(Set_Position[X_AXIS], Set_Position[Y_AXIS], Set_Position[Z_AXIS], 
+                            Set_Position_Joint[Joint1_AXIS], Set_Position_Joint[Joint2_AXIS], Set_Position_Joint[Joint3_AXIS], 
+                            Set_Position_Joint[Joint4_AXIS], Set_Position_Joint[Joint5_AXIS],
+                            Set_Position[E_CART], fr_mm_s, active_extruder);
+  //SERIAL_ECHOLNPAIR("feedrate_mm_s:",fr_mm_s);
+  #endif
+}
+
+inline void buffer_line_to_destination(const int32_t &fr_mm_s) {
   #if ENABLED(HANGPRINTER)
     UNUSED(fr_mm_s);
   #else
@@ -1881,6 +1900,8 @@ inline void buffer_line_to_destination(const float &fr_mm_s) {
   //SERIAL_ECHOLNPAIR("feedrate_mm_s:",fr_mm_s);
   #endif
 }
+
+
 
 #if IS_KINEMATIC
   /**
@@ -3615,6 +3636,8 @@ static void do_homing_move_Joint(const JointEnum axis, const float distance, con
   }
 
   // Tell the planner the axis is at 0
+  //if(ABS(distance)<2500)  current_position_Joint[axis] = base_home_pos_Joint(axis);
+  //else                    current_position_Joint[axis] = 0;
   current_position_Joint[axis] = 0;
 
   // Do the move, which is required to hit an endstop
@@ -3655,6 +3678,41 @@ static void do_homing_move_Joint(const JointEnum axis, const float distance, con
   #if ENABLED(DEBUG_LEVELING_FEATURE)
     if (DEBUGGING(LEVELING)) {
       SERIAL_ECHOPAIR("<<< do_homing_move_Joint(", Joint_codes[axis]);
+      SERIAL_CHAR(')');
+      SERIAL_EOL();
+    }
+  #endif
+}
+
+static void do_move_Joint(const JointEnum axis, const float distance, const float fr_mm_s=0) {
+  #if ENABLED(DEBUG_LEVELING_FEATURE)
+    if (DEBUGGING(LEVELING)) {
+      SERIAL_ECHOPAIR(">>> do_move_Joint(", Joint_codes[axis]);
+      SERIAL_ECHOPAIR(", ", distance);
+      SERIAL_ECHOPGM(", ");
+      if (fr_mm_s)
+        SERIAL_ECHO(fr_mm_s);
+      else {
+        SERIAL_ECHOPAIR("[", homing_feedrate_Joint(axis));
+        SERIAL_CHAR(']');
+      }
+      SERIAL_ECHOLNPGM(")");
+    }
+  #endif
+  
+  // Tell the planner the axis is at 0
+  //current_position_Joint[axis] = 0;
+
+  sync_plan_position();
+  current_position_Joint[axis] = distance; // Set delta/cartesian axes directly
+  planner.buffer_line_joint(0,0,0,current_position_Joint[Joint1_AXIS], current_position_Joint[Joint2_AXIS],
+                            current_position_Joint[Joint3_AXIS], current_position_Joint[Joint4_AXIS], current_position_Joint[Joint5_AXIS],0, fr_mm_s ? fr_mm_s : homing_feedrate_Joint(axis), active_extruder);
+
+  planner.synchronize();    
+
+  #if ENABLED(DEBUG_LEVELING_FEATURE)
+    if (DEBUGGING(LEVELING)) {
+      SERIAL_ECHOPAIR("<<< do_move_Joint(", Joint_codes[axis]);
       SERIAL_CHAR(')');
       SERIAL_EOL();
     }
@@ -3860,7 +3918,7 @@ static void homeJoint(const JointEnum axis) {
     }
   #endif
 
-  const int Joint_home_dir = (  
+  const int Joint_home_dir = (
     home_dir_Joint(axis)
   );
 
@@ -3965,6 +4023,7 @@ static void homeJoint(const JointEnum axis) {
       // BLTOUCH needs to be stowed after trigger to rearm itself
       if (axis == Z_AXIS) set_bltouch_deployed(false);
     #endif
+    //do_move_Joint(axis, 0, get_homing_bump_feedrate_Joint(axis));
   }
 
   /**
@@ -4031,7 +4090,8 @@ static void homeJoint(const JointEnum axis) {
 
     // For cartesian/core machines,
     // set the axis to its home position
-    set_Joint_is_at_home(axis);
+    set_Joint_is_at_home(axis);    
+    do_move_Joint(axis, 0);
     sync_plan_position();
 
     destination_Joint[axis] = current_position_Joint[axis];
@@ -5244,6 +5304,14 @@ inline void gcode_G28(const bool always_home_all) {
     if(home_all || homeB)homeJoint(Joint3_AXIS);
     if(home_all || homeC)homeJoint(Joint4_AXIS);
     if(home_all || homeD)homeJoint(Joint5_AXIS);
+
+    if(axis_homed==31){
+      buffer_line_to_destination_Constant(HOME_position, HOME_position_Joint, homing_feedrate_Joint(0));
+      /*
+      delay(2000);
+      buffer_line_to_destination_Constant(ZERO_position, ZERO_position_Joint, homing_feedrate_Joint(0)));
+      //*/
+    }
 
     SYNC_PLAN_POSITION_KINEMATIC();
 
