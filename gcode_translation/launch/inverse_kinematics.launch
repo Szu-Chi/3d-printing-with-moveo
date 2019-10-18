@@ -2,8 +2,8 @@
 <launch>
   <arg name="chain_start" default="base_link" />
   <arg name="chain_end" default="moveo_nozzle_link" />
-  <arg name="timeout" default="0.05" />
-  <arg name="timeout_second" default="0.1" />
+  <arg name="timeout" default="0.035" />
+  <arg name="timeout_second" default="1" />
   <arg name="eps" default="1e-5"/>
   <!--
     arg name="num_threads" default="16"/
@@ -11,10 +11,10 @@
   <arg name="model" default="$(find moveo_urdf)/urdf/moveo_urdf.urdf"/>
   <param name="robot_description" textfile="$(arg model)" />
   
-  <arg name="gcode_in" default="$(find gcode_translation)/gcode/split 75mm test.gcode"/>
-  <arg name="gcode_out" default="$(find gcode_translation)/gcode/new 75mm test.gcode"/>
-
-  <node name="inverse_kinematics" pkg="gcode_translation" type="inverse_kinematics" output="screen">
+  <arg name="gcode_in" default="$(find gcode_translation)/gcode/split 15mm test.gcode"/>
+  <arg name="gcode_out" default="$(find gcode_translation)/gcode/new 15mm test.gcode"/>
+  <arg name="node_start_delay" default="1.0" />  
+  <node name="inverse_kinematics" pkg="gcode_translation" type="inverse_kinematics" output="screen" >
     <param name="chain_start" value="$(arg chain_start)"/>
     <param name="chain_end" value="$(arg chain_end)"/>
     <param name="timeout" value="$(arg timeout)"/>

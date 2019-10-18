@@ -93,10 +93,20 @@ int main(int argc, char **argv)
 
   std::ifstream input_file(gcode_in);
   if(!input_file.is_open())ROS_ERROR_STREAM("Can't open " <<gcode_in);
+  
+  std::string line;
+  //int line_num = 0;
+  //while(input_file){
+  //  line_num++;
+  //  std::getline(input_file, line);
+  //}
+  //std::cout << "line_num = " << line_num << std::endl;
+  //input_file.close();
+  //input_file.open(gcode_in);
+  //if(!input_file.is_open())ROS_ERROR_STREAM("Can't open " <<gcode_in);
 
   std::ofstream output_file(gcode_out);
   if(!output_file.is_open())ROS_ERROR_STREAM("Can't open " <<gcode_out);
-  std::string line;
   bool check = 0;
   int all_line = 0;
   int second_execution = 0;
@@ -118,7 +128,7 @@ int main(int argc, char **argv)
       if(all_line % 1000 == 0 || !input_file){
         for(int i = 0;i < all_line ;i++){
           line = save[i];
-          if(!line.compare(0,15,";LAYER_COUNT:99")){
+          if(!line.compare(0,8,";LAYER:0")){
             check = 1;
           }
           if(check == 1){
@@ -133,7 +143,7 @@ int main(int argc, char **argv)
               }
               size_t colon_pos_Z = line.find('Z');
               if(colon_pos_Z < 100){
-                end_effector_target_vol.data[2] = stod(line.substr(colon_pos_Z+1))*1e-3;
+                end_effector_target_vol.data[2] = (stod(line.substr(colon_pos_Z+1))*1e-3)+49.75*1e-3;
               }
               find_end_effector_target_vol.push_back(end_effector_target_vol);
               save_place.push_back(i);

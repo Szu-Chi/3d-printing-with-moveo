@@ -57,6 +57,8 @@
         "memory_resource": "cpp",
         "optional": "cpp",
         "set": "cpp",
-        "string_view": "cpp"
+        "string_view": "cpp",
+        "condition_variable": "cpp",
+        "mutex": "cpp"
     }
 }

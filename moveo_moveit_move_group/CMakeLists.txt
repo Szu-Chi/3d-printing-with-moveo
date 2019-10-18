@@ -24,6 +24,13 @@ find_package(catkin REQUIRED
     trac_ik_lib
 )
 
+find_package(OpenMP)
+if (OPENMP_FOUND)
+    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+    set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
+endif()
+
 find_package(Boost REQUIRED system filesystem date_time thread)
 
 
@@ -38,6 +45,7 @@ generate_messages(
   DEPENDENCIES
   sensor_msgs
   std_msgs
+  geometry_msgs
 )
 
 catkin_package(
@@ -60,12 +68,16 @@ link_directories(${catkin_LIBRARY_DIRS})
 ## Declare a C++ executable
 add_executable(ik_test src/moveo_ik_test.cpp)
 add_executable(moveo_set_pose src/moveo_set_pose.cpp)
+add_executable(area_test src/area_test.cpp)
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(ik_test
   ${catkin_LIBRARIES}
 )
 target_link_libraries(moveo_set_pose
+  ${catkin_LIBRARIES}
+)
+target_link_libraries(area_test
   ${catkin_LIBRARIES}
 )
 
