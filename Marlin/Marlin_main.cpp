@@ -5306,7 +5306,7 @@ inline void gcode_G28(const bool always_home_all) {
     if(home_all || homeD)homeJoint(Joint5_AXIS);
 
     if(axis_homed==31){
-      buffer_line_to_destination_Constant(HOME_position, HOME_position_Joint, homing_feedrate_Joint(0));
+      //buffer_line_to_destination_Constant(HOME_position, HOME_position_Joint, homing_feedrate_Joint(0));
       /*
       delay(2000);
       buffer_line_to_destination_Constant(ZERO_position, ZERO_position_Joint, homing_feedrate_Joint(0)));
@@ -16199,11 +16199,13 @@ void setup() {
   #endif
 
 
+  /*
   enable_Joint1();
   enable_Joint2();
   enable_Joint3();
   enable_Joint4();
   enable_Joint5();
+  //*/
 }
 
 /**

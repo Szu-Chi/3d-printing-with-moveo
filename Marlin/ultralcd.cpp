@@ -859,8 +859,16 @@ void lcd_quick_feedback(const bool clear_buttons) {
     }
 
     void lcd_sdcard_stop() {
-      wait_for_heatup = wait_for_user = false;
+      //wait_for_heatup = wait_for_user = false;
+      enqueue_and_echo_commands_P(PSTR("M109 S30"));
+
+      planner.buffer_line_joint(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], 
+                                0, 0, 0, 0, 0, current_position[E_CART], 0, active_extruder);
+
+      wait_for_user = false;
+      wait_for_heatup = true;
       card.abort_sd_printing = true;
+
       lcd_setstatusPGM(PSTR(MSG_PRINT_ABORTED), -1);
       lcd_return_to_status();
     }

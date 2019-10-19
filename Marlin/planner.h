@@ -657,7 +657,6 @@ class Planner {
       );
     }
 
-
     FORCE_INLINE static bool buffer_line_joint(ARG_X, ARG_Y, ARG_Z,
       const int32_t &j1, const int32_t &j2, const int32_t &j3, const int32_t &j4, const int32_t &j5,
       #if ENABLED(HANGPRINTER)

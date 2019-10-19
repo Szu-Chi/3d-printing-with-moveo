@@ -1519,6 +1519,9 @@ int32_t Planner::triggered_position_mm_Joint(const JointEnum axis) {
 
 void Planner::finish_and_disable() {
   while (has_blocks_queued() || cleaning_buffer_counter) idle();
+
+  // planner.buffer_line_joint(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], 
+  //                           0, 0, 0, 0, 0, current_position[E_CART], 0, active_extruder);
   disable_all_steppers();
 }
 
