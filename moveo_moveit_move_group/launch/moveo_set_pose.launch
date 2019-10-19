@@ -2,13 +2,13 @@
 <launch>
   <arg name="chain_start" default="base_link" />
   <arg name="chain_end" default="moveo_nozzle_link" />
-  <arg name="timeout" default="0.05" />
+  <arg name="timeout" default="1" />
   <arg name="eps" default="1e-5"/>
   <arg name="model" default="$(find moveo_urdf)/urdf/moveo_urdf.urdf"/>
   <param name="robot_description" textfile="$(arg model)" />
-  <arg name="end_effector_target_vol_x" default="-0.0"/>
-  <arg name="end_effector_target_vol_y" default="0.2"/>
-  <arg name="end_effector_target_vol_z" default="0.5"/>
+  <arg name="end_effector_target_vol_x" default="0.001"/>
+  <arg name="end_effector_target_vol_y" default="0.597"/>
+  <arg name="end_effector_target_vol_z" default="0.001"/>
   <arg name="end_effector_target_rot_R" default="0.0"/>
   <arg name="end_effector_target_rot_Y" default="0.0"/>
   <arg name="end_effector_target_rot_P" default="0.0"/>

@@ -1,2 +1,3 @@
 gcode_translation/gcode/*.gcode
 .vscode/*.json
+moveo_moveit_move_group/area/*.csv
