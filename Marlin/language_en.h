@@ -68,7 +68,10 @@
   #define MSG_DISABLE_STEPPERS                _UxGT("Disable steppers")
 #endif
 #ifndef MSG_ENABLE_STEPPERS
-  #define MSG_ENABLE_STEPPERS                _UxGT("Enable steppers")
+  #define MSG_ENABLE_STEPPERS                 _UxGT("Enable steppers")
+#endif
+#ifndef MSG_ENABLE_ColdExtrudes
+  #define MSG_ENABLE_ColdExtrudes             _UxGT("Enable cold extrudes")
 #endif
 #ifndef MSG_DEBUG_MENU
   #define MSG_DEBUG_MENU                      _UxGT("Debug Menu")

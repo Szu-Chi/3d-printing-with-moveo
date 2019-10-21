@@ -2780,6 +2780,8 @@ void lcd_quick_feedback(const bool clear_buttons) {
     //
     MENU_ITEM(gcode, MSG_ENABLE_STEPPERS, PSTR("M17"));
 
+    MENU_ITEM(gcode, MSG_ENABLE_ColdExtrudes, PSTR("M302 P1"));
+
     //
     // Change filament
     //
