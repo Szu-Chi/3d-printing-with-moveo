@@ -859,14 +859,13 @@ void lcd_quick_feedback(const bool clear_buttons) {
     }
 
     void lcd_sdcard_stop() {
-      //wait_for_heatup = wait_for_user = false;
-      enqueue_and_echo_commands_P(PSTR("M109 S30"));
+      wait_for_heatup = wait_for_user = false;
+      // enqueue_and_echo_commands_P(PSTR("M109 S30"));
 
-      planner.buffer_line_joint(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], 
-                                0, 0, 0, 0, 0, current_position[E_CART], 0, active_extruder);
+      // planner.buffer_line_joint(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], 0, 0, 0, 0, 0, current_position[E_CART], 0, active_extruder);
 
-      wait_for_user = false;
-      wait_for_heatup = true;
+      // wait_for_user = true;
+      // wait_for_heatup = true;
       card.abort_sd_printing = true;
 
       lcd_setstatusPGM(PSTR(MSG_PRINT_ABORTED), -1);
@@ -2977,7 +2976,7 @@ void lcd_quick_feedback(const bool clear_buttons) {
                                         current_position_Joint[Joint4_AXIS],
                                         current_position_Joint[Joint5_AXIS]
                                       );*/
-        planner.buffer_line_kinematic_joint(current_position_Joint, MMM_TO_MMS(manual_feedrate_mm_m_joint[manual_move_joint]), 0);
+        planner.buffer_line_kinematic_joint(current_position_Joint, MMM_TO_MMS(manual_feedrate_mm_m_joint[manual_move_joint]), manual_move_axis == E_AXIS ? manual_move_e_index : active_extruder);
         manual_move_joint = (int8_t)NO_AXIS;
     }
   }
@@ -3020,10 +3019,12 @@ void lcd_quick_feedback(const bool clear_buttons) {
         #endif
 
       #else
-
-        planner.buffer_line_kinematic(current_position, current_position_Joint, MMM_TO_MMS(manual_feedrate_mm_m[manual_move_axis]), manual_move_axis == E_AXIS ? manual_move_e_index : active_extruder);
+        //planner.buffer_line_kinematic(current_position, current_position_Joint, MMM_TO_MMS(manual_feedrate_mm_m[manual_move_axis]), manual_move_axis == E_AXIS ? manual_move_e_index : active_extruder);
+        planner.buffer_line_kinematic(current_position, current_position_Joint, MMM_TO_MMS(manual_feedrate_mm_m_joint[manual_move_axis]), manual_move_axis == E_AXIS ? manual_move_e_index : active_extruder);
+        SERIAL_ECHOLNPAIR("current_position",current_position);
+        SERIAL_ECHOLNPAIR("current_position_Joint",current_position_Joint);
         manual_move_axis = (int8_t)NO_AXIS;
-
+        manual_move_joint = (int8_t)NO_AXIS;
       #endif
     }
   }
@@ -5354,7 +5355,7 @@ void lcd_update() {
 
     // Handle any queued Move Axis motion
     manage_manual_move();
-    manage_manual_move_joint();
+    //manage_manual_move_joint();
 
     // Update button states for LCD_CLICKED, etc.
     // After state changes the next button update

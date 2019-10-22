@@ -718,7 +718,7 @@ class Planner {
         );
       #else
         //return buffer_segment(raw[X_AXIS], raw[Y_AXIS], raw[Z_AXIS], cart[E_CART], fr_mm_s, extruder, millimeters);
-        return buffer_segment_joint(raw[X_AXIS],raw[Y_AXIS],raw[Z_AXIS],jraw[Joint1_AXIS], jraw[Joint2_AXIS], jraw[Joint3_AXIS], jraw[Joint4_AXIS], jraw[Joint5_AXIS],0, fr_mm_s, extruder, millimeters);
+        return buffer_segment_joint(raw[X_AXIS],raw[Y_AXIS],raw[Z_AXIS],jraw[Joint1_AXIS], jraw[Joint2_AXIS], jraw[Joint3_AXIS], jraw[Joint4_AXIS], jraw[Joint5_AXIS],cart[E_AXIS], fr_mm_s, extruder, millimeters);
       #endif
     }
 
@@ -753,7 +753,7 @@ class Planner {
           , cart[E_CART], fr_mm_s, extruder, millimeters
         );
       #else
-        return buffer_segment_joint(0,0,0,jraw[Joint1_AXIS], jraw[Joint2_AXIS], jraw[Joint3_AXIS], jraw[Joint4_AXIS], jraw[Joint5_AXIS],0, fr_mm_s, extruder, millimeters);
+        return buffer_segment_joint(0,0,0,jraw[Joint1_AXIS], jraw[Joint2_AXIS], jraw[Joint3_AXIS], jraw[Joint4_AXIS], jraw[Joint5_AXIS], extruder, fr_mm_s, extruder, millimeters);
       #endif
     }
 
