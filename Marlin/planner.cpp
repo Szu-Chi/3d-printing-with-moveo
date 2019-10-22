@@ -3327,7 +3327,8 @@ bool Planner::_populate_block_joint_self(block_t * const block, bool split_move,
   
   int32_t de = target[E_AXIS] - position[E_AXIS];
 
-  const int32_t da = MAX5(abs(d0),abs(d1),abs(d2),abs(d3),abs(d4)),
+
+  const int32_t da = MAX5(abs(d0),abs(d1),abs(d2),abs(d3),abs(d4)), 
                 db,
                 dc ;//= target[C_AXIS] - position[C_AXIS];
   /* <-- add a slash to enable

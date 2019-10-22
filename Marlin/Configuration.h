@@ -650,10 +650,8 @@
  * Override with M92
  *                                      X, Y, Z, E0 [, E1[, E2[, E3[, E4]]]]
  */
-#define DEFAULT_AXIS_STEPS_PER_UNIT \
-  {                                 \
-    80, 80, 4000, 837               \
-  }
+
+#define DEFAULT_AXIS_STEPS_PER_UNIT   { 80, 80, 4000, 837 }
 
 /**
  * Default Max Feed Rate (mm/s)
@@ -982,12 +980,14 @@
 #define Joint1_MIN_POS -24800
 #define Joint2_MIN_POS -5500
 #define Joint3_MIN_POS -24700
+
 #define Joint4_MIN_POS -6400
 #define Joint5_MIN_POS -8700
 
 //joint
-#define Joint1_MAX_POS 24800
-#define Joint2_MAX_POS 5650
+
+#define Joint1_MAX_POS 24800 
+#define Joint2_MAX_POS 5650 
 #define Joint3_MAX_POS 24000
 #define Joint4_MAX_POS 6400
 #define Joint5_MAX_POS 7650
