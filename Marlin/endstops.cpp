@@ -762,6 +762,10 @@ void Endstops::update() {
     }
   #endif
 
+  #if ENABLED(Z_MIN_PROBE_ENDSTOP)
+      if (z_probe_enabled) PROCESS_ENDSTOP(Z, MIN_PROBE);
+  #endif
+
   if (stepper.axis_is_moving_Joint(Joint1_AXIS)) {
     if (stepper.motor_direction_Joint(Joint1_AXIS)) { // -direction
       #if HAS_Joint1_MIN       
@@ -869,10 +873,11 @@ void Endstops::update() {
         #endif
       #endif
     }
-  }
-
+  }  
   if (stepper.axis_is_moving(Z_AXIS)) {
+    SERIAL_ECHOLNPGM("HA+");
     if (stepper.motor_direction(Z_AXIS_HEAD)) { // Z -direction. Gantry down, bed up.
+        SERIAL_ECHOLNPGM("HA-");
       #if HAS_Z_MIN
         #if ENABLED(Z_DUAL_ENDSTOPS)
           PROCESS_DUAL_ENDSTOP(Z, Z2, MIN);
@@ -904,7 +909,7 @@ void Endstops::update() {
       #endif
     }
   }
-    //*/  
+  //*/ 
 } // Endstops::update()
 
 #if ENABLED(PINS_DEBUGGING)

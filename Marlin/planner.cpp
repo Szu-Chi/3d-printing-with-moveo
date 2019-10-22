@@ -1519,6 +1519,9 @@ int32_t Planner::triggered_position_mm_Joint(const JointEnum axis) {
 
 void Planner::finish_and_disable() {
   while (has_blocks_queued() || cleaning_buffer_counter) idle();
+
+  // planner.buffer_line_joint(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], 
+  //                           0, 0, 0, 0, 0, current_position[E_CART], 0, active_extruder);
   disable_all_steppers();
 }
 
@@ -3327,7 +3330,7 @@ bool Planner::_populate_block_joint_self(block_t * const block, bool split_move,
 
   const int32_t da = MAX5(abs(d0),abs(d1),abs(d2),abs(d3),abs(d4)), 
                 db,
-                dc;
+                dc ;//= target[C_AXIS] - position[C_AXIS];
   /* <-- add a slash to enable
     SERIAL_ECHOPAIR("  _populate_block_Joint FR:", fr_mm_s);
     SERIAL_ECHOPAIR(" A:", target[A_AXIS]);

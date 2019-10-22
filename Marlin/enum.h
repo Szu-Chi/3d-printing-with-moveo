@@ -48,7 +48,7 @@ enum AxisEnum : unsigned char {
   #endif
   X_HEAD, Y_HEAD, Z_HEAD,
   ALL_AXES  = 0xFE,
-  NO_AXIS   = 0xFF
+  NO_AXIS   = 0xFF 
 };
 
 enum JointEnum: unsigned char {

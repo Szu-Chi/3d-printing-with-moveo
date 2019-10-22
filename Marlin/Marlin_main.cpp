@@ -387,6 +387,12 @@ uint8_t marlin_debug_flags = DEBUG_NONE;
 float current_position[XYZE] = { 0 };
 int32_t current_position_Joint[Joint_All] = { 0 };
 
+int32_t ZERO_position_Joint[Joint_All]={-948, 4328, 17689, 0, -3064};
+float   ZERO_position[XYZE]={0, 0, 0.25, 0};
+
+int32_t HOME_position_Joint[Joint_All]={0, 0, 0, 0, 0};
+float   HOME_position[XYZE]={-45.484, -10, 0, 0};
+
 /**
  * Cartesian Destination
  *   The destination for a move, filled in by G-code movement commands,
@@ -860,8 +866,8 @@ void sync_plan_position() {
         DEBUG_POS_Joint("sync_plan_position_Joint", current_position_Joint);      
       } 
     #endif
-    planner.set_position_mm(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_CART]);
-    planner.set_position_mm_Joint(current_position_Joint[Joint1_AXIS], current_position_Joint[Joint2_AXIS], current_position_Joint[Joint3_AXIS], current_position_Joint[Joint4_AXIS], current_position_Joint[Joint5_AXIS]);
+    planner.set_position_mm(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS],current_position_Joint[Joint1_AXIS], current_position_Joint[Joint2_AXIS], current_position_Joint[Joint3_AXIS], current_position_Joint[Joint4_AXIS], current_position_Joint[Joint5_AXIS], current_position[E_CART]);
+    //planner.set_position_mm_Joint(current_position_Joint[Joint1_AXIS], current_position_Joint[Joint2_AXIS], current_position_Joint[Joint3_AXIS], current_position_Joint[Joint4_AXIS], current_position_Joint[Joint5_AXIS]);
   #endif
 }
 
@@ -1870,7 +1876,19 @@ inline void buffer_line_to_current_position() {
  * Move the planner to the position stored in the destination array, which is
  * used by G0/G1/G2/G3/G5 and many other functions to set a destination.
  */
-inline void buffer_line_to_destination(const float &fr_mm_s) {
+inline void buffer_line_to_destination_Constant(const float (&Set_Position)[XYZE], const int32_t (&Set_Position_Joint)[Joint_All], const int32_t &fr_mm_s) {
+  #if ENABLED(HANGPRINTER)
+    UNUSED(fr_mm_s);
+  #else
+  planner.buffer_line_joint(Set_Position[X_AXIS], Set_Position[Y_AXIS], Set_Position[Z_AXIS], 
+                            Set_Position_Joint[Joint1_AXIS], Set_Position_Joint[Joint2_AXIS], Set_Position_Joint[Joint3_AXIS], 
+                            Set_Position_Joint[Joint4_AXIS], Set_Position_Joint[Joint5_AXIS],
+                            Set_Position[E_CART], fr_mm_s, active_extruder);
+  //SERIAL_ECHOLNPAIR("feedrate_mm_s:",fr_mm_s);
+  #endif
+}
+
+inline void buffer_line_to_destination(const int32_t &fr_mm_s) {
   #if ENABLED(HANGPRINTER)
     UNUSED(fr_mm_s);
   #else
@@ -1881,6 +1899,8 @@ inline void buffer_line_to_destination(const float &fr_mm_s) {
   //SERIAL_ECHOLNPAIR("feedrate_mm_s:",fr_mm_s);
   #endif
 }
+
+
 
 #if IS_KINEMATIC
   /**
@@ -2078,8 +2098,14 @@ void clean_up_after_endstop_or_probe_move() {
       const bool xx = x && !TEST(axis_homed, X_AXIS),
                  yy = y && !TEST(axis_homed, Y_AXIS),
                  zz = z && !TEST(axis_homed, Z_AXIS);
+
+      const bool JJ = x && !TEST(Joint_homed, Joint1_AXIS),
+                 AA = y && !TEST(Joint_homed, Joint2_AXIS),
+                 BB = z && !TEST(Joint_homed, Joint3_AXIS),
+                 CC = z && !TEST(Joint_homed, Joint4_AXIS),
+                 DD = z && !TEST(Joint_homed, Joint5_AXIS);
     #endif
-    if (xx || yy || zz) {
+    /*if (xx || yy || zz) {
       SERIAL_ECHO_START();
       SERIAL_ECHOPGM(MSG_HOME " ");
       if (xx) SERIAL_ECHOPGM(MSG_X);
@@ -2089,6 +2115,22 @@ void clean_up_after_endstop_or_probe_move() {
 
       #if ENABLED(ULTRA_LCD)
         lcd_status_printf_P(0, PSTR(MSG_HOME " %s%s%s " MSG_FIRST), xx ? MSG_X : "", yy ? MSG_Y : "", zz ? MSG_Z : "");
+      #endif
+      return true;
+    }*/
+    // if (JJ || AA || BB || CC || DD) {
+    if (JJ){
+      SERIAL_ECHO_START();
+      SERIAL_ECHOPGM(MSG_HOME " ");
+      if (JJ) SERIAL_ECHOPGM(MSG_Joint1);
+      if (AA) SERIAL_ECHOPGM(MSG_Joint2);
+      if (BB) SERIAL_ECHOPGM(MSG_Joint3);
+      if (BB) SERIAL_ECHOPGM(MSG_Joint4);
+      if (BB) SERIAL_ECHOPGM(MSG_Joint5);
+      SERIAL_ECHOLNPGM(" " MSG_FIRST);
+
+      #if ENABLED(ULTRA_LCD)
+        lcd_status_printf_P(0, PSTR(MSG_HOME " %s%s%s%s%s " MSG_FIRST), JJ ? MSG_Joint1 : "", AA ? MSG_Joint2 : "", BB ? MSG_Joint3 : "", CC ? MSG_Joint4 : "", DD ? MSG_Joint5 : "");
       #endif
       return true;
     }
@@ -2612,6 +2654,7 @@ void clean_up_after_endstop_or_probe_move() {
     #if ENABLED(DEBUG_LEVELING_FEATURE)
       if (DEBUGGING(LEVELING)) {
         DEBUG_POS("set_probe_deployed", current_position);
+        DEBUG_POS_Joint("set_probe_deployed", current_position_Joint);
         SERIAL_ECHOLNPAIR("deploy: ", deploy);
       }
     #endif
@@ -2749,6 +2792,9 @@ void clean_up_after_endstop_or_probe_move() {
         Z_MIN_PROBE
       #endif
     );
+
+    /*SERIAL_ECHOPAIR("hit_state:",endstops.trigger_state());
+    SERIAL_ECHOLNPAIR("  probe_triggered:",probe_triggered);*/
 
     #if QUIET_PROBING
       probing_pause(false);
@@ -3589,6 +3635,8 @@ static void do_homing_move_Joint(const JointEnum axis, const float distance, con
   }
 
   // Tell the planner the axis is at 0
+  //if(ABS(distance)<2500)  current_position_Joint[axis] = base_home_pos_Joint(axis);
+  //else                    current_position_Joint[axis] = 0;
   current_position_Joint[axis] = 0;
 
   // Do the move, which is required to hit an endstop
@@ -3629,6 +3677,41 @@ static void do_homing_move_Joint(const JointEnum axis, const float distance, con
   #if ENABLED(DEBUG_LEVELING_FEATURE)
     if (DEBUGGING(LEVELING)) {
       SERIAL_ECHOPAIR("<<< do_homing_move_Joint(", Joint_codes[axis]);
+      SERIAL_CHAR(')');
+      SERIAL_EOL();
+    }
+  #endif
+}
+
+static void do_move_Joint(const JointEnum axis, const float distance, const float fr_mm_s=0) {
+  #if ENABLED(DEBUG_LEVELING_FEATURE)
+    if (DEBUGGING(LEVELING)) {
+      SERIAL_ECHOPAIR(">>> do_move_Joint(", Joint_codes[axis]);
+      SERIAL_ECHOPAIR(", ", distance);
+      SERIAL_ECHOPGM(", ");
+      if (fr_mm_s)
+        SERIAL_ECHO(fr_mm_s);
+      else {
+        SERIAL_ECHOPAIR("[", homing_feedrate_Joint(axis));
+        SERIAL_CHAR(']');
+      }
+      SERIAL_ECHOLNPGM(")");
+    }
+  #endif
+  
+  // Tell the planner the axis is at 0
+  //current_position_Joint[axis] = 0;
+
+  sync_plan_position();
+  current_position_Joint[axis] = distance; // Set delta/cartesian axes directly
+  planner.buffer_line_joint(0,0,0,current_position_Joint[Joint1_AXIS], current_position_Joint[Joint2_AXIS],
+                            current_position_Joint[Joint3_AXIS], current_position_Joint[Joint4_AXIS], current_position_Joint[Joint5_AXIS],0, fr_mm_s ? fr_mm_s : homing_feedrate_Joint(axis), active_extruder);
+
+  planner.synchronize();    
+
+  #if ENABLED(DEBUG_LEVELING_FEATURE)
+    if (DEBUGGING(LEVELING)) {
+      SERIAL_ECHOPAIR("<<< do_move_Joint(", Joint_codes[axis]);
       SERIAL_CHAR(')');
       SERIAL_EOL();
     }
@@ -3834,7 +3917,7 @@ static void homeJoint(const JointEnum axis) {
     }
   #endif
 
-  const int Joint_home_dir = (  
+  const int Joint_home_dir = (
     home_dir_Joint(axis)
   );
 
@@ -3939,6 +4022,7 @@ static void homeJoint(const JointEnum axis) {
       // BLTOUCH needs to be stowed after trigger to rearm itself
       if (axis == Z_AXIS) set_bltouch_deployed(false);
     #endif
+    //do_move_Joint(axis, 0, get_homing_bump_feedrate_Joint(axis));
   }
 
   /**
@@ -4005,7 +4089,8 @@ static void homeJoint(const JointEnum axis) {
 
     // For cartesian/core machines,
     // set the axis to its home position
-    set_Joint_is_at_home(axis);
+    set_Joint_is_at_home(axis);    
+    do_move_Joint(axis, 0);
     sync_plan_position();
 
     destination_Joint[axis] = current_position_Joint[axis];
@@ -4100,7 +4185,7 @@ static void homeJoint(const JointEnum axis) {
  *  - Set the feedrate, if included
  */
 void gcode_get_destination() {
-	 char *joint[5]={'J','A','B','C','D'};
+	 char joint[5]={'J','A','B','C','D'};
   	for(int i1=1;i1<6;i1++) {
     	if (parser.seen(joint[i1-1])) {
     		int32_t data = parser.value_axis_units(i1-1);	
@@ -5218,6 +5303,14 @@ inline void gcode_G28(const bool always_home_all) {
     if(home_all || homeB)homeJoint(Joint3_AXIS);
     if(home_all || homeC)homeJoint(Joint4_AXIS);
     if(home_all || homeD)homeJoint(Joint5_AXIS);
+
+    if(axis_homed==31){
+      //buffer_line_to_destination_Constant(HOME_position, HOME_position_Joint, homing_feedrate_Joint(0));
+      /*
+      delay(2000);
+      buffer_line_to_destination_Constant(ZERO_position, ZERO_position_Joint, homing_feedrate_Joint(0)));
+      //*/
+    }
 
     SYNC_PLAN_POSITION_KINEMATIC();
 
@@ -15260,7 +15353,7 @@ void prepare_move_to_destination() {
         if (!planner.buffer_segment(pos[X_AXIS], pos[Y_AXIS], pos[Z_AXIS], raw[E_CART], fr_mm_s, active_extruder, MM_PER_ARC_SEGMENT))
           break;
       #else
-        if (!planner.buffer_line_kinematic(raw, fr_mm_s, active_extruder))
+        if (!planner.buffer_line_kinematic(raw, current_position_Joint, fr_mm_s, active_extruder))
           break;
       #endif
     }
@@ -15284,7 +15377,7 @@ void prepare_move_to_destination() {
       planner.apply_leveling(pos);
       planner.buffer_segment(pos[X_AXIS], pos[Y_AXIS], pos[Z_AXIS], cart[E_CART], fr_mm_s, active_extruder, MM_PER_ARC_SEGMENT);
     #else
-      planner.buffer_line_kinematic(cart, fr_mm_s, active_extruder);
+      planner.buffer_line_kinematic(cart,current_position_Joint, fr_mm_s, active_extruder);
     #endif
 
     COPY(current_position, cart);
@@ -16105,11 +16198,13 @@ void setup() {
   #endif
 
 
+  /*
   enable_Joint1();
   enable_Joint2();
   enable_Joint3();
   enable_Joint4();
   enable_Joint5();
+  //*/
 }
 
 /**

@@ -176,6 +176,7 @@ uint16_t max_display_update_time = 0;
   void lcd_tune_menu();
   void lcd_prepare_menu();
   void lcd_move_menu();
+  void lcd_home_menu();
   void lcd_control_menu();
   void lcd_control_temperature_menu();
   void lcd_control_motion_menu();
@@ -828,7 +829,7 @@ void lcd_quick_feedback(const bool clear_buttons) {
   }
 
   inline void line_to_current_z() {
-    planner.buffer_line_kinematic(current_position, MMM_TO_MMS(manual_feedrate_mm_m[Z_AXIS]), active_extruder);
+    planner.buffer_line_kinematic(current_position, current_position_Joint, MMM_TO_MMS(manual_feedrate_mm_m[Z_AXIS]), active_extruder);
   }
 
   inline void line_to_z(const float &z) {
@@ -858,8 +859,15 @@ void lcd_quick_feedback(const bool clear_buttons) {
     }
 
     void lcd_sdcard_stop() {
-      wait_for_heatup = wait_for_user = false;
+      //wait_for_heatup = wait_for_user = false;
+      // enqueue_and_echo_commands_P(PSTR("M109 S30"));
+
+      // planner.buffer_line_joint(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], 0, 0, 0, 0, 0, current_position[E_CART], 0, active_extruder);
+
+      // wait_for_user = true;
+      // wait_for_heatup = true;
       card.abort_sd_printing = true;
+
       lcd_setstatusPGM(PSTR(MSG_PRINT_ABORTED), -1);
       lcd_return_to_status();
     }
@@ -2705,13 +2713,14 @@ void lcd_quick_feedback(const bool clear_buttons) {
     //
     // Auto Home
     //
-    MENU_ITEM(gcode, MSG_AUTO_HOME, PSTR("G28"));
+    MENU_ITEM(submenu, MSG_AUTO_HOME, lcd_home_menu);
+    /*MENU_ITEM(gcode, MSG_AUTO_HOME, PSTR("G28"));
     #if ENABLED(INDIVIDUAL_AXIS_HOMING_MENU)
       MENU_ITEM(gcode, MSG_AUTO_HOME_X, PSTR("G28 X"));
       MENU_ITEM(gcode, MSG_AUTO_HOME_Y, PSTR("G28 Y"));
       MENU_ITEM(gcode, MSG_AUTO_HOME_Z, PSTR("G28 Z"));
     #endif
-
+    */
     //
     // TMC Z Calibration
     //
@@ -2764,6 +2773,13 @@ void lcd_quick_feedback(const bool clear_buttons) {
     // Disable Steppers
     //
     MENU_ITEM(gcode, MSG_DISABLE_STEPPERS, PSTR("M84"));
+
+    //
+    // Enable Steppers
+    //
+    MENU_ITEM(gcode, MSG_ENABLE_STEPPERS, PSTR("M17"));
+
+    MENU_ITEM(gcode, MSG_ENABLE_ColdExtrudes, PSTR("M302 P1"));
 
     //
     // Change filament
@@ -2960,7 +2976,7 @@ void lcd_quick_feedback(const bool clear_buttons) {
                                         current_position_Joint[Joint4_AXIS],
                                         current_position_Joint[Joint5_AXIS]
                                       );*/
-        planner.buffer_line_kinematic_joint(current_position_Joint, MMM_TO_MMS(manual_feedrate_mm_m_joint[manual_move_joint]), 0);
+        planner.buffer_line_kinematic_joint(current_position_Joint, MMM_TO_MMS(manual_feedrate_mm_m_joint[manual_move_joint]), manual_move_axis == E_AXIS ? manual_move_e_index : active_extruder);
         manual_move_joint = (int8_t)NO_AXIS;
     }
   }
@@ -2969,7 +2985,7 @@ void lcd_quick_feedback(const bool clear_buttons) {
 
     if (processing_manual_move) return;
 
-    if (manual_move_axis != (int8_t)NO_AXIS && ELAPSED(millis(), manual_move_start_time) && !planner.is_full()) {
+    if ((manual_move_axis != (int8_t)NO_AXIS || manual_move_joint != (int8_t)NO_AXIS)&& ELAPSED(millis(), manual_move_start_time) && !planner.is_full()) {
 
       #if IS_KINEMATIC
 
@@ -3003,10 +3019,12 @@ void lcd_quick_feedback(const bool clear_buttons) {
         #endif
 
       #else
-
-        planner.buffer_line_kinematic(current_position, MMM_TO_MMS(manual_feedrate_mm_m[manual_move_axis]), manual_move_axis == E_AXIS ? manual_move_e_index : active_extruder);
+        //planner.buffer_line_kinematic(current_position, current_position_Joint, MMM_TO_MMS(manual_feedrate_mm_m[manual_move_axis]), manual_move_axis == E_AXIS ? manual_move_e_index : active_extruder);
+        planner.buffer_line_kinematic(current_position, current_position_Joint, MMM_TO_MMS(manual_feedrate_mm_m_joint[manual_move_joint]), manual_move_axis == E_AXIS ? manual_move_e_index : active_extruder);
+        SERIAL_ECHOLNPAIR("current_position",current_position);
+        SERIAL_ECHOLNPAIR("current_position_Joint",current_position_Joint);
         manual_move_axis = (int8_t)NO_AXIS;
-
+        manual_move_joint = (int8_t)NO_AXIS;
       #endif
     }
   }
@@ -3126,9 +3144,7 @@ void lcd_quick_feedback(const bool clear_buttons) {
   void _lcd_move_joint(const char* name, JointEnum axis) {
     if (use_click()) { return lcd_goto_previous_menu_no_defer(); }
     ENCODER_DIRECTION_NORMAL();
-    if (encoderPosition && !processing_manual_move) {
-
-      
+    if (encoderPosition && !processing_manual_move) {      
       // Start with no limits to movement
       float min = current_position[axis] - 1000,
             max = current_position[axis] + 1000;
@@ -3493,6 +3509,21 @@ void lcd_quick_feedback(const bool clear_buttons) {
 
     #endif
 
+    END_MENU();
+  }
+
+  void lcd_home_menu() {
+    START_MENU();
+    MENU_BACK(MSG_PREPARE); 
+
+    //joint
+    MENU_ITEM(gcode, MSG_HOME_J, PSTR("G28 J"));
+    MENU_ITEM(gcode, MSG_HOME_A, PSTR("G28 A"));
+    MENU_ITEM(gcode, MSG_HOME_B, PSTR("G28 B"));
+    MENU_ITEM(gcode, MSG_HOME_C, PSTR("G28 C"));
+    MENU_ITEM(gcode, MSG_HOME_D, PSTR("G28 D"));
+    MENU_ITEM(gcode, MSG_HOME_ALL, PSTR("G28"));
+          
     END_MENU();
   }
 
@@ -5322,7 +5353,7 @@ void lcd_update() {
 
     // Handle any queued Move Axis motion
     manage_manual_move();
-    manage_manual_move_joint();
+    // manage_manual_move_joint();
 
     // Update button states for LCD_CLICKED, etc.
     // After state changes the next button update

@@ -317,10 +317,10 @@ extern volatile bool wait_for_heatup;
   extern bool suspend_auto_report;
 #endif
 
-extern float current_position[XYZE], destination[XYZE];
+extern float   current_position[XYZE], destination[XYZE];
 extern int32_t current_position_Joint[Joint_All], destination_Joint[Joint_All];
-
-
+extern float   ZERO_position[XYZE], HOME_position[XYZE];
+extern int32_t ZERO_position_Joint[Joint_All], HOME_position_Joint[Joint_All];
 
 /**
  * Workspace offsets
