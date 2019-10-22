@@ -121,7 +121,7 @@ int main(int argc, char **argv)
   std::vector<int> use_onecore;
   use_onecore.reserve(1000);
   std::vector<int> save_use_onecore;
-  use_onecore.reserve(1000);
+  save_use_onecore.reserve(1000);
   while(ros::ok()){
     while(input_file){
       std::getline(input_file, line);
@@ -141,7 +141,7 @@ int main(int argc, char **argv)
               }
               size_t colon_pos_Y = line.find('Y');
               if(colon_pos_Y < 100){
-                end_effector_target_vol.data[1] = (stod(line.substr(colon_pos_Y+1))*1e-3)+0.40;
+                end_effector_target_vol.data[1] = (stod(line.substr(colon_pos_Y+1))*1e-3)+0.30;
               }
               size_t colon_pos_Z = line.find('Z');
               if(colon_pos_Z < 100){

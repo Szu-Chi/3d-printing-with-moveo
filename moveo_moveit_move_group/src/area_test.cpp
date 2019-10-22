@@ -2,6 +2,10 @@
 #include <moveit/move_group_interface/move_group_interface.h>
 #include <moveit/planning_scene_interface/planning_scene_interface.h>
 
+#include <moveit/robot_model_loader/robot_model_loader.h>
+#include <moveit/planning_scene/planning_scene.h>
+#include <moveit/kinematic_constraints/utils.h>
+
 #include <moveit_msgs/DisplayRobotState.h>
 #include <moveit_msgs/DisplayTrajectory.h>
 
@@ -49,7 +53,7 @@ ros::WallTime start_, end_;
 int main(int argc, char **argv)
 {
   start_ = ros::WallTime::now();
-  ros::init(argc, argv, "gcode_translation");
+  ros::init(argc, argv, "area_test");
   ros::NodeHandle node_handle("~");
   ros::AsyncSpinner spinner(1);
   spinner.start();
@@ -99,6 +103,16 @@ int main(int argc, char **argv)
   //-----------------------------
   //Getting Basic Information
   //-----------------------------
+  robot_model_loader::RobotModelLoader robot_model_loader("robot_description");
+  robot_model::RobotModelPtr kinematic_model = robot_model_loader.getModel();
+  planning_scene::PlanningScene planning_scene(kinematic_model);
+  collision_detection::CollisionRequest collision_request;
+  collision_detection::CollisionResult collision_result;
+  planning_scene.checkSelfCollision(collision_request, collision_result);
+  ROS_INFO_STREAM("Test 1: Current state is " << (collision_result.collision ? "in" : "not in") << " self collision");
+  robot_state::RobotState& current_state = planning_scene.getCurrentStateNonConst();
+  collision_request.group_name = "arm";
+
   moveit_visual_tools::MoveItVisualTools visual_tools("base_link");
   visual_tools.deleteAllMarkers();
   visual_tools.trigger();
@@ -130,12 +144,15 @@ int main(int argc, char **argv)
   while(ros::ok()){
     for(int x = 0;x <= 550;x++){
       end_effector_target_vol.data[0] = x * 0.001;
+      //end_effector_target_vol.data[0] = 0;
       for(int y = 0;y <= 550;y++){
         end_effector_target_vol.data[1] = y * 0.001;
+        //end_effector_target_vol.data[1] = 0;
         for(int z = -182;z <=605;z++){
           end_effector_target_vol.data[2] = z * 0.001;
           find_end_effector_target_vol.push_back(end_effector_target_vol);
         }
+        std::vector<KDL::JntArray> save_result(788);
         omp_set_num_threads(num_threads);
         #pragma omp parallel for
         for(int i = 0;i < 788;i++){
@@ -149,7 +166,9 @@ int main(int argc, char **argv)
             save_place[i] = 0;
           }
           else{
+            //ROS_INFO_STREAM("Num" << i);
             save_place[i] = 1;
+            save_result.at(i) = result;
             //save_use_onecore[i] = 0;
           }
         }
@@ -175,22 +194,50 @@ int main(int argc, char **argv)
         //use_onecore.clear();
         std::vector< geometry_msgs::Point > save_draw_point(788);
         save_draw_point.reserve(788);
-        bool save_check = 0;
         int times = 0;
         for(int l = 0;l < 788 ;l++){
           if(save_place[l] == 1){
-            output_file << find_end_effector_target_vol[l].data[0] << "," << find_end_effector_target_vol[l].data[1] << "," << find_end_effector_target_vol[l].data[2] << std::endl;
-            save_draw_point[times].x = find_end_effector_target_vol[l].data[0];
-            save_draw_point[times].y = find_end_effector_target_vol[l].data[1];
-            save_draw_point[times].z = find_end_effector_target_vol[l].data[2];
-            times++;
+            std::vector<double> joint_values(chain.getNrOfJoints());
+            for(int i = 0;i < chain.getNrOfJoints(); i++){
+              joint_values.at(i) = save_result.at(l).data(i);
+            }
+            const robot_model::JointModelGroup* joint_model_group = current_state.getJointModelGroup("arm");
+            current_state.setJointGroupPositions(joint_model_group, joint_values);
+            collision_request.contacts = true;
+            collision_request.max_contacts = 1000;
+            collision_result.clear();
+            planning_scene.checkSelfCollision(collision_request, collision_result);
+            if(collision_result.collision == 0){
+              output_file << find_end_effector_target_vol[l].data[0] << "," << find_end_effector_target_vol[l].data[1] << "," << find_end_effector_target_vol[l].data[2] << std::endl;
+              save_draw_point[times].x = find_end_effector_target_vol[l].data[0];
+              save_draw_point[times].y = find_end_effector_target_vol[l].data[1];
+              save_draw_point[times].z = find_end_effector_target_vol[l].data[2];
+              times++;
+            }
+            else{
+              collision_detection::CollisionResult::ContactMap::const_iterator it;
+              for (it = collision_result.contacts.begin(); it != collision_result.contacts.end(); ++it)
+              {
+                ROS_INFO("Contact between: %s and %s", it->first.first.c_str(), it->first.second.c_str());
+              }
+            }
+            joint_values.clear();
           }
         }
-        visual_tools.publishSpheres(save_draw_point, rvt::colors::GREEN, rvt::scales::MEDIUM);
-        visual_tools.trigger();
+        for(int m = 0;m < 788-times;m++){
+          save_draw_point.pop_back();
+        }
+        if(!save_draw_point.empty()){
+          if(save_draw_point.size() == 1){
+            save_draw_point.push_back(save_draw_point[0]);
+          }
+          visual_tools.publishSpheres(save_draw_point, rvt::colors::GREEN, rvt::scales::MEDIUM);
+          visual_tools.trigger();
+        }
         find_end_effector_target_vol.clear();
         save_place.clear();
         save_draw_point.clear();
+        save_result.clear();
       }
     }
     end_ = ros::WallTime::now();
