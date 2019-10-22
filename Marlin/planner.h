@@ -697,10 +697,10 @@ class Planner {
      *  extruder     - target extruder
      *  millimeters  - the length of the movement, if known
      */
-    FORCE_INLINE static bool buffer_line_kinematic(const float (&cart)[XYZE], const long (&jcart)[Joint_All], const float &fr_mm_s, const uint8_t extruder, const float millimeters = 0.0) {
+    FORCE_INLINE static bool buffer_line_kinematic(const float (&cart)[XYZE], const int32_t (&jcart)[Joint_All], const float &fr_mm_s, const uint8_t extruder, const float millimeters = 0.0) {
       #if PLANNER_LEVELING
-        float raw[XYZ] = { cart[X_AXIS], cart[Y_AXIS], cart[Z_AXIS] };
-        const long (&jraw)[Joint_All] = jcart;
+        float raw[XYZ] = { cart[X_AXIS], cart[Y_AXIS], cart[Z_AXIS]};
+        const int32_t (&jraw)[Joint_All] = jcart;
         apply_leveling(raw);
       #else
         const float (&raw)[XYZE] = cart;
@@ -733,7 +733,7 @@ class Planner {
      *  millimeters  - the length of the movement, if known
      */
 
-    FORCE_INLINE static bool buffer_line_kinematic_joint(const long (&jcart)[Joint_All], const float &fr_mm_s, const uint8_t extruder, const float millimeters = 0.0) {
+    FORCE_INLINE static bool buffer_line_kinematic_joint(const int32_t (&jcart)[Joint_All], const float &fr_mm_s, const uint8_t extruder, const float millimeters = 0.0) {
       /*#if PLANNER_LEVELING
         //float jraw[XYZ] = { jcart[X_AXIS], jcart[Y_AXIS], jcart[Z_AXIS] };
         const long (&jraw)[Joint_All] = jcart;
@@ -741,7 +741,7 @@ class Planner {
       #else
         const long (&jraw)[Joint_All] = jcart;
       #endif*/
-      const long (&jraw)[Joint_All] = jcart;
+      const int32_t (&jraw)[Joint_All] = jcart;
       #if IS_KINEMATIC
         inverse_kinematics(raw);
         return buffer_segment(
@@ -753,7 +753,7 @@ class Planner {
           , cart[E_CART], fr_mm_s, extruder, millimeters
         );
       #else
-        return buffer_segment_joint(0,0,0,jraw[Joint1_AXIS], jraw[Joint2_AXIS], jraw[Joint3_AXIS], jraw[Joint4_AXIS], jraw[Joint5_AXIS], extruder, fr_mm_s, extruder, millimeters);
+        return buffer_segment_joint(0,0,0,jraw[Joint1_AXIS], jraw[Joint2_AXIS], jraw[Joint3_AXIS], jraw[Joint4_AXIS], jraw[Joint5_AXIS], 0, fr_mm_s, extruder, millimeters);
       #endif
     }
 

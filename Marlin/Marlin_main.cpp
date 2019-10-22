@@ -393,7 +393,6 @@ float   ZERO_position[XYZE]={0, 0, 0.25, 0};
 int32_t HOME_position_Joint[Joint_All]={0, 0, 0, 0, 0};
 float   HOME_position[XYZE]={-45.484, -10, 0, 0};
 
-
 /**
  * Cartesian Destination
  *   The destination for a move, filled in by G-code movement commands,

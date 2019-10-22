@@ -4308,7 +4308,7 @@ bool Planner::buffer_segment_joint(const float &a, const float &b, const float &
     }
   }
 
-  //* <-- add a slash to enable
+  /* <-- add a slash to enable
     SERIAL_ECHOPAIR("  buffer_segment FR:", fr_mm_s);
     #if IS_KINEMATIC
       SERIAL_ECHOPAIR(" A:", a);
