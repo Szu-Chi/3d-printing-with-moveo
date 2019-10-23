@@ -109,9 +109,9 @@
   #define Z_CS_PIN         -1//40
 #endif
 
-#define E0_STEP_PIN        65//26
-#define E0_DIR_PIN         42//28
-#define E0_ENABLE_PIN      40//24
+#define E0_STEP_PIN        60//65//26
+#define E0_DIR_PIN         61//42//28
+#define E0_ENABLE_PIN      56//40//24
 #ifndef E0_CS_PIN
   #define E0_CS_PIN        58//42
 #endif
@@ -136,9 +136,9 @@
 #define Joint2_MIN_PIN     19//18
 #define Joint2_MAX_PIN     -1//19
 // Joint 3
-#define Joint3_STEP_PIN    60
-#define Joint3_DIR_PIN     61 
-#define Joint3_ENABLE_PIN  56
+#define Joint3_STEP_PIN    65//60
+#define Joint3_DIR_PIN     42//61 
+#define Joint3_ENABLE_PIN  40//56
 #define Joint3_MIN_PIN     14//14
 #define Joint3_MAX_PIN     -1//15
 // Joint 4
