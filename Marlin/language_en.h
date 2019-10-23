@@ -64,6 +64,9 @@
 #ifndef MSG_AUTOSTART
   #define MSG_AUTOSTART                       _UxGT("Autostart")
 #endif
+#ifndef MSG_Go_Zero
+  #define MSG_Go_Zero                         _UxGT("Go to Joint Zero")
+#endif
 #ifndef MSG_DISABLE_STEPPERS
   #define MSG_DISABLE_STEPPERS                _UxGT("Disable steppers")
 #endif

@@ -1207,6 +1207,21 @@ void lcd_quick_feedback(const bool clear_buttons) {
     }
   #endif
 
+  void Go_to_Joint_Zero()
+  {
+    current_position_Joint[Joint1_AXIS]=0;
+    current_position_Joint[Joint2_AXIS]=0;
+    current_position_Joint[Joint3_AXIS]=0;
+    current_position_Joint[Joint4_AXIS]=0;
+    current_position_Joint[Joint5_AXIS]=0;
+    
+    current_position[X_AXIS]=18.83;
+    current_position[Y_AXIS]=70.83;
+    current_position[Z_AXIS]=779.94;
+
+    planner.buffer_line_kinematic(current_position, current_position_Joint, MMM_TO_MMS(manual_feedrate_mm_m_joint[0]), 0);
+  }
+
   #if ENABLED(BABYSTEP_ZPROBE_GFX_OVERLAY) || ENABLED(MESH_EDIT_GFX_OVERLAY)
 
     void _lcd_zoffset_overlay_gfx(const float zvalue) {
@@ -2780,6 +2795,8 @@ void lcd_quick_feedback(const bool clear_buttons) {
     MENU_ITEM(gcode, MSG_ENABLE_STEPPERS, PSTR("M17"));
 
     MENU_ITEM(gcode, MSG_ENABLE_ColdExtrudes, PSTR("M302 P1"));
+
+    MENU_ITEM(function, MSG_Go_Zero, Go_to_Joint_Zero);
 
     //
     // Change filament

@@ -133,7 +133,7 @@
 #define Joint2_STEP_PIN    46
 #define Joint2_DIR_PIN     48
 #define Joint2_ENABLE_PIN  62
-#define Joint2_MIN_PIN     19//18
+#define Joint2_MIN_PIN     18//18
 #define Joint2_MAX_PIN     -1//19
 // Joint 3
 #define Joint3_STEP_PIN    60
