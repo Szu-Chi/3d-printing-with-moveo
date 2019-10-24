@@ -323,7 +323,8 @@ extern float   ZERO_position[XYZE], HOME_position[XYZE];
 extern int32_t ZERO_position_Joint[Joint_All], HOME_position_Joint[Joint_All];
 extern float   HOME_position_Z20[XYZE], HOME_position_Z10[XYZE], HOME_position_Z5[XYZE], HOME_position_Z0[XYZE], HOME_position_ZNeg10[XYZE];
 extern int32_t HOME_position_Z20_Joint[Joint_All], HOME_position_Z10_Joint[Joint_All], HOME_position_Z5_Joint[Joint_All], HOME_position_Z0_Joint[Joint_All], HOME_position_ZNeg10_Joint[Joint_All];
-extern float   HOME_position_Slopep[Joint_All];
+extern float   HOME_position_Slope[Joint_All];
+extern float   a[5], b[5], c[5];
 /**
  * Workspace offsets
  */
