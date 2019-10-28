@@ -393,6 +393,22 @@ float   ZERO_position[XYZE]={0, 0, 0.25, 0};
 int32_t HOME_position_Joint[Joint_All]={0, 0, 0, 0, 0};
 float   HOME_position[XYZE]={-45.484, -10, 0, 0};
 
+int32_t HOME_position_Z20_Joint[Joint_All]={-609, 3504, 16908, 0, -2917};
+float   HOME_position_Z20[XYZE]={0, 0, 20, 0};
+/*
+int32_t HOME_position_Z10_Joint[Joint_All]={-609, 3621, 16573, 0, -2947};
+float   HOME_position_Z10[XYZE]={0, 0, 10, 0};
+int32_t HOME_position_Z5_Joint[Joint_All]={-609, 3680, 16396, 0, -2960};
+float   HOME_position_Z5[XYZE]={0, 0, 5, 0};
+int32_t HOME_position_Z0_Joint[Joint_All]={-609, 3739, 16214, 0, -2972};
+float   HOME_position_Z0[XYZE]={0, 0, 0, 0};
+int32_t HOME_position_ZNeg10_Joint[Joint_All]={-609, 3857, 15830, 0, -2994};
+float   HOME_position_ZNeg10[XYZE]={0, 0, -10, 0};
+float   HOME_position_Slope[Joint_All]={0,	0.1175,	-0.347,	0,  -0.0275};
+//*/
+float   a[5]={0.0000000000, 0.000000375, -0.0000125000, 0.0000000000, 0.0000021250};
+float   b[5]={0.0000000000, -0.1182499975, 0.3720000088, 0.0000000000, 0.0232500006};
+float   c[5]={-609, 3739, 16214, 0, -2972};
 /**
  * Cartesian Destination
  *   The destination for a move, filled in by G-code movement commands,
@@ -1876,15 +1892,88 @@ inline void buffer_line_to_current_position() {
  * Move the planner to the position stored in the destination array, which is
  * used by G0/G1/G2/G3/G5 and many other functions to set a destination.
  */
+inline void Set_current_XYZE(const float (&Set_current_XYZ_point)[XYZE]){
+  current_position[X_AXIS]=Set_current_XYZ_point[X_AXIS];
+  current_position[Y_AXIS]=Set_current_XYZ_point[Y_AXIS];
+  current_position[Z_AXIS]=Set_current_XYZ_point[Z_AXIS];
+  current_position[E_AXIS]=Set_current_XYZ_point[E_AXIS];
+ 
+  DEBUG_POS("Set_current", current_position);   
+}
+
+inline void Set_current_Joint(const int32_t (&Set_current_Joint_point)[Joint_All]){
+  current_position_Joint[Joint1_AXIS]=Set_current_Joint_point[Joint1_AXIS];
+  current_position_Joint[Joint2_AXIS]=Set_current_Joint_point[Joint2_AXIS];
+  current_position_Joint[Joint3_AXIS]=Set_current_Joint_point[Joint3_AXIS];
+  current_position_Joint[Joint4_AXIS]=Set_current_Joint_point[Joint4_AXIS];
+  current_position_Joint[Joint5_AXIS]=Set_current_Joint_point[Joint5_AXIS];
+
+  DEBUG_POS_Joint("Set_current_Joint", current_position_Joint);   
+}
+
+inline void Set_current_Joint_Curve(const float point){
+  DEBUG_POS_Joint("(Before)Set_current_Joint_Curve", current_position_Joint); 
+  float point1=point*100;
+  current_position_Joint[Joint1_AXIS]=a[0]*point1*point1 + b[0]*point1 + c[0];
+  current_position_Joint[Joint2_AXIS]=a[1]*point1*point1 + b[1]*point1 + c[1];
+  current_position_Joint[Joint3_AXIS]=a[2]*point1*point1 + b[2]*point1 + c[2];
+  current_position_Joint[Joint4_AXIS]=a[3]*point1*point1 + b[3]*point1 + c[3];
+  current_position_Joint[Joint5_AXIS]=a[4]*point1*point1 + b[4]*point1 + c[4];
+
+  SERIAL_ECHOLNPAIR(" point:", point);
+
+  DEBUG_POS_Joint("(After)Set_current_Joint_Curve", current_position_Joint);   
+}
+
+inline void Set_current_Joint_Slope(const int32_t (&Set_current_Joint_data)[Joint_All], const float (&Set_current_Joint_slope)[Joint_All], const float point){
+  DEBUG_POS_Joint("(Before)Set_current_Joint_Slope", Set_current_Joint_data);  
+
+  current_position_Joint[Joint1_AXIS]=Set_current_Joint_data[Joint1_AXIS] + (int32_t)LROUND(Set_current_Joint_slope[Joint1_AXIS] * point);
+  current_position_Joint[Joint2_AXIS]=Set_current_Joint_data[Joint2_AXIS] + (int32_t)LROUND(Set_current_Joint_slope[Joint2_AXIS] * point);
+  current_position_Joint[Joint3_AXIS]=Set_current_Joint_data[Joint3_AXIS] + (int32_t)LROUND(Set_current_Joint_slope[Joint3_AXIS] * point);
+  current_position_Joint[Joint4_AXIS]=Set_current_Joint_data[Joint4_AXIS] + (int32_t)LROUND(Set_current_Joint_slope[Joint4_AXIS] * point);
+  current_position_Joint[Joint5_AXIS]=Set_current_Joint_data[Joint5_AXIS] + (int32_t)LROUND(Set_current_Joint_slope[Joint5_AXIS] * point);
+
+  SERIAL_ECHOPAIR("Slope J:", Set_current_Joint_slope[Joint1_AXIS]);
+  SERIAL_ECHOPAIR(" Slope A:", Set_current_Joint_slope[Joint2_AXIS]);
+  SERIAL_ECHOPAIR(" Slope B:", Set_current_Joint_slope[Joint3_AXIS]);
+  SERIAL_ECHOPAIR(" Slope C:", Set_current_Joint_slope[Joint4_AXIS]);
+  SERIAL_ECHOPAIR(" Slope D:", Set_current_Joint_slope[Joint5_AXIS]);
+
+  SERIAL_ECHOLNPAIR(" point:", point);
+
+  DEBUG_POS_Joint("(After)Set_current_Joint_Slope", current_position_Joint);   
+}
+
+inline float Delta_Z_01mm(const float data1, const float data2){
+  return (data1 - data2)* 100;
+}
+
 inline void buffer_line_to_destination_Constant(const float (&Set_Position)[XYZE], const int32_t (&Set_Position_Joint)[Joint_All], const int32_t &fr_mm_s) {
   #if ENABLED(HANGPRINTER)
     UNUSED(fr_mm_s);
   #else
+  SERIAL_ECHOLNPGM("<<< buffer_line_to_destination_Constant");
+
+  current_position[X_AXIS]=Set_Position[X_AXIS];
+  current_position[Y_AXIS]=Set_Position[Y_AXIS];
+  current_position[Z_AXIS]=Set_Position[Z_AXIS];
+  current_position[E_AXIS]=Set_Position[E_AXIS];
+  
+  current_position_Joint[Joint1_AXIS]=Set_Position_Joint[Joint1_AXIS];
+  current_position_Joint[Joint2_AXIS]=Set_Position_Joint[Joint2_AXIS];
+  current_position_Joint[Joint3_AXIS]=Set_Position_Joint[Joint3_AXIS];
+  current_position_Joint[Joint4_AXIS]=Set_Position_Joint[Joint4_AXIS];
+  current_position_Joint[Joint5_AXIS]=Set_Position_Joint[Joint5_AXIS];
+
   planner.buffer_line_joint(Set_Position[X_AXIS], Set_Position[Y_AXIS], Set_Position[Z_AXIS], 
                             Set_Position_Joint[Joint1_AXIS], Set_Position_Joint[Joint2_AXIS], Set_Position_Joint[Joint3_AXIS], 
                             Set_Position_Joint[Joint4_AXIS], Set_Position_Joint[Joint5_AXIS],
                             Set_Position[E_CART], fr_mm_s, active_extruder);
   //SERIAL_ECHOLNPAIR("feedrate_mm_s:",fr_mm_s);
+  sync_plan_position();
+
+  SERIAL_ECHOLNPGM(">>> buffer_line_to_destination_Constant");
   #endif
 }
 
@@ -2049,11 +2138,62 @@ void do_blocking_move_to(const float rx, const float ry, const float rz, const f
     if (DEBUGGING(LEVELING)) SERIAL_ECHOLNPGM("<<< do_blocking_move_to");
   #endif
 }
+
+void do_blocking_move_to_Joint(const float rx, const float ry, const float rz, const float &fr_mm_s/*=0.0*/) {
+  const float old_feedrate_mm_s = feedrate_mm_s;
+
+  #if ENABLED(DEBUG_LEVELING_FEATURE)
+    if (DEBUGGING(LEVELING)) print_xyz(PSTR(">>> do_blocking_move_to_Joint"), NULL, LOGICAL_X_POSITION(rx), LOGICAL_Y_POSITION(ry), LOGICAL_Z_POSITION(rz));
+  #endif
+
+  const float z_feedrate = fr_mm_s ? fr_mm_s : homing_feedrate(Z_AXIS);
+
+
+
+  // If Z needs to raise, do it before moving XY
+  if (current_position[Z_AXIS] < rz) {
+    feedrate_mm_s = z_feedrate;
+
+    Set_current_Joint_Curve(rz);
+    // Set_current_Joint_Slope(current_position_Joint,HOME_position_Slope,Delta_Z_01mm(current_position[Z_AXIS],rz));
+    // Set_current_Joint_Slope(current_position_Joint,HOME_position_Slope,100);
+    SERIAL_ECHOLNPGM("//To low//");
+    current_position[Z_AXIS] = rz;   
+
+    //Set_current_Joint(HOME_position_Z10_Joint);
+
+    buffer_line_to_current_position();    
+  }
+  feedrate_mm_s = fr_mm_s ? fr_mm_s : XY_PROBE_FEEDRATE_MM_S;
+  current_position[X_AXIS] = rx;
+  current_position[Y_AXIS] = ry;
+  buffer_line_to_current_position();
+  // If Z needs to lower, do it after moving XY
+  if (current_position[Z_AXIS] > rz) {
+    feedrate_mm_s = z_feedrate;
+
+    Set_current_Joint_Curve(rz);
+    // Set_current_Joint_Slope(current_position_Joint,HOME_position_Slope,Delta_Z_01mm(current_position[Z_AXIS],rz));
+    // Set_current_Joint_Slope(current_position_Joint,HOME_position_Slope,100);
+    SERIAL_ECHOLNPGM("//To High//");
+    current_position[Z_AXIS] = rz;
+    buffer_line_to_current_position();
+  }
+
+  planner.synchronize();
+
+  feedrate_mm_s = old_feedrate_mm_s;
+
+  #if ENABLED(DEBUG_LEVELING_FEATURE)
+    if (DEBUGGING(LEVELING)) SERIAL_ECHOLNPGM("<<< do_blocking_move_to_Joint");
+  #endif
+}
 void do_blocking_move_to_x(const float &rx, const float &fr_mm_s/*=0.0*/) {
   do_blocking_move_to(rx, current_position[Y_AXIS], current_position[Z_AXIS], fr_mm_s);
 }
 void do_blocking_move_to_z(const float &rz, const float &fr_mm_s/*=0.0*/) {
-  do_blocking_move_to(current_position[X_AXIS], current_position[Y_AXIS], rz, fr_mm_s);
+  // do_blocking_move_to(current_position[X_AXIS], current_position[Y_AXIS], rz, fr_mm_s);
+  do_blocking_move_to_Joint(current_position[X_AXIS], current_position[Y_AXIS], rz, fr_mm_s);
 }
 void do_blocking_move_to_xy(const float &rx, const float &ry, const float &fr_mm_s/*=0.0*/) {
   do_blocking_move_to(rx, ry, current_position[Z_AXIS], fr_mm_s);
@@ -2645,6 +2785,7 @@ void clean_up_after_endstop_or_probe_move() {
     NOMORE(z_dest, Z_MAX_POS);
 
     if (z_dest > current_position[Z_AXIS])
+      //Set_current_Joint_Slope(current_position_Joint, HOME_position_Slope, LROUND((z_dest-current_position[Z_AXIS])*100));
       do_blocking_move_to_z(z_dest);
   }
 
@@ -2971,7 +3112,8 @@ void clean_up_after_endstop_or_probe_move() {
     const float old_feedrate_mm_s = feedrate_mm_s;
     feedrate_mm_s = XY_PROBE_FEEDRATE_MM_S;
 
-    // Move the probe to the starting XYZ
+    // Move the probe to the starting XYZ and Joint
+    //Set_current_Joint(HOME_position_Z20_Joint);
     do_blocking_move_to(nx, ny, nz);
 
     float measured_z = NAN;
@@ -5078,7 +5220,6 @@ inline void gcode_G4() {
  *
  */
 inline void gcode_G28(const bool always_home_all) {
-
   #if ENABLED(DEBUG_LEVELING_FEATURE)
     if (DEBUGGING(LEVELING)) {
       SERIAL_ECHOLNPGM(">>> G28");
@@ -5108,8 +5249,10 @@ inline void gcode_G28(const bool always_home_all) {
     #endif
     return;
   }
-
   // Wait for planner moves to finish!
+  // Set_current_Joint(HOME_position_Z20_Joint);
+  // Set_current_Joint_Slope(current_position_Joint,HOME_position_Slope,100);
+
   planner.synchronize();
 
   // Cancel the active G29 session
@@ -5304,14 +5447,6 @@ inline void gcode_G28(const bool always_home_all) {
     if(home_all || homeC)homeJoint(Joint4_AXIS);
     if(home_all || homeD)homeJoint(Joint5_AXIS);
 
-    if(axis_homed==31){
-      //buffer_line_to_destination_Constant(HOME_position, HOME_position_Joint, homing_feedrate_Joint(0));
-      /*
-      delay(2000);
-      buffer_line_to_destination_Constant(ZERO_position, ZERO_position_Joint, homing_feedrate_Joint(0)));
-      //*/
-    }
-
     SYNC_PLAN_POSITION_KINEMATIC();
 
   #endif // !DELTA (gcode_G28)
@@ -5329,6 +5464,18 @@ inline void gcode_G28(const bool always_home_all) {
   /*
   report_current_position();
   //*/
+
+  // if(axis_homed==31){
+  if(Joint_homed==1){
+    //buffer_line_to_destination_Constant(HOME_position, HOME_position_Joint, homing_feedrate_Joint(0));
+    buffer_line_to_destination_Constant(HOME_position_Z20, HOME_position_Z20_Joint, homing_feedrate_Joint(0));
+    /*
+    delay(2000);
+    buffer_line_to_destination_Constant(ZERO_position, ZERO_position_Joint, homing_feedrate_Joint(0)));
+    //*/
+  }
+ 
+
   clean_up_after_endstop_or_probe_move();
 
   // Restore the active tool after homing
@@ -5339,7 +5486,7 @@ inline void gcode_G28(const bool always_home_all) {
       #define NO_FETCH true
     #endif
     tool_change(old_tool_index, 0, NO_FETCH);
-  #endif
+  #endif  
 
   lcd_refresh();
 
@@ -6528,10 +6675,24 @@ void home_all_axes() { gcode_G28(true); }
    *   Y   Probe Y position (default current Y)
    *   E   Engage the probe for each probe (default 1)
    */
-  inline void gcode_G30() {
+  inline void gcode_G30() {  
     const float xpos = parser.linearval('X', current_position[X_AXIS] + X_PROBE_OFFSET_FROM_EXTRUDER),
                 ypos = parser.linearval('Y', current_position[Y_AXIS] + Y_PROBE_OFFSET_FROM_EXTRUDER);
+    /*
+    Set_current_Joint(HOME_position_Z20_Joint);
+    Set_current_XYZE(HOME_position_Z20);
 
+    Set_current_Joint_Curve(10);
+    Set_current_Joint_Curve(0);
+    Set_current_Joint_Curve(-10);
+    Set_current_Joint_Curve(-20);
+     
+    Set_current_Joint_Slope(HOME_position_Z20_Joint, HOME_position_Slope, Delta_Z_01mm(current_position[Z_AXIS],10.0));
+    Set_current_Joint_Slope(HOME_position_Z20_Joint, HOME_position_Slope, Delta_Z_01mm(current_position[Z_AXIS],0.0));
+    Set_current_Joint_Slope(HOME_position_Z20_Joint, HOME_position_Slope, Delta_Z_01mm(current_position[Z_AXIS],-10.0));
+    Set_current_Joint_Slope(HOME_position_Z20_Joint, HOME_position_Slope, Delta_Z_01mm(current_position[Z_AXIS],-20.0));
+    //*/
+    
     if (!position_is_reachable_by_probe(xpos, ypos)) return;
 
     // Disable leveling so the planner won't mess with us
