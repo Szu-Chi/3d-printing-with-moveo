@@ -129,10 +129,10 @@ int main(int argc, char **argv)
   if(!output_file.is_open())ROS_ERROR_STREAM("Can't open " <<gcode_out);
 
   std::vector<KDL::Vector> find_end_effector_target_vol;
-  find_end_effector_target_vol.reserve(788);
+  find_end_effector_target_vol.reserve(901);
 
   std::vector<int> save_place;
-  save_place.reserve(788);
+  save_place.reserve(901);
 
   //std::vector<int> use_onecore;
   //use_onecore.reserve(620);
@@ -142,20 +142,20 @@ int main(int argc, char **argv)
 
   int second_execution = 0;
   while(ros::ok()){
-    for(int x = 0;x <= 550;x++){
-      end_effector_target_vol.data[0] = x * 0.001;
-      //end_effector_target_vol.data[0] = 0;
+    //for(int x = 0;x <= 550;x++){
+      //end_effector_target_vol.data[0] = x * 0.001;
+      end_effector_target_vol.data[0] = 0;
       for(int y = 0;y <= 550;y++){
         end_effector_target_vol.data[1] = y * 0.001;
         //end_effector_target_vol.data[1] = 0;
-        for(int z = -182;z <=605;z++){
+        for(int z = -300;z <=600;z++){
           end_effector_target_vol.data[2] = z * 0.001;
           find_end_effector_target_vol.push_back(end_effector_target_vol);
         }
-        std::vector<KDL::JntArray> save_result(788);
+        std::vector<KDL::JntArray> save_result(901);
         omp_set_num_threads(num_threads);
         #pragma omp parallel for
-        for(int i = 0;i < 788;i++){
+        for(int i = 0;i < 901;i++){
           int rc = -1;
           int thread_num = omp_get_thread_num();
           KDL::JntArray result;
@@ -192,10 +192,10 @@ int main(int argc, char **argv)
         //  }
         //}
         //use_onecore.clear();
-        std::vector< geometry_msgs::Point > save_draw_point(788);
-        save_draw_point.reserve(788);
+        std::vector< geometry_msgs::Point > save_draw_point(901);
+        save_draw_point.reserve(901);
         int times = 0;
-        for(int l = 0;l < 788 ;l++){
+        for(int l = 0;l < 901 ;l++){
           if(save_place[l] == 1){
             std::vector<double> joint_values(chain.getNrOfJoints());
             for(int i = 0;i < chain.getNrOfJoints(); i++){
@@ -224,7 +224,7 @@ int main(int argc, char **argv)
             joint_values.clear();
           }
         }
-        for(int m = 0;m < 788-times;m++){
+        for(int m = 0;m < 901-times;m++){
           save_draw_point.pop_back();
         }
         if(!save_draw_point.empty()){
@@ -239,7 +239,7 @@ int main(int argc, char **argv)
         save_draw_point.clear();
         save_result.clear();
       }
-    }
+    //}
     end_ = ros::WallTime::now();
     double execution_time = (end_ - start_).toNSec() * 1e-9;
     ROS_INFO_STREAM("Exectution time (ms): " << execution_time);
