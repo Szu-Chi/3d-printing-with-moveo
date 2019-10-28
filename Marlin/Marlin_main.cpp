@@ -395,6 +395,7 @@ float   HOME_position[XYZE]={-45.484, -10, 0, 0};
 
 int32_t HOME_position_Z20_Joint[Joint_All]={-609, 3504, 16908, 0, -2917};
 float   HOME_position_Z20[XYZE]={0, 0, 20, 0};
+/*
 int32_t HOME_position_Z10_Joint[Joint_All]={-609, 3621, 16573, 0, -2947};
 float   HOME_position_Z10[XYZE]={0, 0, 10, 0};
 int32_t HOME_position_Z5_Joint[Joint_All]={-609, 3680, 16396, 0, -2960};
@@ -404,6 +405,7 @@ float   HOME_position_Z0[XYZE]={0, 0, 0, 0};
 int32_t HOME_position_ZNeg10_Joint[Joint_All]={-609, 3857, 15830, 0, -2994};
 float   HOME_position_ZNeg10[XYZE]={0, 0, -10, 0};
 float   HOME_position_Slope[Joint_All]={0,	0.1175,	-0.347,	0,  -0.0275};
+//*/
 float   a[5]={0.0000000000, 0.000000375, -0.0000125000, 0.0000000000, 0.0000021250};
 float   b[5]={0.0000000000, -0.1182499975, 0.3720000088, 0.0000000000, 0.0232500006};
 float   c[5]={-609, 3739, 16214, 0, -2972};
