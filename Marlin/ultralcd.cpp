@@ -862,11 +862,6 @@ void lcd_quick_feedback(const bool clear_buttons) {
       wait_for_heatup = wait_for_user = false;
       card.abort_sd_printing = true;
       lcd_setstatusPGM(PSTR(MSG_PRINT_ABORTED), -1);
-      for(int i=0;i<5;i++){
-        current_position_Joint[i] = 0;
-      }
-      planner.buffer_line_kinematic_joint(current_position_Joint, MMM_TO_MMS(manual_feedrate_mm_m_joint[0]), 
-                                          manual_move_axis == E_AXIS ? manual_move_e_index : active_extruder);
       lcd_return_to_status();
     }
 
