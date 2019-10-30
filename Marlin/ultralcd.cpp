@@ -859,15 +859,8 @@ void lcd_quick_feedback(const bool clear_buttons) {
     }
 
     void lcd_sdcard_stop() {
-      //wait_for_heatup = wait_for_user = false;
-      // enqueue_and_echo_commands_P(PSTR("M109 S30"));
-
-      // planner.buffer_line_joint(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], 0, 0, 0, 0, 0, current_position[E_CART], 0, active_extruder);
-
-      // wait_for_user = true;
-      // wait_for_heatup = true;
+      wait_for_heatup = wait_for_user = false;
       card.abort_sd_printing = true;
-
       lcd_setstatusPGM(PSTR(MSG_PRINT_ABORTED), -1);
       lcd_return_to_status();
     }
@@ -3002,7 +2995,7 @@ void lcd_quick_feedback(const bool clear_buttons) {
 
     if (processing_manual_move) return;
 
-    if ((manual_move_axis != (int8_t)NO_AXIS || manual_move_joint != (int8_t)NO_AXIS)&& ELAPSED(millis(), manual_move_start_time) && !planner.is_full()) {
+    if ((manual_move_axis != (int8_t)NO_AXIS || (manual_move_joint != (int8_t)NO_AXIS)) && ELAPSED(millis(), manual_move_start_time) && !planner.is_full()) {
 
       #if IS_KINEMATIC
 
@@ -3036,12 +3029,16 @@ void lcd_quick_feedback(const bool clear_buttons) {
         #endif
 
       #else
+        static float old_E0_position = 0;
         //planner.buffer_line_kinematic(current_position, current_position_Joint, MMM_TO_MMS(manual_feedrate_mm_m[manual_move_axis]), manual_move_axis == E_AXIS ? manual_move_e_index : active_extruder);
-        planner.buffer_line_kinematic(current_position, current_position_Joint, MMM_TO_MMS(manual_feedrate_mm_m_joint[manual_move_joint]), manual_move_axis == E_AXIS ? manual_move_e_index : active_extruder);
+        planner.buffer_line_kinematic(current_position, current_position_Joint, 
+                                      (current_position[E_AXIS] != old_E0_position) ? MMM_TO_MMS(manual_feedrate_mm_m[E_AXIS]):MMM_TO_MMS(manual_feedrate_mm_m_joint[manual_move_joint])
+                                      , manual_move_axis == E_AXIS ? manual_move_e_index : active_extruder);
         SERIAL_ECHOLNPAIR("current_position",current_position);
         SERIAL_ECHOLNPAIR("current_position_Joint",current_position_Joint);
+        old_E0_position = current_position[E_AXIS];
         manual_move_axis = (int8_t)NO_AXIS;
-        manual_move_joint = (int8_t)NO_AXIS;
+        //manual_move_joint = (int8_t)NO_AXIS;
       #endif
     }
   }
@@ -5369,9 +5366,8 @@ void lcd_update() {
     static millis_t return_to_status_ms = 0;
 
     // Handle any queued Move Axis motion
+    //manage_manual_move_joint();
     manage_manual_move();
-    // manage_manual_move_joint();
-
     // Update button states for LCD_CLICKED, etc.
     // After state changes the next button update
     // may be delayed 300-500ms.

@@ -16626,7 +16626,7 @@ void loop() {
         #endif
       );
       clear_command_queue();
-      quickstop_stepper();
+      //quickstop_stepper();
       print_job_timer.stop();
       thermalManager.disable_all_heaters();
       #if FAN_COUNT > 0
@@ -16636,6 +16636,7 @@ void loop() {
       #if ENABLED(POWER_LOSS_RECOVERY)
         card.removeJobRecoveryFile();
       #endif
+      buffer_line_to_destination_Constant(HOME_position, HOME_position_Joint, homing_feedrate_Joint(0));
     }
 
   #endif // SDSUPPORT
