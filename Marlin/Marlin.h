@@ -325,7 +325,7 @@ extern float   HOME_position_Z20[XYZE], HOME_position_Z10[XYZE], HOME_position_Z
 extern int32_t HOME_position_Z20_Joint[Joint_All], HOME_position_Z10_Joint[Joint_All], HOME_position_Z5_Joint[Joint_All], HOME_position_Z0_Joint[Joint_All], HOME_position_ZNeg10_Joint[Joint_All];
 extern float   HOME_position_Slope[Joint_All];
 extern float   a[5], b[5], c[5];
-extern const float PROGMEM a_m[25][5], b_m[25][5], c_m[25][5];
+extern float   a_m[25][5], b_m[25][5], c_m[25][5];
 /**
  * Workspace offsets
  */

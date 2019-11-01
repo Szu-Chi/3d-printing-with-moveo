@@ -177,10 +177,7 @@
 //#define SWITCHING_EXTRUDER
 #if ENABLED(SWITCHING_EXTRUDER)
 #define SWITCHING_EXTRUDER_SERVO_NR 0
-#define SWITCHING_EXTRUDER_SERVO_ANGLES \
-  {                                     \
-    0, 90                               \
-  } // Angles for E0, E1[, E2, E3]
+#define SWITCHING_EXTRUDER_SERVO_ANGLES {0, 90} // Angles for E0, E1[, E2, E3]
 #if EXTRUDERS > 3
 #define SWITCHING_EXTRUDER_E23_SERVO_NR 1
 #endif
@@ -973,6 +970,7 @@
 #define B_MIN_POS_step -24700
 #define C_MIN_POS_step -6400
 #define D_MIN_POS_step -8700
+
 #define J_MAX_POS_step 24800
 #define A_MAX_POS_step 5650
 #define B_MAX_POS_step 24000
@@ -983,7 +981,6 @@
 #define Joint1_MIN_POS -24800
 #define Joint2_MIN_POS -5500
 #define Joint3_MIN_POS -24700
-
 #define Joint4_MIN_POS -6400
 #define Joint5_MIN_POS -8700
 

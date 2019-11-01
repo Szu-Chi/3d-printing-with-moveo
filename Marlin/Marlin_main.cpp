@@ -439,85 +439,85 @@ float   a[5]={0.0000000000, 0.000000375, -0.0000125000, 0.0000000000, 0.00000212
 float   b[5]={0.0000000000, -0.1182499975, 0.3720000088, 0.0000000000, 0.0232500006};
 float   c[5]={-609, 3739, 16214, 0, -2972};
 
-const float PROGMEM  a_m[25][5] = {{0.0000001250, 0.0000002500, -0.0000111250, 0.0000000000, -0.0000042500},
-                    {0.0000000000, 0.0000002500, -0.0000112500, 0.0000000000, -0.0000042500},
-                    {0.0000000000, 0.0000002500, -0.0000112500, 0.0000000000, -0.0000043750},
-                    {0.0000001250, -0.0000005000, -0.0000115000, 0.0000000000, 0.0000060000},
-                    {0.0000000000, -0.0000003750, -0.0000112500, 0.0000000000, 0.0000053750},
-                    {0.0000000000, 0.0000002500, -0.0000111250, 0.0000000000, 0.0000043750},
-                    {0.0000000000, 0.0000001250, -0.0000111250, 0.0000000000, 0.0000046250},
-                    {0.0000000000, -0.0000001250, -0.0000111250, 0.0000000000, 0.0000050000},
-                    {-0.0000001250, -0.0000002500, -0.0000113750, 0.0000000000, 0.0000048750},
-                    {0.0000000000, -0.0000001250, -0.0000112500, 0.0000000000, 0.0000048750},
-                    {-0.0000001250, 0.0000003750, -0.0000111250, 0.0000000000, 0.0000040000},
-                    {0.0000000000, 0.0000005000, -0.0000111250, 0.0000000000, 0.0000040000},
-                    {0.0000000000, 0.0000003750, -0.0000112500, 0.0000000000, 0.0000040000},
-                    {0.0000000000, 0.0000005000, -0.0000113750, 0.0000000000, 0.0000037500},
-                    {0.0000000000, 0.0000006250, -0.0000116250, 0.0000000000, 0.0000036250},
-                    {0.0000000000, 0.0000011250, -0.0000126250, 0.0000000000, 0.0000036250},
-                    {0.0000000000, 0.0000008750, -0.0000121250, 0.0000000000, 0.0000036250},
-                    {0.0000000000, 0.0000008750, -0.0000120000, 0.0000000000, 0.0000037500},
-                    {0.0000000000, 0.0000008750, -0.0000118750, 0.0000000000, 0.0000036250},
-                    {0.0000000000, 0.0000008750, -0.0000118750, 0.0000000000, 0.0000036250},
-                    {0.0000000000, 0.0000013750, -0.0000147500, 0.0000000000, 0.0000037500},
-                    {0.0000000000, 0.0000013750, -0.0000142500, 0.0000000000, 0.0000038750},
-                    {0.0000000000, 0.0000013750, -0.0000143750, 0.0000000000, 0.0000038750},
-                    {0.0000000000, 0.0000013750, -0.0000153750, 0.0000000000, 0.0000038750},
-                    {0.0000000000, 0.0000020000, -0.0000175000, 0.0000000000, 0.0000045000}
+float a_m[25][5] = {{0.0000001250, 0.0000002500, -0.0000111250, 0.0000000000, -0.0000042500},
+                                  {0.0000000000, 0.0000002500, -0.0000112500, 0.0000000000, -0.0000042500},
+                                  {0.0000000000, 0.0000002500, -0.0000112500, 0.0000000000, -0.0000043750},
+                                  {0.0000001250, -0.0000005000, -0.0000115000, 0.0000000000, 0.0000060000},
+                                  {0.0000000000, -0.0000003750, -0.0000112500, 0.0000000000, 0.0000053750},
+                                  {0.0000000000, 0.0000002500, -0.0000111250, 0.0000000000, 0.0000043750},
+                                  {0.0000000000, 0.0000001250, -0.0000111250, 0.0000000000, 0.0000046250},
+                                  {0.0000000000, -0.0000001250, -0.0000111250, 0.0000000000, 0.0000050000},
+                                  {-0.0000001250, -0.0000002500, -0.0000113750, 0.0000000000, 0.0000048750},
+                                  {0.0000000000, -0.0000001250, -0.0000112500, 0.0000000000, 0.0000048750},
+                                  {-0.0000001250, 0.0000003750, -0.0000111250, 0.0000000000, 0.0000040000},
+                                  {0.0000000000, 0.0000005000, -0.0000111250, 0.0000000000, 0.0000040000},
+                                  {0.0000000000, 0.0000003750, -0.0000112500, 0.0000000000, 0.0000040000},
+                                  {0.0000000000, 0.0000005000, -0.0000113750, 0.0000000000, 0.0000037500},
+                                  {0.0000000000, 0.0000006250, -0.0000116250, 0.0000000000, 0.0000036250},
+                                  {0.0000000000, 0.0000011250, -0.0000126250, 0.0000000000, 0.0000036250},
+                                  {0.0000000000, 0.0000008750, -0.0000121250, 0.0000000000, 0.0000036250},
+                                  {0.0000000000, 0.0000008750, -0.0000120000, 0.0000000000, 0.0000037500},
+                                  {0.0000000000, 0.0000008750, -0.0000118750, 0.0000000000, 0.0000036250},
+                                  {0.0000000000, 0.0000008750, -0.0000118750, 0.0000000000, 0.0000036250},
+                                  {0.0000000000, 0.0000013750, -0.0000147500, 0.0000000000, 0.0000037500},
+                                  {0.0000000000, 0.0000013750, -0.0000142500, 0.0000000000, 0.0000038750},
+                                  {0.0000000000, 0.0000013750, -0.0000143750, 0.0000000000, 0.0000038750},
+                                  {0.0000000000, 0.0000013750, -0.0000153750, 0.0000000000, 0.0000038750},
+                                  {0.0000000000, 0.0000020000, -0.0000175000, 0.0000000000, 0.0000045000}
 };
 
-const float PROGMEM b_m[25][5]  = {{0.0002500000, -0.1185000017, 0.2242500037, 0.0000000000, -0.1089999974},
-                    {0.0000000000, -0.1199999973, 0.2255000025, 0.0000000000, -0.1110000014},
-                    {0.0000000000, -0.1190000027, 0.2245000005, 0.0000000000, -0.1097500026},
-                    {-0.0002500000, -0.1424999982, 0.2529999912, 0.0000000000, 0.1379999965},
-                    {0.0000000000, -0.1347499937, 0.2415000051, 0.0000000000, 0.1292500049},
-                    {0.0000000000, -0.1209999993, 0.2262499928, 0.0000000000, 0.1122500002},
-                    {0.0000000000, -0.1262499988, 0.2312500030, 0.0000000000, 0.1192499995},
-                    {0.0000000000, -0.1297499985, 0.2352499962, 0.0000000000, 0.1234999970},
-                    {0.0002500000, -0.1305000037, 0.2362499982, 0.0000000000, 0.1247500032},
-                    {0.0000000000, -0.1292500049, 0.2345000058, 0.0000000000, 0.1227499992},
-                    {-0.0002500000, -0.1152499989, 0.2222499996, 0.0000000000, 0.1045000032},
-                    {0.0000000000, -0.1164999977, 0.2227499932, 0.0000000000, 0.1059999987},
-                    {0.0000000000, -0.1157499999, 0.2224999964, 0.0000000000, 0.1049999967},
-                    {0.0000000000, -0.1134999990, 0.2217500061, 0.0000000000, 0.1014999971},
-                    {0.0000000000, -0.1102500036, 0.2212499976, 0.0000000000, 0.0957499966},
-                    {0.0000000000, -0.1027500033, 0.2322500050, 0.0000000000, 0.0787499994},
-                    {0.0000000000, -0.1047499999, 0.2267500013, 0.0000000000, 0.0842500031},
-                    {0.0000000000, -0.1057500020, 0.2245000005, 0.0000000000, 0.0874999985},
-                    {0.0000000000, -0.1062500030, 0.2237499952, 0.0000000000, 0.0882499963},
-                    {0.0000000000, -0.1057500020, 0.2247499973, 0.0000000000, 0.0867500007},
-                    {0.0000000000, -0.1012500003, 0.2540000081, 0.0000000000, 0.0665000007},
-                    {0.0000000000, -0.1012500003, 0.2504999936, 0.0000000000, 0.0682500005},
-                    {0.0000000000, -0.1012500003, 0.2527500093, 0.0000000000, 0.0672499985},
-                    {0.0000000000, -0.1012500003, 0.2617500126, 0.0000000000, 0.0632499978},
-                    {0.0000000000, -0.1019999981, 0.2829999924, 0.0000000000, 0.0560000017}
+float b_m[25][5]  = {{0.0002500000, -0.1185000017, 0.2242500037, 0.0000000000, -0.1089999974},
+                                   {0.0000000000, -0.1199999973, 0.2255000025, 0.0000000000, -0.1110000014},
+                                   {0.0000000000, -0.1190000027, 0.2245000005, 0.0000000000, -0.1097500026},
+                                   {-0.0002500000, -0.1424999982, 0.2529999912, 0.0000000000, 0.1379999965},
+                                   {0.0000000000, -0.1347499937, 0.2415000051, 0.0000000000, 0.1292500049},
+                                   {0.0000000000, -0.1209999993, 0.2262499928, 0.0000000000, 0.1122500002},
+                                   {0.0000000000, -0.1262499988, 0.2312500030, 0.0000000000, 0.1192499995},
+                                   {0.0000000000, -0.1297499985, 0.2352499962, 0.0000000000, 0.1234999970},
+                                   {0.0002500000, -0.1305000037, 0.2362499982, 0.0000000000, 0.1247500032},
+                                   {0.0000000000, -0.1292500049, 0.2345000058, 0.0000000000, 0.1227499992},
+                                   {-0.0002500000, -0.1152499989, 0.2222499996, 0.0000000000, 0.1045000032},
+                                   {0.0000000000, -0.1164999977, 0.2227499932, 0.0000000000, 0.1059999987},
+                                   {0.0000000000, -0.1157499999, 0.2224999964, 0.0000000000, 0.1049999967},
+                                   {0.0000000000, -0.1134999990, 0.2217500061, 0.0000000000, 0.1014999971},
+                                   {0.0000000000, -0.1102500036, 0.2212499976, 0.0000000000, 0.0957499966},
+                                   {0.0000000000, -0.1027500033, 0.2322500050, 0.0000000000, 0.0787499994},
+                                   {0.0000000000, -0.1047499999, 0.2267500013, 0.0000000000, 0.0842500031},
+                                   {0.0000000000, -0.1057500020, 0.2245000005, 0.0000000000, 0.0874999985},
+                                   {0.0000000000, -0.1062500030, 0.2237499952, 0.0000000000, 0.0882499963},
+                                   {0.0000000000, -0.1057500020, 0.2247499973, 0.0000000000, 0.0867500007},
+                                   {0.0000000000, -0.1012500003, 0.2540000081, 0.0000000000, 0.0665000007},
+                                   {0.0000000000, -0.1012500003, 0.2504999936, 0.0000000000, 0.0682500005},
+                                   {0.0000000000, -0.1012500003, 0.2527500093, 0.0000000000, 0.0672499985},
+                                   {0.0000000000, -0.1012500003, 0.2617500126, 0.0000000000, 0.0632499978},
+                                   {0.0000000000, -0.1019999981, 0.2829999924, 0.0000000000, 0.0560000017}
 };
 
-const float PROGMEM c_m[25][5] = {{2240.0000000000, 2879.0000000000, 19637.0000000000, 3199.0000000000, -1891.0000000000},
-                    {256.0000000000, 2855.0000000000, 19973.0000000000, 3199.0000000000, -1790.0000000000},
-                    {-1760.0000000000, 2870.0000000000, 19759.0000000000, 3199.0000000000, -1854.0000000000},
-                    {-4302.0000000000, 2678.0000000000, 23496.0000000000, 0.0000000000, 267.0000000000},
-                    {-5935.0000000000, 2714.0000000000, 22451.0000000000, 0.0000000000, 647.0000000000},
-                    {-5139.0000000000, 2844.0000000000, 20132.0000000000, 0.0000000000, 1402.0000000000},
-                    {-3691.0000000000, 2781.0000000000, 21123.0000000000, 0.0000000000, 1092.0000000000},
-                    {-2096.0000000000, 2749.0000000000, 21707.0000000000, 0.0000000000, 901.0000000000},
-                    {-416.0000000000, 2741.0000000000, 21872.0000000000, 0.0000000000, 846.0000000000},
-                    {1258.0000000000, 2754.0000000000, 21613.0000000000, 0.0000000000, 932.0000000000},
-                    {1032.0000000000, 2933.0000000000, 18916.0000000000, 0.0000000000, 1764.0000000000},
-                    {-408.0000000000, 2913.0000000000, 19166.0000000000, 0.0000000000, 1691.0000000000},
-                    {-1851.0000000000, 2926.0000000000, 19007.0000000000, 0.0000000000, 1737.0000000000},
-                    {-3240.0000000000, 2970.0000000000, 18440.0000000000, 0.0000000000, 1901.0000000000},
-                    {-4531.0000000000, 3051.0000000000, 17463.0000000000, 0.0000000000, 2174.0000000000},
-                    {-4055.0000000000, 3343.0000000000, 14301.0000000000, 0.0000000000, 3006.0000000000},
-                    {-2895.0000000000, 3244.0000000000, 15328.0000000000, 0.0000000000, 2743.0000000000},
-                    {-1666.0000000000, 3189.0000000000, 15913.0000000000, 0.0000000000, 2590.0000000000},
-                    {-402.0000000000, 3174.0000000000, 16076.0000000000, 0.0000000000, 2548.0000000000},
-                    {861.0000000000, 3198.0000000000, 15820.0000000000, 0.0000000000, 2615.0000000000},
-                    {727.0000000000, 3573.0000000000, 12041.0000000000, 0.0000000000, 3566.0000000000},
-                    {-397.0000000000, 3543.0000000000, 12331.0000000000, 0.0000000000, 3495.0000000000},
-                    {-1522.0000000000, 3562.0000000000, 12146.0000000000, 0.0000000000, 3540.0000000000},
-                    {-2622.0000000000, 3633.0000000000, 11473.0000000000, 0.0000000000, 3703.0000000000},
-                    {-3673.0000000000, 3764.0000000000, 10246.0000000000, 0.0000000000, 3994.0000000000}
+float c_m[25][5] = {{2240.0000000000, 2879.0000000000, 19637.0000000000, 3199.0000000000, -1891.0000000000},
+                                  {256.0000000000, 2855.0000000000, 19973.0000000000, 3199.0000000000, -1790.0000000000},
+                                  {-1760.0000000000, 2870.0000000000, 19759.0000000000, 3199.0000000000, -1854.0000000000},
+                                  {-4302.0000000000, 2678.0000000000, 23496.0000000000, 0.0000000000, 267.0000000000},
+                                  {-5935.0000000000, 2714.0000000000, 22451.0000000000, 0.0000000000, 647.0000000000},
+                                  {-5139.0000000000, 2844.0000000000, 20132.0000000000, 0.0000000000, 1402.0000000000},
+                                  {-3691.0000000000, 2781.0000000000, 21123.0000000000, 0.0000000000, 1092.0000000000},
+                                  {-2096.0000000000, 2749.0000000000, 21707.0000000000, 0.0000000000, 901.0000000000},
+                                  {-416.0000000000, 2741.0000000000, 21872.0000000000, 0.0000000000, 846.0000000000},
+                                  {1258.0000000000, 2754.0000000000, 21613.0000000000, 0.0000000000, 932.0000000000},
+                                  {1032.0000000000, 2933.0000000000, 18916.0000000000, 0.0000000000, 1764.0000000000},
+                                  {-408.0000000000, 2913.0000000000, 19166.0000000000, 0.0000000000, 1691.0000000000},
+                                  {-1851.0000000000, 2926.0000000000, 19007.0000000000, 0.0000000000, 1737.0000000000},
+                                  {-3240.0000000000, 2970.0000000000, 18440.0000000000, 0.0000000000, 1901.0000000000},
+                                  {-4531.0000000000, 3051.0000000000, 17463.0000000000, 0.0000000000, 2174.0000000000},
+                                  {-4055.0000000000, 3343.0000000000, 14301.0000000000, 0.0000000000, 3006.0000000000},
+                                  {-2895.0000000000, 3244.0000000000, 15328.0000000000, 0.0000000000, 2743.0000000000},
+                                  {-1666.0000000000, 3189.0000000000, 15913.0000000000, 0.0000000000, 2590.0000000000},
+                                  {-402.0000000000, 3174.0000000000, 16076.0000000000, 0.0000000000, 2548.0000000000},
+                                  {861.0000000000, 3198.0000000000, 15820.0000000000, 0.0000000000, 2615.0000000000},
+                                  {727.0000000000, 3573.0000000000, 12041.0000000000, 0.0000000000, 3566.0000000000},
+                                  {-397.0000000000, 3543.0000000000, 12331.0000000000, 0.0000000000, 3495.0000000000},
+                                  {-1522.0000000000, 3562.0000000000, 12146.0000000000, 0.0000000000, 3540.0000000000},
+                                  {-2622.0000000000, 3633.0000000000, 11473.0000000000, 0.0000000000, 3703.0000000000},
+                                  {-3673.0000000000, 3764.0000000000, 10246.0000000000, 0.0000000000, 3994.0000000000}
 };
 /**
  * Cartesian Destination
@@ -906,7 +906,7 @@ XYZ_CONSTS_FROM_CONFIG(signed char, home_dir, HOME_DIR);
 Joint_CONSTS_FROM_CONFIG(float, base_min_pos_Joint,   MIN_POS); 
 Joint_CONSTS_FROM_CONFIG(float, base_max_pos_Joint,   MAX_POS); 
 Joint_CONSTS_FROM_CONFIG(float, base_home_pos_Joint,  HOME_POS);
-Joint_CONSTS_FROM_CONFIG(float, max_length_Joint,     MAX_LENGTH);  
+Joint_CONSTS_FROM_CONFIG(float, max_length_Joint,     MAX_LENGTH);
 Joint_CONSTS_FROM_CONFIG(float, home_bump_mm_Joint,   HOME_BUMP_MM);
 Joint_CONSTS_FROM_CONFIG(signed char, home_dir_Joint, HOME_DIR); 
 
@@ -2046,11 +2046,12 @@ inline void Set_current_Joint_Curve(const float point){
   DEBUG_POS_Joint("(After)Set_current_Joint_Curve", current_position_Joint);   
 }
 
-int X_Y_to_Number(const int Nx,const int Ny)
+int X_Y_to_Number(const float Nx,const float Ny)
 {
   int tempX=(int)(Nx/45);
   int tempY=(int)(Ny/45);
   int temp=0;
+  SERIAL_ECHOLNPAIR("tempY*5+tempX:", tempY*5+tempX);
   switch(tempY*5+tempX)
   { //y*5+x
     case 0:
@@ -2129,25 +2130,40 @@ int X_Y_to_Number(const int Nx,const int Ny)
       temp=24;
     break;
   }
-
   return temp;
 }
 
-inline void Set_current_Joint_Curve_More(const float point, const int numberx, const int numbery){
-  int number=X_Y_to_Number(numberx, numberx);
+float Forward_Curve(float point_FC, int number_mat, int Joint_num)
+{
+  SERIAL_ECHOPAIR("point_FC:", point_FC);
+  SERIAL_ECHOPAIR(" number_mat:", number_mat);
+  SERIAL_ECHOPAIR(" Joint_num:", Joint_num);
+  float temp_return = c_m[number_mat][Joint_num];//a_m[number_mat][Joint_num]*point_FC*point_FC+b_m[number_mat][Joint_num]*point_FC+c_m[number_mat][Joint_num];// + b_m[0][Joint_num]*point_FC + c_m[0][Joint_num];
+  SERIAL_ECHOPAIR(" return data:", temp_return);
+  SERIAL_ECHOLNPAIR(" c_m[0][0]:", c_m[0][Joint_num]);  
 
+  return temp_return;
+}
+
+void Set_current_Joint_Curve_More(float numberx,float numbery,float numberz){
+  int number = X_Y_to_Number(numberx, numbery);
+  //int number = 0;
+  SERIAL_ECHOLNPAIR("number:", number);
+  
   DEBUG_POS_Joint("(Before)Set_current_Joint_Curve_More", current_position_Joint); 
-  float point1=point*100;
-  current_position_Joint[Joint1_AXIS]=a_m[number][0]*point1*point1 + b_m[number][0]*point1 + c_m[number][0];
-  current_position_Joint[Joint2_AXIS]=a_m[number][1]*point1*point1 + b_m[number][1]*point1 + c_m[number][1];
-  current_position_Joint[Joint3_AXIS]=a_m[number][2]*point1*point1 + b_m[number][2]*point1 + c_m[number][2];
-  current_position_Joint[Joint4_AXIS]=a_m[number][3]*point1*point1 + b_m[number][3]*point1 + c_m[number][3];
-  current_position_Joint[Joint5_AXIS]=a_m[number][4]*point1*point1 + b_m[number][4]*point1 + c_m[number][4];
+  float point1=numberz*100;
 
-  SERIAL_ECHOPAIR(" point:", point);
-  SERIAL_ECHOPAIR(" x:", numberx);
-  SERIAL_ECHOPAIR("-y:", numbery);
-  SERIAL_ECHOLNPAIR(" number:", number);
+  //SERIAL_ECHOLNPAIR("Forward_Curve(2000,0,0)", Forward_Curve(2000,0,0));
+
+  current_position_Joint[Joint1_AXIS]=(int32_t)Forward_Curve(point1, number, Joint1_AXIS);
+  current_position_Joint[Joint2_AXIS]=(int32_t)Forward_Curve(point1, number, Joint2_AXIS);
+  current_position_Joint[Joint3_AXIS]=(int32_t)Forward_Curve(point1, number, Joint3_AXIS);
+  current_position_Joint[Joint4_AXIS]=(int32_t)Forward_Curve(point1, number, Joint4_AXIS);
+  current_position_Joint[Joint5_AXIS]=(int32_t)Forward_Curve(point1, number, Joint5_AXIS);
+
+  //SERIAL_ECHOPAIR(" point:", point);
+  //SERIAL_ECHOPAIR(" x:", numberx);
+  //SERIAL_ECHOPAIR("-y:", numbery);
 
   DEBUG_POS_Joint("(After)Set_current_Joint_Curve_More", current_position_Joint);   
 }
@@ -2335,7 +2351,8 @@ void do_blocking_move_to(const float rx, const float ry, const float rz, const f
     }
 
   #else
-
+    /*------------------------Old------------------------*/
+    /*
     // If Z needs to raise, do it before moving XY
     if (current_position[Z_AXIS] < rz) {
       feedrate_mm_s = z_feedrate;
@@ -2355,6 +2372,63 @@ void do_blocking_move_to(const float rx, const float ry, const float rz, const f
       current_position[Z_AXIS] = rz;
       buffer_line_to_current_position();
     }
+    //*/
+    /*------------------------Old------------------------*/
+
+    /*------------------------New------------------------*/
+    if (current_position[Z_AXIS] < rz) {
+    feedrate_mm_s = z_feedrate;
+
+    Set_current_Joint_Curve_More(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS]);
+    // Set_current_Joint_Slope(current_position_Joint,HOME_position_Slope,Delta_Z_01mm(current_position[Z_AXIS],rz));
+    // Set_current_Joint_Slope(current_position_Joint,HOME_position_Slope,100);
+    SERIAL_ECHOLNPGM("//To low//");
+    current_position[Z_AXIS] = rz;   
+
+    //Set_current_Joint(HOME_position_Z10_Joint);
+
+    buffer_line_to_current_position();    
+  }
+  
+  feedrate_mm_s = fr_mm_s ? fr_mm_s : XY_PROBE_FEEDRATE_MM_S;
+  current_position[X_AXIS] = rx;
+  current_position[Y_AXIS] = ry;
+
+  //int tempp = X_Y_to_Number((int)rx,(int)ry);
+  //int tempp=0;
+
+  SERIAL_ECHOPGM("//Move XY to ");
+  SERIAL_ECHOPAIR("X:",rx);
+  SERIAL_ECHOPAIR(" Y:",ry);
+  SERIAL_ECHOLNPGM("//");  
+  
+  Set_current_Joint_Curve_More(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS]);
+  buffer_line_to_current_position();
+  // If Z needs to lower, do it after moving XY
+  if (current_position[Z_AXIS] > rz) {
+    feedrate_mm_s = z_feedrate;
+
+    // Set_current_Joint_Slope(current_position_Joint,HOME_position_Slope,Delta_Z_01mm(current_position[Z_AXIS],rz));
+    // Set_current_Joint_Slope(current_position_Joint,HOME_position_Slope,100);
+    SERIAL_ECHOLNPGM("//To High//");
+
+    /*
+    current_position[Z_AXIS] = rz;
+    buffer_line_to_current_position();
+    //*/
+    bool probe_triggered1=0;    
+    do
+    { 
+      current_position[Z_AXIS] -= 0.01;
+      Set_current_Joint_Curve_More(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS]);
+      SERIAL_ECHOLN(current_position[Z_AXIS]);
+      for(int i=0;i<1000;i++);
+      sync_plan_position();
+      buffer_line_to_current_position();
+      probe_triggered1 = TEST(endstops.trigger_state(),Z_MIN_PROBE);
+    } while (current_position[Z_AXIS]>rz && probe_triggered1 == 0);
+  }
+  /*------------------------New------------------------*/
 
   #endif
 
@@ -2380,7 +2454,7 @@ void do_blocking_move_to_Joint(const float rx, const float ry, const float rz, c
   if (current_position[Z_AXIS] < rz) {
     feedrate_mm_s = z_feedrate;
 
-    Set_current_Joint_Curve_More(rz , rx, ry);
+    Set_current_Joint_Curve_More(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS]);
     // Set_current_Joint_Slope(current_position_Joint,HOME_position_Slope,Delta_Z_01mm(current_position[Z_AXIS],rz));
     // Set_current_Joint_Slope(current_position_Joint,HOME_position_Slope,100);
     SERIAL_ECHOLNPGM("//To low//");
@@ -2390,6 +2464,7 @@ void do_blocking_move_to_Joint(const float rx, const float ry, const float rz, c
 
     buffer_line_to_current_position();    
   }
+  
   feedrate_mm_s = fr_mm_s ? fr_mm_s : XY_PROBE_FEEDRATE_MM_S;
   current_position[X_AXIS] = rx;
   current_position[Y_AXIS] = ry;
@@ -2397,22 +2472,36 @@ void do_blocking_move_to_Joint(const float rx, const float ry, const float rz, c
   //int tempp = X_Y_to_Number((int)rx,(int)ry);
   //int tempp=0;
 
-  /*SERIAL_ECHOPAIR("//---------tempp:", tempp);
-  SERIAL_ECHOLNPGM("---------//");
-
-  Set_current_Joint_5(HOME_position_Joint_Mesh[tempp][Joint1_AXIS], HOME_position_Joint_Mesh[tempp][Joint2_AXIS], HOME_position_Joint_Mesh[tempp][Joint3_AXIS],HOME_position_Joint_Mesh[tempp][Joint4_AXIS], HOME_position_Joint_Mesh[tempp][Joint5_AXIS]);*/
-  Set_current_Joint_Curve_More(rz , rx, ry);
+  SERIAL_ECHOPGM("//Move XY to ");
+  SERIAL_ECHOPAIR("X:",rx);
+  SERIAL_ECHOPAIR(" Y:",ry);
+  SERIAL_ECHOLNPGM("//");  
+  
+  Set_current_Joint_Curve_More(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS]);
   buffer_line_to_current_position();
   // If Z needs to lower, do it after moving XY
   if (current_position[Z_AXIS] > rz) {
     feedrate_mm_s = z_feedrate;
 
-    Set_current_Joint_Curve_More(rz, rx, ry);
     // Set_current_Joint_Slope(current_position_Joint,HOME_position_Slope,Delta_Z_01mm(current_position[Z_AXIS],rz));
     // Set_current_Joint_Slope(current_position_Joint,HOME_position_Slope,100);
     SERIAL_ECHOLNPGM("//To High//");
+
+    /*
     current_position[Z_AXIS] = rz;
     buffer_line_to_current_position();
+    //*/
+    bool probe_triggered1=0;    
+    do
+    { 
+      current_position[Z_AXIS] -= 0.01;
+      Set_current_Joint_Curve_More(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS]);
+      SERIAL_ECHOLN(current_position[Z_AXIS]);
+      for(int i=0;i<1000;i++);
+      sync_plan_position();
+      buffer_line_to_current_position();
+      probe_triggered1 = TEST(endstops.trigger_state(),Z_MIN_PROBE);
+    } while (current_position[Z_AXIS]>rz && probe_triggered1 == 0);
   }
 
   planner.synchronize();
@@ -2423,6 +2512,7 @@ void do_blocking_move_to_Joint(const float rx, const float ry, const float rz, c
     if (DEBUGGING(LEVELING)) SERIAL_ECHOLNPGM("<<< do_blocking_move_to_Joint");
   #endif
 }
+
 void do_blocking_move_to_x(const float &rx, const float &fr_mm_s/*=0.0*/) {
   do_blocking_move_to(rx, current_position[Y_AXIS], current_position[Z_AXIS], fr_mm_s);
 }
@@ -4354,8 +4444,8 @@ static void homeJoint(const JointEnum axis) {
   SERIAL_ECHOLNPAIR(", Joint5_MAX_LENGTH:",base_max_pos_Joint(4)-base_min_pos_Joint(4));
   //*/
 
-  // do_homing_move_Joint(axis, 1.5f * max_length_Joint(axis) * Joint_home_dir);
-  do_homing_move_Joint(axis, 1.5f * (base_max_pos_Joint(axis)-base_min_pos_Joint(axis)) * Joint_home_dir);
+  do_homing_move_Joint(axis, 1.5f * max_length_Joint(axis) * Joint_home_dir);
+  //do_homing_move_Joint(axis, 1.5f * (base_max_pos_Joint(axis)-base_min_pos_Joint(axis)) * Joint_home_dir);
 
   #if HOMING_Z_WITH_PROBE && ENABLED(BLTOUCH)
     // BLTOUCH needs to be stowed after trigger to rearm itself
@@ -5675,12 +5765,13 @@ inline void gcode_G28(const bool always_home_all) {
     #endif // Z_HOME_DIR < 0
     //*/
 
+    //*
     if(home_all || homeJ)homeJoint(Joint1_AXIS);
     if(home_all || homeA)homeJoint(Joint2_AXIS);
     if(home_all || homeB)homeJoint(Joint3_AXIS);
     if(home_all || homeC)homeJoint(Joint4_AXIS);
     if(home_all || homeD)homeJoint(Joint5_AXIS);
-
+    //*/
     SYNC_PLAN_POSITION_KINEMATIC();
 
   #endif // !DELTA (gcode_G28)
@@ -5699,17 +5790,26 @@ inline void gcode_G28(const bool always_home_all) {
   report_current_position();
   //*/
 
+  //*
   // if(axis_homed==31){
   if(Joint_homed==1){
     //buffer_line_to_destination_Constant(HOME_position, HOME_position_Joint, homing_feedrate_Joint(0));
     buffer_line_to_destination_Constant(HOME_position_Z20, HOME_position_Z20_Joint, homing_feedrate_Joint(0));
-    /*
-    delay(2000);
-    buffer_line_to_destination_Constant(ZERO_position, ZERO_position_Joint, homing_feedrate_Joint(0)));
-    //*/
+    
+    //delay(2000);
+    //buffer_line_to_destination_Constant(ZERO_position, ZERO_position_Joint, homing_feedrate_Joint(0));
+    
   }
- 
+  //*/
+  // buffer_line_to_destination_Constant(HOME_position_Z20, HOME_position_Z20_Joint, homing_feedrate_Joint(0));
 
+  /*
+  SERIAL_ECHOLNPAIR("Forward_Curve(2000, 0, 1):", Forward_Curve(2000,0,1));
+  SERIAL_ECHOLNPAIR("Forward_Curve(2000, 0, 2):", Forward_Curve(2000,0,2));
+  SERIAL_ECHOLNPAIR("Forward_Curve(2000, 0, 3):", Forward_Curve(2000,0,3));
+  SERIAL_ECHOLNPAIR("Forward_Curve(2000, 0, 4):", Forward_Curve(2000,0,4));
+  SERIAL_ECHOLNPAIR("Forward_Curve(2000, 0, 5):", Forward_Curve(2000,0,5));
+  //*/
   clean_up_after_endstop_or_probe_move();
 
   // Restore the active tool after homing
