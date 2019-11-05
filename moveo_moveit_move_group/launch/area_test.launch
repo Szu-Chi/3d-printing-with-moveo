@@ -2,8 +2,8 @@
 <launch>
   <arg name="chain_start" default="base_link" />
   <arg name="chain_end" default="moveo_nozzle_link" />
-  <arg name="timeout" default="0.035" />
-  <arg name="timeout_second" default="0.03" />
+  <arg name="timeout" default="0.1" />
+  <arg name="timeout_second" default="0.05" />
   <arg name="eps" default="1e-5"/>
   <!--
     arg name="num_threads" default="16"/

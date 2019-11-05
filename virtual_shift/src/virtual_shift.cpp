@@ -65,7 +65,7 @@ int main(int argc, char **argv)
         }
         size_t colon_pos_D = line.find('D');
         if(colon_pos_D < 100){
-          target_joints.at(4) = double(stod(line.substr(colon_pos_D+1))*(2*M_PI)/(200*32*4.666));
+          target_joints.at(4) = double(stod(line.substr(colon_pos_D+1))*(2*M_PI)/(200*16*4.666));
         }
         size_t colon_pos_Z = line.find('Z');
         if(colon_pos_Z < 100){

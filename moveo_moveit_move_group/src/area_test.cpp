@@ -72,9 +72,10 @@ int main(int argc, char **argv)
   node_handle.param("urdf_param", urdf_param, std::string("/robot_description"));
   node_handle.param("eps", eps, 1e-5);
   node_handle.param("num_threads", num_threads, omp_get_num_procs()*2);
-
+  ROS_INFO_STREAM("There are threads:" << num_threads);
   KDL::Chain chain;
   KDL::JntArray ll, ul; //lower joint limits, upper joint limits
+  
   TRAC_IK::TRAC_IK** tracik_solver = new TRAC_IK::TRAC_IK*[num_threads];
   for(int i = 0; i < num_threads; i++){
     tracik_solver[i] = new TRAC_IK::TRAC_IK(chain_start, chain_end, urdf_param, timeout, eps, TRAC_IK::Speed);
@@ -82,20 +83,25 @@ int main(int argc, char **argv)
   }
   TRAC_IK::TRAC_IK tracik_solver_onecore(chain_start, chain_end, urdf_param, timeout_second, eps, TRAC_IK::Speed);
   if(!check_trac_ik_valid(tracik_solver_onecore, chain, ll, ul)) return -1;
-
+  
   assert(chain.getNrOfJoints() == ll.data.size());
   assert(chain.getNrOfJoints() == ul.data.size());
+
   // Create Nominal chain configuration midway between all joint limits
   KDL::JntArray nominal(chain.getNrOfJoints());
+    for (uint j = 0; j < nominal.data.size(); j++)
+  {
+    nominal(j) = (ll(j) + ul(j)) / 2.0;
+  }
+  KDL::Vector target_bounds_rot(0, 0, 2* M_PI), target_bounds_vel(0,0,0);
+  const KDL::Twist target_bounds(target_bounds_vel, target_bounds_rot);
+
   //-----------------------------
   //Getting Basic Information
   //-----------------------------
   moveit_visual_tools::MoveItVisualTools visual_tools("base_link");
   visual_tools.deleteAllMarkers();
   visual_tools.trigger();
-
-  KDL::Vector target_bounds_rot(0, 0, 2* M_PI), target_bounds_vel(0,0,0);
-  const KDL::Twist target_bounds(target_bounds_vel, target_bounds_rot);
 
   KDL::Vector end_effector_target_vol;
   KDL::Rotation end_effector_target_rot;
@@ -109,69 +115,78 @@ int main(int argc, char **argv)
   if(!output_file.is_open())ROS_ERROR_STREAM("Can't open " <<gcode_out);
 
   std::vector<KDL::Vector> find_end_effector_target_vol;
-  find_end_effector_target_vol.reserve(700);
+  find_end_effector_target_vol.reserve(788);
 
   std::vector<int> save_place;
-  save_place.reserve(700);
+  save_place.reserve(788);
 
-  std::vector<int> use_onecore;
-  use_onecore.reserve(700);
+  //std::vector<int> use_onecore;
+  //use_onecore.reserve(620);
+
+  //std::vector<int> save_use_onecore;
+  //save_use_onecore.reserve(620);
 
   int second_execution = 0;
   while(ros::ok()){
-    for(int z = 1;z <= 650;z++){
-      end_effector_target_vol.data[2] = z * 0.001;
-      for(int x = 1;x <= 700;x++){
-        end_effector_target_vol.data[0] = x * 0.001;
-        for(int y = 1;y <=700;y++){
-          end_effector_target_vol.data[1] = y * 0.001;
+    for(int x = 0;x <= 550;x++){
+      end_effector_target_vol.data[0] = x * 0.001;
+      for(int y = 0;y <= 550;y++){
+        end_effector_target_vol.data[1] = y * 0.001;
+        for(int z = -182;z <=605;z++){
+          end_effector_target_vol.data[2] = z * 0.001;
           find_end_effector_target_vol.push_back(end_effector_target_vol);
         }
-        int two_times = 0;
         omp_set_num_threads(num_threads);
         #pragma omp parallel for
-        for(int i = 0;i < 700;i++){
+        for(int i = 0;i < 788;i++){
           int rc = -1;
           int thread_num = omp_get_thread_num();
           KDL::JntArray result;
           KDL::Frame end_effector_pose(end_effector_target_rot, find_end_effector_target_vol[i]);
           rc = tracik_solver[thread_num]->CartToJnt(nominal, end_effector_pose, result, target_bounds);
           if(rc < 0){
-            #pragma omp atomic
-            two_times += 1;
-            use_onecore.push_back(two_times - 1);
+            //save_use_onecore[i] = 1;
+            save_place[i] = 0;
           }
           else{
             save_place[i] = 1;
+            //save_use_onecore[i] = 0;
           }
         }
-        for(int j = 0;j < use_onecore.size();j++){
-          int rc = -1;
-          second_execution++;
-          KDL::JntArray result;
-          KDL::Frame end_effector_pose(end_effector_target_rot, find_end_effector_target_vol[use_onecore[j]]);
-          rc = tracik_solver_onecore.CartToJnt(nominal, end_effector_pose, result, target_bounds);
-          if(rc < 0){
-            save_place[use_onecore[j]] = 0;
-          }
-          else{
-            save_place[use_onecore[j]] = 1;
+        //for(int j = 0;j < 620;j++){
+        //  if(save_use_onecore[j] == 1){
+        //    use_onecore.push_back(j);
+        //  }
+        //}
+        //save_use_onecore.clear();
+        //for(int k = 0;k < use_onecore.size();k++){
+        //  int rc = -1;
+        //  second_execution++;
+        //  KDL::JntArray result;
+        //  KDL::Frame end_effector_pose(end_effector_target_rot, find_end_effector_target_vol[use_onecore[k]]);
+        //  rc = tracik_solver_onecore.CartToJnt(nominal, end_effector_pose, result, target_bounds);
+        //  if(rc < 0){
+        //    save_place[use_onecore[k]] = 0;
+        //  }
+        //  else{
+        //    save_place[use_onecore[k]] = 1;
+        //  }
+        //}
+        //use_onecore.clear();
+        std::vector< geometry_msgs::Point > save_draw_point(788);
+        save_draw_point.reserve(788);
+        bool save_check = 0;
+        int times = 0;
+        for(int l = 0;l < 788 ;l++){
+          if(save_place[l] == 1){
+            output_file << find_end_effector_target_vol[l].data[0] << "," << find_end_effector_target_vol[l].data[1] << "," << find_end_effector_target_vol[l].data[2] << std::endl;
+            save_draw_point[times].x = find_end_effector_target_vol[l].data[0];
+            save_draw_point[times].y = find_end_effector_target_vol[l].data[1];
+            save_draw_point[times].z = find_end_effector_target_vol[l].data[2];
+            times++;
           }
         }
-        use_onecore.clear();
-        std::vector< geometry_msgs::Point > save_draw_point(700);
-        save_draw_point.reserve(700);
-        int save_draw = 0;
-        for(int k = 0;k < 700 ;k++){
-          if(save_place[k] == 1){
-            output_file << find_end_effector_target_vol[k].data[0] << "," << find_end_effector_target_vol[k].data[1] << "," << find_end_effector_target_vol[k].data[2] << std::endl;
-            save_draw_point[save_draw].x = find_end_effector_target_vol[k].data[0];
-            save_draw_point[save_draw].y = find_end_effector_target_vol[k].data[1];
-            save_draw_point[save_draw].z = find_end_effector_target_vol[k].data[2];
-            save_draw++;
-          }
-        }
-        visual_tools.publishSpheres(save_draw_point, rvt::colors::BLUE, rvt::scales::MEDIUM);
+        visual_tools.publishSpheres(save_draw_point, rvt::colors::GREEN, rvt::scales::MEDIUM);
         visual_tools.trigger();
         find_end_effector_target_vol.clear();
         save_place.clear();

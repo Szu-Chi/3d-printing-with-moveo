@@ -31,7 +31,7 @@ std::vector<double> solveJoint(KDL::Frame end_effector_pose){
   double eps = 1e-5;
   node_handle.param("eps", eps, 1e-5);
   ROS_INFO_STREAM("eps :" << eps);
-  TRAC_IK::TRAC_IK tracik_solver(chain_start, chain_end, urdf_param, timeout, eps, TRAC_IK::Distance);
+  TRAC_IK::TRAC_IK tracik_solver(chain_start, chain_end, urdf_param, timeout, eps, TRAC_IK::Speed);
 
   KDL::Chain chain;
   KDL::JntArray ll, ul; //lower joint limits, upper joint limits

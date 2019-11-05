@@ -32,7 +32,7 @@ bool check_trac_ik_valid(TRAC_IK::TRAC_IK &tracik_solver,KDL::Chain &chain, KDL:
 }
 
 void motor_setep_convert(Eigen::VectorXd &data){
-  static const double joint_division[5] = {200*32*10.533*0.95, 200*16*5.71428*0.95, 1028.57143*16*4.523809*0.95, 200*32, 200*32*4.666};
+  static const double joint_division[5] = {200*32*10.533*0.95, 200*16*5.71428*0.95, 1028.57143*16*4.523809*0.95, 200*32, 200*16*4.666};
   for(int i = 0; i < 5; i++){
     data(i) = data(i)/(M_PI)*180 * joint_division[i]/360;
   }
@@ -120,6 +120,8 @@ int main(int argc, char **argv)
   save_place.reserve(1000);
   std::vector<int> use_onecore;
   use_onecore.reserve(1000);
+  std::vector<int> save_use_onecore;
+  use_onecore.reserve(1000);
   while(ros::ok()){
     while(input_file){
       std::getline(input_file, line);
@@ -139,11 +141,11 @@ int main(int argc, char **argv)
               }
               size_t colon_pos_Y = line.find('Y');
               if(colon_pos_Y < 100){
-                end_effector_target_vol.data[1] = (stod(line.substr(colon_pos_Y+1))*1e-3)+0.30;
+                end_effector_target_vol.data[1] = (stod(line.substr(colon_pos_Y+1))*1e-3)+0.40;
               }
               size_t colon_pos_Z = line.find('Z');
               if(colon_pos_Z < 100){
-                end_effector_target_vol.data[2] = (stod(line.substr(colon_pos_Z+1))*1e-3)+49.75*1e-3;
+                end_effector_target_vol.data[2] = (stod(line.substr(colon_pos_Z+1))*1e-3);
               }
               find_end_effector_target_vol.push_back(end_effector_target_vol);
               save_place.push_back(i);
@@ -159,18 +161,25 @@ int main(int argc, char **argv)
           KDL::Frame end_effector_pose(end_effector_target_rot, find_end_effector_target_vol[j]);
           rc = tracik_solver[thread_num]->CartToJnt(nominal, end_effector_pose, result, target_bounds);
           if(rc < 0){
-            use_onecore.push_back(j);
+            save_use_onecore[j] = 1;
           }
           else{
             motor_setep_convert(result.data);
             save_result[j] = result;
+            save_use_onecore[j] = 0;
           }
         }
-        for(int k = 0;k < use_onecore.size();k++){
+        for(int k = 0;k < 1000;k++){
+          if(save_use_onecore[k] == 1){
+            use_onecore.push_back(k);
+          }
+        }
+        save_use_onecore.clear();
+        for(int l = 0;l < use_onecore.size();l++){
           int rc = -1;
           second_execution++;
           KDL::JntArray result;
-          KDL::Frame end_effector_pose(end_effector_target_rot, find_end_effector_target_vol[use_onecore[k]]);
+          KDL::Frame end_effector_pose(end_effector_target_rot, find_end_effector_target_vol[use_onecore[l]]);
           rc = tracik_solver_onecore.CartToJnt(nominal, end_effector_pose, result, target_bounds);
           if(rc < 0){
             ROS_ERROR_STREAM("Threr is no solution found in " << timeout_second << "s");
@@ -178,14 +187,14 @@ int main(int argc, char **argv)
             return -1;
           }
           motor_setep_convert(result.data);
-          save_result[use_onecore[k]] = result;
+          save_result[use_onecore[l]] = result;
         }
         find_end_effector_target_vol.clear();
         use_onecore.clear();
         int pop_out = 0;
-        for(int l = 0;l < all_line ;l++){
-          line = save[l];
-          if((save_place[pop_out] == l) && (pop_out < save_place.size())){
+        for(int m = 0;m < all_line ;m++){
+          line = save[m];
+          if((save_place[pop_out] == m) && (pop_out < save_place.size())){
             output_file << line[0] << line[1];
             for(int i = 0;i < chain.getNrOfJoints(); i++){
               static const char joint_code[5] = {'J', 'A', 'B', 'C', 'D'};
