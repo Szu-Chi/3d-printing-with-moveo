@@ -520,7 +520,7 @@
   } // Feedrates for manual moves along X, Y, Z, E from panel
 #define MANUAL1_FEEDRATE                    \
   {                                         \
-    5 * 60, 5 * 60, 15 * 60, 5 * 60, 5 * 60\
+    5 * 60, 5 * 60, 100 * 60, 50 * 60, 5 * 60\
   }
 #define ULTIPANEL_FEEDMULTIPLY // Comment to disable setting feedrate multiplier via encoder
 #endif

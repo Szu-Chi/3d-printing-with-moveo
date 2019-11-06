@@ -970,13 +970,13 @@
 
 #define J_MIN_POS_step -24800
 #define A_MIN_POS_step -5500
-#define B_MIN_POS_step -24700
-#define C_MIN_POS_step -6400
+#define B_MIN_POS_step -123500
+#define C_MIN_POS_step -6400*5
 #define D_MIN_POS_step -8700
 #define J_MAX_POS_step 24800
 #define A_MAX_POS_step 5650
-#define B_MAX_POS_step 24000
-#define C_MAX_POS_step 6400
+#define B_MAX_POS_step 120000
+#define C_MAX_POS_step 6400*5
 #define D_MAX_POS_step 7650
 
 //joint

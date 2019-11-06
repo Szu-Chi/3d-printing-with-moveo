@@ -225,6 +225,19 @@ void safe_delay(millis_t ms) {
     return conv;
   }
 
+  // Convert signed float to string with +12345 format
+  char* ftostr6sign(const long &f) {
+    long i = f; //(f * 10 + (f < 0 ? -5: 5)) / 10;
+    conv[0] = MINUSOR(i, '+');
+    conv[1] = RJDIGIT(i, 100000);
+    conv[2] = RJDIGIT(i, 10000);
+    conv[3] = RJDIGIT(i, 1000);
+    conv[4] = RJDIGIT(i, 100);
+    conv[5] = RJDIGIT(i, 10);
+    conv[6] = DIGIMOD(i, 1);
+    return conv;
+  }
+
   // Convert unsigned float to string with 1234.56 format omitting trailing zeros
   char* ftostr62rj(const float &f) {
     const long i = ((f < 0 ? -f : f) * 1000 + 5) / 10;

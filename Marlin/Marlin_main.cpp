@@ -16637,6 +16637,10 @@ void loop() {
         card.removeJobRecoveryFile();
       #endif
       buffer_line_to_destination_Constant(HOME_position, HOME_position_Joint, homing_feedrate_Joint(0));
+      endstops.init();          // Init endstops and pullups
+      stepper.init();           // Init stepper. This enables interrupts!
+      thermalManager.init();    // Initialize temperature loop
+      print_job_timer.init();   // Initial setup of print job timer
     }
 
   #endif // SDSUPPORT
