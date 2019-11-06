@@ -1821,13 +1821,13 @@ uint32_t Stepper::stepper_block_phase_isr() {
       if (X_MOVE_TEST) SBI(axis_bits, A_AXIS);
       if (Y_MOVE_TEST) SBI(axis_bits, B_AXIS);
       if (Z_MOVE_TEST) SBI(axis_bits, C_AXIS);
-      SERIAL_ECHOLNPAIR("axis_bits:",axis_bits);
+      //SERIAL_ECHOLNPAIR("axis_bits:",axis_bits);
       if(Joint1_MOVE_TEST)SBI(axis_bits_Joint, Joint1_AXIS);
       if(Joint2_MOVE_TEST)SBI(axis_bits_Joint, Joint2_AXIS);
       if(Joint3_MOVE_TEST)SBI(axis_bits_Joint, Joint3_AXIS);
       if(Joint4_MOVE_TEST)SBI(axis_bits_Joint, Joint4_AXIS);
       if(Joint5_MOVE_TEST)SBI(axis_bits_Joint, Joint5_AXIS);
-      SERIAL_ECHOLNPAIR("axis_bits_Joint:",axis_bits_Joint);
+      //SERIAL_ECHOLNPAIR("axis_bits_Joint:",axis_bits_Joint);
       //if (!!current_block->steps[E_AXIS]) SBI(axis_bits, E_AXIS);
       //if (!!current_block->steps[A_AXIS]) SBI(axis_bits, X_HEAD);
       //if (!!current_block->steps[B_AXIS]) SBI(axis_bits, Y_HEAD);
