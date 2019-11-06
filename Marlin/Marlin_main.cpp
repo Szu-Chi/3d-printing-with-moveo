@@ -602,6 +602,7 @@ FORCE_INLINE float homing_feedrate(const AxisEnum a) { return pgm_read_float(&ho
 FORCE_INLINE float homing_feedrate_Joint(const JointEnum a) { return pgm_read_float(&homing_feedrate_mm_s_Joint[a]); }
 
 float feedrate_mm_s = MMM_TO_MMS(1500.0f);
+const float manual_feedrate_mm_m_joint[] = MANUAL2_FEEDRATE;
 static float saved_feedrate_mm_s;
 int16_t feedrate_percentage = 100, saved_feedrate_percentage;
 
@@ -4444,7 +4445,7 @@ static void homeJoint(const JointEnum axis) {
   SERIAL_ECHOLNPAIR(", Joint5_MAX_LENGTH:",base_max_pos_Joint(4)-base_min_pos_Joint(4));
   //*/
 
-  do_homing_move_Joint(axis, 1.5f * max_length_Joint(axis) * Joint_home_dir);
+  do_homing_move_Joint(axis, 1.5f * max_length_Joint(axis) * Joint_home_dir, manual_feedrate_mm_m_joint[axis]);
   //do_homing_move_Joint(axis, 1.5f * (base_max_pos_Joint(axis)-base_min_pos_Joint(axis)) * Joint_home_dir);
 
   #if HOMING_Z_WITH_PROBE && ENABLED(BLTOUCH)
@@ -4556,7 +4557,7 @@ static void homeJoint(const JointEnum axis) {
     // For cartesian/core machines,
     // set the axis to its home position
     set_Joint_is_at_home(axis);    
-    do_move_Joint(axis, 0);
+    do_move_Joint(axis, 0, manual_feedrate_mm_m_joint[axis]);
     sync_plan_position();
 
     destination_Joint[axis] = current_position_Joint[axis];

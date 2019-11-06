@@ -1009,36 +1009,31 @@
 #define Z_MAX_POS 200
 
 #define J_MIN_POS_step -24800
-#define A_MIN_POS_step -5500
+#define A_MIN_POS_step -44000
 #define B_MIN_POS_step -123500
-#define C_MIN_POS_step -6400*5
-#define D_MIN_POS_step -8700
+#define C_MIN_POS_step -172800
+#define D_MIN_POS_step -43500
 
 #define J_MAX_POS_step 24800
-#define A_MAX_POS_step 5650
+#define A_MAX_POS_step 45200
 #define B_MAX_POS_step 120000
-#define C_MAX_POS_step 6400*5
-#define D_MAX_POS_step 7650
+#define C_MAX_POS_step 172800
+#define D_MAX_POS_step 38250
 
 // joint
 #define Joint1_MIN_POS -24800
-#define Joint2_MIN_POS -5500
-#define Joint3_MIN_POS -24700
-
-#define Joint4_MIN_POS -6400
-#define Joint5_MIN_POS -8700
-
+#define Joint2_MIN_POS -44000
+#define Joint3_MIN_POS -123500
+#define Joint4_MIN_POS -172800
+#define Joint5_MIN_POS -43500
 
 //joint
 
 #define Joint1_MAX_POS 24800 
-#define Joint2_MAX_POS 5650 
-
-// joint
-
-#define Joint3_MAX_POS 24000
-#define Joint4_MAX_POS 6400
-#define Joint5_MAX_POS 7650
+#define Joint2_MAX_POS 45200 
+#define Joint3_MAX_POS 120000
+#define Joint4_MAX_POS 172800
+#define Joint5_MAX_POS 38250
 
 /**
  * Software Endstops
