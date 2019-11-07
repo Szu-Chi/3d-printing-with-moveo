@@ -154,6 +154,8 @@ int main(int argc, char **argv){
   end_ = ros::WallTime::now();
   double execution_time = (end_ - start_).toNSec() * 1e-9;
   ROS_INFO_STREAM("Exectution time (ms): " << execution_time);
+  input_file.close();
+  output_file.close();
   ros::shutdown();
   return 0;
 }

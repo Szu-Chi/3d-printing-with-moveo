@@ -2,7 +2,7 @@
 <launch>
   <arg name="chain_start" default="base_link" />
   <arg name="chain_end" default="moveo_nozzle_link" />
-  <arg name="timeout" default="0.1" />
+  <arg name="timeout" default="0.2" />
   <arg name="timeout_second" default="0.05" />
   <arg name="eps" default="1e-5"/>
   <!--
@@ -11,7 +11,7 @@
   <arg name="model" default="$(find moveo_urdf)/urdf/moveo_urdf.urdf"/>
   <param name="robot_description" textfile="$(arg model)" />
   
-  <arg name="gcode_out" default="$(find moveo_moveit_move_group)/area/area.csv"/>
+  <arg name="gcode_out" default="$(find moveo_moveit_move_group)/area/all_area.csv"/>
   <arg name="node_start_delay" default="1.0" />  
   <node name="area_test" pkg="moveo_moveit_move_group" type="area_test" output="screen">
     <param name="chain_start" value="$(arg chain_start)"/>
