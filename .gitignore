@@ -1,4 +1,5 @@
 gcode_translation/gcode/*.gcode
 gcode_translation/gcode/test
 moveo_moveit_move_group/area/*.csv
+.vscode
 

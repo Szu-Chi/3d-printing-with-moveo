@@ -11,9 +11,9 @@
   <arg name="model" default="$(find moveo_urdf)/urdf/moveo_urdf.urdf"/>
   <param name="robot_description" textfile="$(arg model)" />
   
-  <arg name="gcode_out" default="$(find moveo_moveit_move_group)/area/all_area.csv"/>
+  <arg name="gcode_out" default="$(find moveo_moveit_move_group)/area/area.csv"/>
   <arg name="node_start_delay" default="1.0" />  
-  <node name="area_test" pkg="moveo_moveit_move_group" type="area_test" output="screen">
+  <node name="area_test_p_n" pkg="moveo_moveit_move_group" type="area_test_p_n" output="screen">
     <param name="chain_start" value="$(arg chain_start)"/>
     <param name="chain_end" value="$(arg chain_end)"/>
     <param name="timeout" value="$(arg timeout)"/>

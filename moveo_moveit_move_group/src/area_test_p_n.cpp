@@ -42,7 +42,7 @@ bool check_trac_ik_valid(TRAC_IK::TRAC_IK &tracik_solver,KDL::Chain &chain, KDL:
 }
 
 void motor_setep_convert(Eigen::VectorXd &data){
-  static const double joint_division[5] = {200*32*10.533*0.95, 200*16*5.71428*0.95, 1028.57143*16*4.523809*0.95, 200*32, 200*32*4.3306};
+  static const double joint_division[5] = {200*32*10.533*0.95, 200*16*5.71428*0.95, 1028.57143*16*4.523809*0.95, 200*32, 200*32*4.666};
   for(int i = 0; i < 5; i++){
     data(i) = data(i)/(M_PI)*180 * joint_division[i]/360;
   }
@@ -117,7 +117,7 @@ int main(int argc, char **argv)
   visual_tools.trigger();
 
   KDL::Vector end_effector_target_vol;
-  KDL::Rotation end_effector_target_rot;
+  KDL::Rotation end_effector_target_rot = KDL::Rotation::Quaternion(0,0,1,0);
   
   geometry_msgs::Point draw_point;
 
@@ -128,10 +128,10 @@ int main(int argc, char **argv)
   if(!output_file.is_open())ROS_ERROR_STREAM("Can't open " <<gcode_out);
 
   std::vector<KDL::Vector> find_end_effector_target_vol;
-  find_end_effector_target_vol.reserve(330);
+  find_end_effector_target_vol.reserve(256);
 
   std::vector<int> save_place;
-  save_place.reserve(330);
+  save_place.reserve(256);
 
   //std::vector<int> use_onecore;
   //use_onecore.reserve(620);
@@ -141,20 +141,21 @@ int main(int argc, char **argv)
 
   int second_execution = 0;
   while(ros::ok()){
-    for(int x = -150;x <= 150;x++){
-      end_effector_target_vol.data[0] = x * 0.001;
       //end_effector_target_vol.data[0] = 0;
-      for(int y = 175;y <= 425;y++){
-        end_effector_target_vol.data[1] = y * 0.001;
-        //end_effector_target_vol.data[1] = 0;
-        for(int z = -85;z <= 245;z++){
-          end_effector_target_vol.data[2] = z * 0.001;
+      for(int z = -100;z <= 300;z++){
+        end_effector_target_vol.data[2] = z * 0.001;
+        //for(int x = 0;x <= 300;x++){
+          //end_effector_target_vol.data[0] = x * 0.001;
+        //end_effector_target_vol.data[2] = 0;
+        for(int y = 0;y <= 255;y++){
+          end_effector_target_vol.data[1] = y * 0.001;
+          //end_effector_target_vol.data[1] = 0;
           find_end_effector_target_vol.push_back(end_effector_target_vol);
         }
-        std::vector<KDL::JntArray> save_result(330);
+        std::vector<KDL::JntArray> save_result(256);
         omp_set_num_threads(num_threads);
         #pragma omp parallel for
-        for(int i = 0;i < 330;i++){
+        for(int i = 0;i < 256;i++){
           int rc = -1;
           int thread_num = omp_get_thread_num();
           KDL::JntArray result;
@@ -191,10 +192,10 @@ int main(int argc, char **argv)
         //  }
         //}
         //use_onecore.clear();
-        std::vector< geometry_msgs::Point > save_draw_point(330);
-        save_draw_point.reserve(330);
+        std::vector< geometry_msgs::Point > save_draw_point(256);
+        save_draw_point.reserve(256);
         int times = 0;
-        for(int l = 0;l < 330 ;l++){
+        for(int l = 0;l < 256 ;l++){
           if(save_place[l] == 1){
             std::vector<double> joint_values(chain.getNrOfJoints());
             for(int i = 0;i < chain.getNrOfJoints(); i++){
@@ -208,15 +209,21 @@ int main(int argc, char **argv)
             planning_scene.checkSelfCollision(collision_request, collision_result);
             if(collision_result.collision == 0){
               motor_setep_convert(save_result.at(l).data);
-              //if(int(save_result.at(l).data(3)) != 0){
-                output_file << find_end_effector_target_vol[l].data[0] << "," << find_end_effector_target_vol[l].data[1] << "," << find_end_effector_target_vol[l].data[2] << ",";
-                output_file << int(save_result.at(l).data(0)) << "," << int(save_result.at(l).data(1)) << "," << int(save_result.at(l).data(2)) << ",";
-                output_file << int(save_result.at(l).data(3)) << "," << int(save_result.at(l).data(4)) << std::endl;
-                save_draw_point[times].x = find_end_effector_target_vol[l].data[0];
-                save_draw_point[times].y = find_end_effector_target_vol[l].data[1];
-                save_draw_point[times].z = find_end_effector_target_vol[l].data[2];
+              if((int(save_result.at(l).data(3)) > 2) || (int(save_result.at(l).data(3)) < -2)){
+                if(times > 0){
+                  if(find_end_effector_target_vol[l].data[1] == save_draw_point[0].y + 0.001*times){
+                    save_draw_point[1].x = find_end_effector_target_vol[l].data[0];
+                    save_draw_point[1].y = find_end_effector_target_vol[l].data[1];
+                    save_draw_point[1].z = find_end_effector_target_vol[l].data[2];
+                  }
+                }
+                else{
+                  save_draw_point[0].x = find_end_effector_target_vol[l].data[0];
+                  save_draw_point[0].y = find_end_effector_target_vol[l].data[1];
+                  save_draw_point[0].z = find_end_effector_target_vol[l].data[2];
+                }
                 times++;
-              //}
+              }
             }
             else{
               collision_detection::CollisionResult::ContactMap::const_iterator it;
@@ -228,13 +235,14 @@ int main(int argc, char **argv)
             joint_values.clear();
           }
         }
-        for(int m = 0;m < 330-times;m++){
+        for(int m = 0;m < 256-2;m++){
           save_draw_point.pop_back();
         }
         if(!save_draw_point.empty()){
           if(save_draw_point.size() == 1){
             save_draw_point.push_back(save_draw_point[0]);
           }
+          output_file << save_draw_point[1].x << "," << save_draw_point[1].y << "," << save_draw_point[1].z << std::endl;
           visual_tools.publishSpheres(save_draw_point, rvt::colors::GREEN, rvt::scales::MEDIUM);
           visual_tools.trigger();
         }
@@ -243,10 +251,10 @@ int main(int argc, char **argv)
         save_draw_point.clear();
         save_result.clear();
       }
-    }
+    //}
     end_ = ros::WallTime::now();
     double execution_time = (end_ - start_).toNSec() * 1e-9;
-    ROS_INFO_STREAM("Exectution time (ms): " << execution_time);
+    ROS_INFO_STREAM("Exectution time (s): " << execution_time);
     for(int i = 0; i < num_threads; i++){
       delete tracik_solver[i];
     }
