@@ -396,7 +396,7 @@
 #define HOMING_BUMP_DIVISOR {2, 2, 4} // Re-Bump Speed Divisor (Divides the Homing Feedrate)
 
 //joint
-#define HOMING_BUMP_DIVISOR_Joint {200, 200, 200, 200, 200}
+#define HOMING_BUMP_DIVISOR_Joint {80, 40, 20, 80, 50}
 
 //#define QUICK_HOME                     // If homing includes X and Y, do a diagonal move initially
 
@@ -513,7 +513,7 @@
   }
 #define MANUAL2_FEEDRATE                    \
   {                                         \
-    1 * 60, 1 * 60, 2 * 60, 2 * 60, 2 * 60\
+    0.3 * 60, 1 * 60, 2 * 60, 2 * 60, 2 * 60\
   }
 #define ULTIPANEL_FEEDMULTIPLY // Comment to disable setting feedrate multiplier via encoder
 #endif

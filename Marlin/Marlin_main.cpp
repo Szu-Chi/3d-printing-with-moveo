@@ -1977,7 +1977,7 @@ inline float get_homing_bump_feedrate_Joint(const JointEnum axis) {
     SERIAL_ECHO_START();
     SERIAL_ECHOLNPGM("Warning: Homing Bump Divisor < 1");
   }
-  return homing_feedrate_Joint(axis) / hbd;
+  return (float)(homing_feedrate_Joint(axis) / hbd);
 }
 
 /**
