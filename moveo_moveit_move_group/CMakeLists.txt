@@ -68,6 +68,7 @@ link_directories(${catkin_LIBRARY_DIRS})
 add_executable(ik_test src/moveo_ik_test.cpp)
 add_executable(moveo_set_pose src/moveo_set_pose.cpp)
 add_executable(area_test src/area_test.cpp)
+add_executable(area_test_p_n src/area_test_p_n.cpp)
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(ik_test
@@ -79,4 +80,8 @@ target_link_libraries(moveo_set_pose
 target_link_libraries(area_test
   ${catkin_LIBRARIES}
 )
+target_link_libraries(area_test_p_n
+  ${catkin_LIBRARIES}
+)
+
 

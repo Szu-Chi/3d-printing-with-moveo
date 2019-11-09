@@ -59,7 +59,7 @@ std::vector<double> solveJoint(KDL::Frame end_effector_pose){
   KDL::JntArray nominal(chain.getNrOfJoints());
 
   //solving IK
-  KDL::Vector target_bounds_rot(0, 0, 2* M_PI), target_bounds_vel(0,0,0);
+  KDL::Vector target_bounds_rot(0, 0, M_PI*45/180), target_bounds_vel(0,0,0);
   const KDL::Twist target_bounds(target_bounds_vel, target_bounds_rot);
   KDL::JntArray result;
   int rc = tracik_solver.CartToJnt(nominal, end_effector_pose, result, target_bounds);
@@ -118,6 +118,7 @@ void set_target_pose(const geometry_msgs::PoseStamped& chain_end){
 
   KDL::Rotation end_effector_target_rot;
   double end_effector_target_R, end_effector_target_P,end_effector_target_Y;
+  //end_effector_target_rot  = KDL::Rotation::Quaternion(chain_end.pose.orientation.x, chain_end.pose.orientation.y, chain_end.pose.orientation.z, chain_end.pose.orientation.w);
   end_effector_target_rot  = KDL::Rotation::Quaternion(chain_end.pose.orientation.x, chain_end.pose.orientation.y, chain_end.pose.orientation.z, chain_end.pose.orientation.w);
 
   //node_handle.param("end_effector_target_rot", end_effector_rot,(0, 0.3, 0.4));
@@ -140,6 +141,7 @@ void set_target_pose(const geometry_msgs::PoseStamped& chain_end){
   std::vector<double> target_joints = solveJoint(end_effector_pose);
   if (!target_joints.empty()){
     move_group.setJointValueTarget(target_joints);
+    move_group.setPlanningTime(0.5);
     moveit::planning_interface::MoveGroupInterface::Plan my_plan;
     moveit::planning_interface::MoveItErrorCode success = move_group.plan(my_plan);
     visual_tools.publishTrajectoryLine(my_plan.trajectory_, joint_model_group);
