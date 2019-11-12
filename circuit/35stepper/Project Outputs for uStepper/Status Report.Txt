@@ -1,0 +1,12 @@
+Output: NC Drill Files
+Type  : NC Drill
+From  : Project [uStepper.PrjPcb]
+   Generated File[uStepper.TXT]
+   Generated File[uStepper.LDP]
+   Generated File[uStepper.DRR]
+
+
+Files Generated   : 3
+Documents Printed : 0
+
+Finished Output Generation At ¤U¤È 10:12:34 On 2019/11/11

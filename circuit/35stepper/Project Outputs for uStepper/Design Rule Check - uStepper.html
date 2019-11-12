@@ -1,0 +1,730 @@
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html">
+<style type="text/css">
+		h1, h2, h3, h4, h5, h6 {
+			font-family : segoe ui;
+			color : black;
+			background-color : #EDE7D9;
+			padding: 0.3em;
+		}
+
+		h1 {
+			font-size: 1.2em;
+		}		
+
+		h2 {
+			font-size: 1.2em;
+		}
+
+		body {
+			font-family : segoe ui;
+		}
+
+		td, th {
+			padding: 0.5em;
+			text-align : left;
+			width: 10em;
+		}
+		th {
+			background-color : #EEEEEE;
+
+		}
+		th.column1, td.column1 {
+			text-align: left;
+			width : auto;
+		}
+		table {
+			width : 100%;
+			font-size: 0.9em;
+		}
+
+		.DRC_summary_header {
+			padding-bottom : 0.1em;
+			border : 0px solid black;
+			width: 100%;
+			align: left;
+		}
+
+		.DRC_summary_header_col1,
+		.DRC_summary_header_col2, 
+		.DRC_summary_header_col3 {
+			color : black;
+			font-size:100%;
+			padding : 0em;
+			padding-top : 0.2em;
+			padding-bottom 0.2em;
+			border : 0px solid black;
+			vertical-align: top;
+			text-align: left;
+		}
+
+		.DRC_summary_header_col1 {
+			font-weight: bold;
+			width: 8em;
+		}
+
+		.DRC_summary_header_col2 {
+			width: 0.1em;
+		
+		}
+
+		.DRC_summary_header_col3 {
+			width : auto;
+		}
+
+		.header_holder {
+		    Width = 100%;
+		    border = 0px solid green;
+		    padding = 0;
+		}
+
+
+		.front_matter, .front_matter_column1, .front_matter_column2, .front_matter_column3
+		{
+			left : 0;
+			top : 0;
+			padding: 0em;
+			padding-top : 0.1em;
+			border : 0px solid black;
+			width : 100%;
+			vertical-align: top;
+			text-align: left;
+		}
+
+		.front_matter_column1 {
+			width : 8em;
+			font-weight: bold;
+		}
+
+		.front_matter_column2 {
+			width: 0.1em;
+		}
+
+		.front_matter_column3 {
+			width : auto;
+		}
+
+		.total_column1, .total_column {
+			font-weight : bold;
+		}
+		.total_column1 {
+			text-align : left;
+		}
+		.warning, .error {
+			color : red;
+			font-weight : bold;
+		}
+		tr.onmouseout_odd {
+			background-color : #white;
+		}
+		tr.onmouseout_even { 
+			background-color : #FAFAFA;
+		}
+		tr.onmouseover_odd, tr.onmouseover_even { 
+			background-color : #EEEEEE;
+		} 
+		a:link, a:visited, .q a:link,.q a:active,.q {
+			color: #21489e; 
+		}
+		a:link.callback, a:visited.callback { 
+			color: #21489e;
+		}
+		a:link.customize, a:visited.customize {
+			color: #C0C0C0;
+			position: absolute; 
+			right: 10px;
+		}	
+		p.contents_level1 {
+			font-weight : bold;
+			font-size : 110%;
+			margin : 0.5em;
+		}
+		p.contents_level2 {
+			position : relative;
+			left : 20px;
+			margin : 0.5em;
+		}
+	</style><script type="text/javascript">
+		function coordToMils(coord) {
+			var number = coord / 10000;
+			
+			if (number != number.toFixed(3))
+				number = number.toFixed(3);
+
+			return number + 'mil'
+		}
+
+		function coordToMM(coord) {
+			var number = 0.0254 * coord / 10000;
+			
+			if (number != number.toFixed(4))
+				number = number.toFixed(4);
+			
+			return number + 'mm'
+		}
+	
+		function convertCoord(coordNode, units) {
+			for (var i = 0; i < coordNode.childNodes.length; i++) {
+				coordNode.removeChild(coordNode.childNodes[i]);
+			}
+
+			var coord = coordNode.getAttribute('value');
+			if (coord != null) {
+				if (units == 'mm') {
+					textNode = document.createTextNode(coordToMM(coord));
+					coordNode.appendChild(textNode);
+				} else if (units == 'mil') {
+					textNode = document.createTextNode(coordToMils(coord));		
+					coordNode.appendChild(textNode);	
+				}
+			}
+		}
+	
+		function convertUnits(unitNode, units) {
+			for (var i = 0; i < unitNode.childNodes.length; i++) {
+				unitNode.removeChild(unitNode.childNodes[i]);		
+			}
+		
+			textNode = document.createTextNode(units); 
+			unitNode.appendChild(textNode);
+		}
+	
+		function changeUnits(radio_input, units) {
+			if (radio_input.checked) {
+			
+				var elements = document.getElementsByName('coordinate');
+				if (elements) {
+					for (var i = 0; i < elements.length; i++) {
+						convertCoord(elements[i], units);
+					}
+				}
+	
+				var elements = document.getElementsByName('units');
+				if (elements) {
+					for (var i = 0; i < elements.length; i++) {
+						convertUnits(elements[i], units);
+					}
+				}
+			}
+		}
+	</script><title>Design Rule Verification Report</title>
+</head>
+<body onload=""><img ALT="Altium" src="
+			file://C:\Users\Public\Documents\Altium\AD19\Templates\AD_logo.png
+		"><h1>Design Rule Verification Report</h1>
+<table class="header_holder">
+<td class="column1">
+<table class="front_matter">
+<tr class="front_matter">
+<td class="front_matter_column1">Date:</td>
+<td class="front_matter_column2"></td>
+<td class="front_matter_column3">2019/11/11</td>
+</tr>
+<tr class="front_matter">
+<td class="front_matter_column1">Time:</td>
+<td class="front_matter_column2"></td>
+<td class="front_matter_column3">下午 09:54:04</td>
+</tr>
+<tr class="front_matter">
+<td class="front_matter_column1">Elapsed Time:</td>
+<td class="front_matter_column2"></td>
+<td class="front_matter_column3">00:00:00</td>
+</tr>
+<tr class="front_matter">
+<td class="front_matter_column1">Filename:</td>
+<td class="front_matter_column2"></td>
+<td class="front_matter_column3"><a href="file:///D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc" class="file"><acronym title="D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc">D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc</acronym></a></td>
+</tr>
+</table>
+</td>
+<td class="column2">
+<table class="DRC_summary_header">
+<tr>
+<td class="DRC_summary_header_col1">Warnings:</td>
+<td class="DRC_summary_header_col2"></td>
+<td class="DRC_summary_header_col3">0</td></tr>
+<tr>
+<td class="DRC_summary_header_col1">Rule Violations:</td>
+<td class="DRC_summary_header_col2"></td>
+<td class="DRC_summary_header_col3" style="color : red">130</td></tr>
+</table>
+</td>
+</table><a name="ID1N1E4LZCG0RTKAXHWBW23FKALFVQYAMORX31YAMDYBOSKFZCEW3K"><h2>Summary</h2></a><table>
+<tr>
+<th class="column1">Warnings</th>
+<th class="column2">Count</th>
+</tr>
+<tr>
+<td style="font-weight : bold; text-align : right" class="column1">Total</td>
+<td style="font-weight : bold" class="column2">0</td>
+</tr>
+</table><br><table>
+<tr>
+<th class="column1">Rule Violations</th>
+<th class="column2">Count</th>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="#IDLCESNDUIIQTOI5TMK0E413RBXBBZQYFRWYYERICJVFT4A4Z4W3DI">Clearance Constraint (Gap=0.152mm) (All),(All)</a></td>
+<td class="column2">0</td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="#ID3F1MLBESIRLEFCT23BWVPNDKEJVZ03CPZLSSEEPU01BOQ50UX5YL">Short-Circuit Constraint (Allowed=No) (All),(All)</a></td>
+<td class="column2">0</td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="#IDUAU5FQLH4H0WI1HY3QXPVGMLFC3AWTUBQTMUG3LGCZ1I5I3YO25">Un-Routed Net Constraint ( (All) )</a></td>
+<td class="column2">0</td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="#IDZP4N4SAGUO0LIONPOJRIJ1FQYCV2VTSHML1IMNJHCL034NABSHAO">Modified Polygon (Allow modified: No), (Allow shelved: No)</a></td>
+<td class="column2">0</td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="#IDZBCP0XC411BKCWP4TI45MQRQ1HMBF0EH232XICNE3CLFAVSYYRCJ">Width Constraint (Min=0.152mm) (Max=1.27mm) (Preferred=0.254mm) (All)</a></td>
+<td class="column2">0</td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="#IDDSSPD5TBEX20GRBEZOISCHNC5FLJIQF50OKKEIM2DBA20K3DEFMH">Power Plane Connect Rule(Relief Connect )(Expansion=0.508mm) (Conductor Width=0.254mm) (Air Gap=0.254mm) (Entries=4) (All)</a></td>
+<td class="column2">0</td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="#IDWORLL3ZB01INCKVIZRN0KNXC4DGG1V3FTQVDQVMHJUVZH5X4NHLM">Hole Size Constraint (Min=0.025mm) (Max=2.54mm) (All)</a></td>
+<td class="column2">4</td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="#IDE2LNV3BFIIVJO3SKHGOYXIL4DZLLGLHEJ3FTXGNDBRM42JFOTFC">Hole To Hole Clearance (Gap=0.254mm) (All),(All)</a></td>
+<td class="column2">0</td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="#IDCYKGZNHAYQY5G2KGMBXE3NHMILUNTWUDYQRWNFHKM1EGY5HFN1LE">Minimum Solder Mask Sliver (Gap=0.254mm) (All),(All)</a></td>
+<td class="column2">17</td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="#IDMOOBB23UQA0BNEBWG2UV403WTPGTA3VYLCCXFOPHLWNHOGCEP33C">Silk To Solder Mask (Clearance=0.254mm) (IsPad),(All)</a></td>
+<td class="column2">109</td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="#IDI2A1FX0DBBICI15TRDO5P2J5UEX4BLAFV0XAS2EG2X2LG041NELL">Silk to Silk (Clearance=0.254mm) (All),(All)</a></td>
+<td class="column2">0</td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="#IDOG4ONEFGBPCLKRJYZXD21XDU1NHPD4MGFKCZXXFYEMIUTLYPMC5C">Net Antennae (Tolerance=0mm) (All)</a></td>
+<td class="column2">0</td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="#ID0F0EYAOM3CSGOP0D04LEYLET3ERMW4XWXJEOWJLXSAJW12LJQMTP">Room uStepper (Bounding Region = (25.273mm, 25.4mm, 60.325mm, 60.452mm) (InComponentClass('uStepper'))</a></td>
+<td class="column2">0</td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="#IDZHUFEZF51T0AP312D012YLKEEJ05IJK3TTPKBAPOM2XAFIDSKMWD">Height Constraint (Min=0mm) (Max=25.4mm) (Prefered=12.7mm) (All)</a></td>
+<td class="column2">0</td>
+</tr>
+<tr>
+<td style="font-weight : bold; text-align : right" class="column1">Total</td>
+<td style="font-weight : bold" class="column2">130</td>
+</tr>
+</table><br><a name="IDWORLL3ZB01INCKVIZRN0KNXC4DGG1V3FTQVDQVMHJUVZH5X4NHLM"><table>
+<tr>
+<th style="text-align : left" colspan="1" class="rule">Hole Size Constraint (Min=0.025mm) (Max=2.54mm) (All)</th>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=2141.107mil|Location2.X=2260.468mil|Location1.Y=2141.107mil|Location2.Y=2260.468mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=2141.107mil|Location2.X=2260.468mil|Location1.Y=2141.107mil|Location2.Y=2260.468mil|Absolute=True">Hole Size Constraint: (3mm &gt; 2.54mm) Via (30.5mm,30.5mm) from Top Layer to Bottom Layer Actual Hole Size = 3mm</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=2141.107mil|Location2.X=2260.468mil|Location1.Y=1117.485mil|Location2.Y=1236.845mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=2141.107mil|Location2.X=2260.468mil|Location1.Y=1117.485mil|Location2.Y=1236.845mil|Absolute=True">Hole Size Constraint: (3mm &gt; 2.54mm) Via (30.5mm,4.5mm) from Top Layer to Bottom Layer Actual Hole Size = 3mm</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1117.485mil|Location2.X=1236.845mil|Location1.Y=2141.107mil|Location2.Y=2260.468mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1117.485mil|Location2.X=1236.845mil|Location1.Y=2141.107mil|Location2.Y=2260.468mil|Absolute=True">Hole Size Constraint: (3mm &gt; 2.54mm) Via (4.5mm,30.5mm) from Top Layer to Bottom Layer Actual Hole Size = 3mm</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1117.485mil|Location2.X=1236.845mil|Location1.Y=1117.485mil|Location2.Y=1236.845mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1117.485mil|Location2.X=1236.845mil|Location1.Y=1117.485mil|Location2.Y=1236.845mil|Absolute=True">Hole Size Constraint: (3mm &gt; 2.54mm) Via (4.5mm,4.5mm) from Top Layer to Bottom Layer Actual Hole Size = 3mm</acronym></a><br></td>
+</tr>
+</table></a><hr color="#EEEEEE"><a href="#top" style="font-size: 0.9em">Back to top</a><br><br><a name="IDCYKGZNHAYQY5G2KGMBXE3NHMILUNTWUDYQRWNFHKM1EGY5HFN1LE"><table>
+<tr>
+<th style="text-align : left" colspan="1" class="rule">Minimum Solder Mask Sliver (Gap=0.254mm) (All),(All)</th>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1913.855mil|Location2.X=1925.105mil|Location1.Y=1652.665mil|Location2.Y=1666.055mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1913.855mil|Location2.X=1925.105mil|Location1.Y=1652.665mil|Location2.Y=1666.055mil|Absolute=True">Minimum Solder Mask Sliver Constraint: (0.082mm &lt; 0.254mm) Between Pad C11-1(24.003mm,17.653mm) on Top Layer And Via (22.987mm,16.637mm) from Top Layer to Bottom Layer [Top Solder] Mask Sliver [0.082mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1920.375mil|Location2.X=1931.625mil|Location1.Y=1743.125mil|Location2.Y=1754.375mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1920.375mil|Location2.X=1931.625mil|Location1.Y=1743.125mil|Location2.Y=1754.375mil|Absolute=True">Minimum Solder Mask Sliver Constraint: (0.241mm &lt; 0.254mm) Between Pad C4-1(24.003mm,20.003mm) on Bottom Layer And Pad R7-1(24.13mm,18.034mm) on Bottom Layer [Bottom Solder] Mask Sliver [0.241mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=2000.375mil|Location2.X=2011.625mil|Location1.Y=1743.125mil|Location2.Y=1754.375mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=2000.375mil|Location2.X=2011.625mil|Location1.Y=1743.125mil|Location2.Y=1754.375mil|Absolute=True">Minimum Solder Mask Sliver Constraint: (0.241mm &lt; 0.254mm) Between Pad C4-2(26.035mm,20.003mm) on Bottom Layer And Pad R7-2(26.162mm,18.034mm) on Bottom Layer [Bottom Solder] Mask Sliver [0.241mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1444.375mil|Location2.X=1455.625mil|Location1.Y=1884.375mil|Location2.Y=1895.625mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1444.375mil|Location2.X=1455.625mil|Location1.Y=1884.375mil|Location2.Y=1895.625mil|Absolute=True">Minimum Solder Mask Sliver Constraint: (0.051mm &lt; 0.254mm) Between Pad C6-2(10.541mm,22.352mm) on Top Layer And Via (12.065mm,22.606mm) from Top Layer to Bottom Layer [Top Solder] Mask Sliver [0.051mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1913.855mil|Location2.X=1925.105mil|Location1.Y=1643.945mil|Location2.Y=1657.37mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1913.855mil|Location2.X=1925.105mil|Location1.Y=1643.945mil|Location2.Y=1657.37mil|Absolute=True">Minimum Solder Mask Sliver Constraint: (0.082mm &lt; 0.254mm) Between Pad C7-1(24.003mm,15.621mm) on Top Layer And Via (22.987mm,16.637mm) from Top Layer to Bottom Layer [Top Solder] Mask Sliver [0.082mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1885.617mil|Location2.X=1896.867mil|Location1.Y=1636.583mil|Location2.Y=1647.833mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1885.617mil|Location2.X=1896.867mil|Location1.Y=1636.583mil|Location2.Y=1647.833mil|Absolute=True">Minimum Solder Mask Sliver Constraint: (0.251mm &lt; 0.254mm) Between Pad IC2-18(21.694mm,15.825mm) on Top Layer And Via (22.987mm,16.637mm) from Top Layer to Bottom Layer [Top Solder] Mask Sliver [0.251mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1883.765mil|Location2.X=1895.015mil|Location1.Y=1649.375mil|Location2.Y=1660.625mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1883.765mil|Location2.X=1895.015mil|Location1.Y=1649.375mil|Location2.Y=1660.625mil|Absolute=True">Minimum Solder Mask Sliver Constraint: (0.09mm &lt; 0.254mm) Between Pad IC2-19(21.694mm,16.625mm) on Top Layer And Via (22.987mm,16.637mm) from Top Layer to Bottom Layer [Top Solder] Mask Sliver [0.09mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1885.478mil|Location2.X=1896.728mil|Location1.Y=1661.54mil|Location2.Y=1672.84mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1885.478mil|Location2.X=1896.728mil|Location1.Y=1661.54mil|Location2.Y=1672.84mil|Absolute=True">Minimum Solder Mask Sliver Constraint: (0.235mm &lt; 0.254mm) Between Pad IC2-20(21.694mm,17.425mm) on Top Layer And Via (22.987mm,16.637mm) from Top Layer to Bottom Layer [Top Solder] Mask Sliver [0.235mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1772.464mil|Location2.X=1783.714mil|Location1.Y=1826.955mil|Location2.Y=1838.205mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1772.464mil|Location2.X=1783.714mil|Location1.Y=1826.955mil|Location2.Y=1838.205mil|Absolute=True">Minimum Solder Mask Sliver Constraint: (0.219mm &lt; 0.254mm) Between Pad IC2-25(20.244mm,22.075mm) on Top Layer And Via (19.431mm,20.828mm) from Top Layer to Bottom Layer [Top Solder] Mask Sliver [0.219mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1759.375mil|Location2.X=1770.625mil|Location1.Y=1829.08mil|Location2.Y=1840.33mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1759.375mil|Location2.X=1770.625mil|Location1.Y=1829.08mil|Location2.Y=1840.33mil|Absolute=True">Minimum Solder Mask Sliver Constraint: (0.044mm &lt; 0.254mm) Between Pad IC2-26(19.444mm,22.075mm) on Top Layer And Via (19.431mm,20.828mm) from Top Layer to Bottom Layer [Top Solder] Mask Sliver [0.044mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1746.957mil|Location2.X=1758.207mil|Location1.Y=1827.115mil|Location2.Y=1838.365mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1746.957mil|Location2.X=1758.207mil|Location1.Y=1827.115mil|Location2.Y=1838.365mil|Absolute=True">Minimum Solder Mask Sliver Constraint: (0.201mm &lt; 0.254mm) Between Pad IC2-27(18.644mm,22.075mm) on Top Layer And Via (19.431mm,20.828mm) from Top Layer to Bottom Layer [Top Solder] Mask Sliver [0.201mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1470.672mil|Location2.X=1481.922mil|Location1.Y=1912.098mil|Location2.Y=1923.348mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1470.672mil|Location2.X=1481.922mil|Location1.Y=1912.098mil|Location2.Y=1923.348mil|Absolute=True">Minimum Solder Mask Sliver Constraint: (0.191mm &lt; 0.254mm) Between Pad P2-1(12.954mm,24.257mm) on Multi-Layer And Via (12.065mm,22.606mm) from Top Layer to Bottom Layer [Top Solder] Mask Sliver [0.191mm] / [Bottom Solder] Mask Sliver [0.191mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1469.375mil|Location2.X=1480.625mil|Location1.Y=1856.875mil|Location2.Y=1868.125mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1469.375mil|Location2.X=1480.625mil|Location1.Y=1856.875mil|Location2.Y=1868.125mil|Absolute=True">Minimum Solder Mask Sliver Constraint: (0.178mm &lt; 0.254mm) Between Pad R3-1(11.938mm,20.955mm) on Bottom Layer And Via (12.065mm,22.606mm) from Top Layer to Bottom Layer [Bottom Solder] Mask Sliver [0.178mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1916.796mil|Location2.X=1928.046mil|Location1.Y=1649.375mil|Location2.Y=1660.625mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1916.796mil|Location2.X=1928.046mil|Location1.Y=1649.375mil|Location2.Y=1660.625mil|Absolute=True">Minimum Solder Mask Sliver Constraint: (0.182mm &lt; 0.254mm) Between Pad R8-2(24.13mm,15.938mm) on Bottom Layer And Via (22.987mm,16.637mm) from Top Layer to Bottom Layer [Bottom Solder] Mask Sliver [0.182mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1739.185mil|Location2.X=1750.48mil|Location1.Y=1777.995mil|Location2.Y=1789.245mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1739.185mil|Location2.X=1750.48mil|Location1.Y=1777.995mil|Location2.Y=1789.245mil|Absolute=True">Minimum Solder Mask Sliver Constraint: (0.06mm &lt; 0.254mm) Between Pad U1-1(19.85mm,19.577mm) on Bottom Layer And Via (18.669mm,20.193mm) from Top Layer to Bottom Layer [Bottom Solder] Mask Sliver [0.06mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1264.375mil|Location2.X=1275.625mil|Location1.Y=1118.356mil|Location2.Y=1129.606mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1264.375mil|Location2.X=1275.625mil|Location1.Y=1118.356mil|Location2.Y=1129.606mil|Absolute=True">Minimum Solder Mask Sliver Constraint: (0.098mm &lt; 0.254mm) Between Text "SPIE Lab" (6.858mm,1.778mm) on Top Solder And Text "Taipei Tech" (6.731mm,3.556mm) on Top Solder [Top Solder] Mask Sliver [0.098mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1714.375mil|Location2.X=1725.625mil|Location1.Y=1789.375mil|Location2.Y=1800.625mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1714.375mil|Location2.X=1725.625mil|Location1.Y=1789.375mil|Location2.Y=1800.625mil|Absolute=True">Minimum Solder Mask Sliver Constraint: (0.059mm &lt; 0.254mm) Between Via (17.907mm,20.193mm) from Top Layer to Bottom Layer And Via (18.669mm,20.193mm) from Top Layer to Bottom Layer [Top Solder] Mask Sliver [0.059mm] / [Bottom Solder] Mask Sliver [0.059mm]</acronym></a><br></td>
+</tr>
+</table></a><hr color="#EEEEEE"><a href="#top" style="font-size: 0.9em">Back to top</a><br><br><a name="IDMOOBB23UQA0BNEBWG2UV403WTPGTA3VYLCCXFOPHLWNHOGCEP33C"><table>
+<tr>
+<th style="text-align : left" colspan="1" class="rule">Silk To Solder Mask (Clearance=0.254mm) (IsPad),(All)</th>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1919.375mil|Location2.X=1930.625mil|Location1.Y=1747.625mil|Location2.Y=1758.875mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1919.375mil|Location2.X=1930.625mil|Location1.Y=1747.625mil|Location2.Y=1758.875mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.216mm &lt; 0.254mm) Between Pad C4-1(24.003mm,20.003mm) on Bottom Layer And Track (23.495mm,17.145mm)(23.495mm,18.923mm) on Bottom Overlay [Bottom Overlay] to [Bottom Solder] clearance [0.216mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1959.375mil|Location2.X=1970.625mil|Location1.Y=1747.625mil|Location2.Y=1758.875mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1959.375mil|Location2.X=1970.625mil|Location1.Y=1747.625mil|Location2.Y=1758.875mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.216mm &lt; 0.254mm) Between Pad C4-1(24.003mm,20.003mm) on Bottom Layer And Track (23.495mm,18.923mm)(26.797mm,18.923mm) on Bottom Overlay [Bottom Overlay] to [Bottom Solder] clearance [0.216mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=2039.375mil|Location2.X=2050.625mil|Location1.Y=1747.625mil|Location2.Y=1758.875mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=2039.375mil|Location2.X=2050.625mil|Location1.Y=1747.625mil|Location2.Y=1758.875mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.216mm &lt; 0.254mm) Between Pad C4-2(26.035mm,20.003mm) on Bottom Layer And Track (23.495mm,18.923mm)(26.797mm,18.923mm) on Bottom Overlay [Bottom Overlay] to [Bottom Solder] clearance [0.216mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1547.918mil|Location2.X=1559.168mil|Location1.Y=2239.454mil|Location2.Y=2250.704mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1547.918mil|Location2.X=1559.168mil|Location1.Y=2239.454mil|Location2.Y=2250.704mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.25mm &lt; 0.254mm) Between Pad IC1-1(12.885mm,32.125mm) on Top Layer And Track (14.285mm,26.595mm)(14.285mm,33.095mm) on Top Overlay [Top Overlay] to [Top Solder] clearance [0.25mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1547.918mil|Location2.X=1559.168mil|Location1.Y=2059.926mil|Location2.Y=2071.176mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1547.918mil|Location2.X=1559.168mil|Location1.Y=2059.926mil|Location2.Y=2071.176mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.25mm &lt; 0.254mm) Between Pad IC1-3(12.885mm,27.565mm) on Top Layer And Track (14.285mm,26.595mm)(14.285mm,33.095mm) on Top Overlay [Top Overlay] to [Top Solder] clearance [0.25mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1548.273mil|Location2.X=1559.523mil|Location1.Y=1794.572mil|Location2.Y=1805.822mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1548.273mil|Location2.X=1559.523mil|Location1.Y=1794.572mil|Location2.Y=1805.822mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.25mm &lt; 0.254mm) Between Pad IC2-1(13.194mm,20.625mm) on Top Layer And Track (14.294mm,14.675mm)(14.294mm,20.975mm) on Top Overlay [Top Overlay] to [Top Solder] clearance [0.25mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1548.293mil|Location2.X=1559.543mil|Location1.Y=1818.9mil|Location2.Y=1830.15mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1548.293mil|Location2.X=1559.543mil|Location1.Y=1818.9mil|Location2.Y=1830.15mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.254mm &lt; 0.254mm) Between Pad IC2-1(13.194mm,20.625mm) on Top Layer And Track (14.294mm,20.975mm)(20.594mm,20.975mm) on Top Overlay [Top Overlay] to [Top Solder] clearance [0.254mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1615.978mil|Location2.X=1623.644mil|Location1.Y=1501.167mil|Location2.Y=1508.833mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1615.978mil|Location2.X=1623.644mil|Location1.Y=1501.167mil|Location2.Y=1508.833mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (Collision &lt; 0.254mm) Between Pad IC2-10(15.444mm,13.575mm) on Top Layer And Track (11.684mm,12.827mm)(32.004mm,12.827mm) on Top Overlay [Top Overlay] to [Top Solder] clearance [0mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1590.595mil|Location2.X=1601.845mil|Location1.Y=1563.273mil|Location2.Y=1574.523mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1590.595mil|Location2.X=1601.845mil|Location1.Y=1563.273mil|Location2.Y=1574.523mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.25mm &lt; 0.254mm) Between Pad IC2-10(15.444mm,13.575mm) on Top Layer And Track (14.294mm,14.675mm)(20.594mm,14.675mm) on Top Overlay [Top Overlay] to [Top Solder] clearance [0.25mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1647.474mil|Location2.X=1655.14mil|Location1.Y=1501.167mil|Location2.Y=1508.833mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1647.474mil|Location2.X=1655.14mil|Location1.Y=1501.167mil|Location2.Y=1508.833mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (Collision &lt; 0.254mm) Between Pad IC2-11(16.244mm,13.575mm) on Top Layer And Track (11.684mm,12.827mm)(32.004mm,12.827mm) on Top Overlay [Top Overlay] to [Top Solder] clearance [0mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1622.092mil|Location2.X=1633.342mil|Location1.Y=1563.273mil|Location2.Y=1574.523mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1622.092mil|Location2.X=1633.342mil|Location1.Y=1563.273mil|Location2.Y=1574.523mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.25mm &lt; 0.254mm) Between Pad IC2-11(16.244mm,13.575mm) on Top Layer And Track (14.294mm,14.675mm)(20.594mm,14.675mm) on Top Overlay [Top Overlay] to [Top Solder] clearance [0.25mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1678.97mil|Location2.X=1686.637mil|Location1.Y=1501.167mil|Location2.Y=1508.833mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1678.97mil|Location2.X=1686.637mil|Location1.Y=1501.167mil|Location2.Y=1508.833mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (Collision &lt; 0.254mm) Between Pad IC2-12(17.044mm,13.575mm) on Top Layer And Track (11.684mm,12.827mm)(32.004mm,12.827mm) on Top Overlay [Top Overlay] to [Top Solder] clearance [0mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1653.588mil|Location2.X=1664.838mil|Location1.Y=1563.273mil|Location2.Y=1574.523mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1653.588mil|Location2.X=1664.838mil|Location1.Y=1563.273mil|Location2.Y=1574.523mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.25mm &lt; 0.254mm) Between Pad IC2-12(17.044mm,13.575mm) on Top Layer And Track (14.294mm,14.675mm)(20.594mm,14.675mm) on Top Overlay [Top Overlay] to [Top Solder] clearance [0.25mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1710.466mil|Location2.X=1718.133mil|Location1.Y=1501.167mil|Location2.Y=1508.833mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1710.466mil|Location2.X=1718.133mil|Location1.Y=1501.167mil|Location2.Y=1508.833mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (Collision &lt; 0.254mm) Between Pad IC2-13(17.844mm,13.575mm) on Top Layer And Track (11.684mm,12.827mm)(32.004mm,12.827mm) on Top Overlay [Top Overlay] to [Top Solder] clearance [0mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1685.084mil|Location2.X=1696.334mil|Location1.Y=1563.273mil|Location2.Y=1574.523mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1685.084mil|Location2.X=1696.334mil|Location1.Y=1563.273mil|Location2.Y=1574.523mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.25mm &lt; 0.254mm) Between Pad IC2-13(17.844mm,13.575mm) on Top Layer And Track (14.294mm,14.675mm)(20.594mm,14.675mm) on Top Overlay [Top Overlay] to [Top Solder] clearance [0.25mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1741.962mil|Location2.X=1749.629mil|Location1.Y=1501.167mil|Location2.Y=1508.833mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1741.962mil|Location2.X=1749.629mil|Location1.Y=1501.167mil|Location2.Y=1508.833mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (Collision &lt; 0.254mm) Between Pad IC2-14(18.644mm,13.575mm) on Top Layer And Track (11.684mm,12.827mm)(32.004mm,12.827mm) on Top Overlay [Top Overlay] to [Top Solder] clearance [0mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1716.58mil|Location2.X=1727.83mil|Location1.Y=1563.273mil|Location2.Y=1574.523mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1716.58mil|Location2.X=1727.83mil|Location1.Y=1563.273mil|Location2.Y=1574.523mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.25mm &lt; 0.254mm) Between Pad IC2-14(18.644mm,13.575mm) on Top Layer And Track (14.294mm,14.675mm)(20.594mm,14.675mm) on Top Overlay [Top Overlay] to [Top Solder] clearance [0.25mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1773.458mil|Location2.X=1781.125mil|Location1.Y=1501.167mil|Location2.Y=1508.833mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1773.458mil|Location2.X=1781.125mil|Location1.Y=1501.167mil|Location2.Y=1508.833mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (Collision &lt; 0.254mm) Between Pad IC2-15(19.444mm,13.575mm) on Top Layer And Track (11.684mm,12.827mm)(32.004mm,12.827mm) on Top Overlay [Top Overlay] to [Top Solder] clearance [0mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1748.076mil|Location2.X=1759.326mil|Location1.Y=1563.273mil|Location2.Y=1574.523mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1748.076mil|Location2.X=1759.326mil|Location1.Y=1563.273mil|Location2.Y=1574.523mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.25mm &lt; 0.254mm) Between Pad IC2-15(19.444mm,13.575mm) on Top Layer And Track (14.294mm,14.675mm)(20.594mm,14.675mm) on Top Overlay [Top Overlay] to [Top Solder] clearance [0.25mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1804.954mil|Location2.X=1812.621mil|Location1.Y=1501.167mil|Location2.Y=1508.833mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1804.954mil|Location2.X=1812.621mil|Location1.Y=1501.167mil|Location2.Y=1508.833mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (Collision &lt; 0.254mm) Between Pad IC2-16(20.244mm,13.575mm) on Top Layer And Track (11.684mm,12.827mm)(32.004mm,12.827mm) on Top Overlay [Top Overlay] to [Top Solder] clearance [0mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1779.572mil|Location2.X=1790.822mil|Location1.Y=1563.273mil|Location2.Y=1574.523mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1779.572mil|Location2.X=1790.822mil|Location1.Y=1563.273mil|Location2.Y=1574.523mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.25mm &lt; 0.254mm) Between Pad IC2-16(20.244mm,13.575mm) on Top Layer And Track (14.294mm,14.675mm)(20.594mm,14.675mm) on Top Overlay [Top Overlay] to [Top Solder] clearance [0.25mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1803.9mil|Location2.X=1815.15mil|Location1.Y=1563.293mil|Location2.Y=1574.543mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1803.9mil|Location2.X=1815.15mil|Location1.Y=1563.293mil|Location2.Y=1574.543mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.254mm &lt; 0.254mm) Between Pad IC2-16(20.244mm,13.575mm) on Top Layer And Track (20.594mm,14.675mm)(20.594mm,20.975mm) on Top Overlay [Top Overlay] to [Top Solder] clearance [0.254mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1814.001mil|Location2.X=1825.251mil|Location1.Y=1573.394mil|Location2.Y=1584.644mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1814.001mil|Location2.X=1825.251mil|Location1.Y=1573.394mil|Location2.Y=1584.644mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.254mm &lt; 0.254mm) Between Pad IC2-17(21.694mm,15.025mm) on Top Layer And Track (14.294mm,14.675mm)(20.594mm,14.675mm) on Top Overlay [Top Overlay] to [Top Solder] clearance [0.254mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1814.021mil|Location2.X=1825.271mil|Location1.Y=1597.722mil|Location2.Y=1608.972mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1814.021mil|Location2.X=1825.271mil|Location1.Y=1597.722mil|Location2.Y=1608.972mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.25mm &lt; 0.254mm) Between Pad IC2-17(21.694mm,15.025mm) on Top Layer And Track (20.594mm,14.675mm)(20.594mm,20.975mm) on Top Overlay [Top Overlay] to [Top Solder] clearance [0.25mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1814.021mil|Location2.X=1825.271mil|Location1.Y=1629.217mil|Location2.Y=1640.467mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1814.021mil|Location2.X=1825.271mil|Location1.Y=1629.217mil|Location2.Y=1640.467mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.25mm &lt; 0.254mm) Between Pad IC2-18(21.694mm,15.825mm) on Top Layer And Track (20.594mm,14.675mm)(20.594mm,20.975mm) on Top Overlay [Top Overlay] to [Top Solder] clearance [0.25mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1814.021mil|Location2.X=1825.271mil|Location1.Y=1660.714mil|Location2.Y=1671.964mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1814.021mil|Location2.X=1825.271mil|Location1.Y=1660.714mil|Location2.Y=1671.964mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.25mm &lt; 0.254mm) Between Pad IC2-19(21.694mm,16.625mm) on Top Layer And Track (20.594mm,14.675mm)(20.594mm,20.975mm) on Top Overlay [Top Overlay] to [Top Solder] clearance [0.25mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1548.273mil|Location2.X=1559.523mil|Location1.Y=1763.076mil|Location2.Y=1774.326mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1548.273mil|Location2.X=1559.523mil|Location1.Y=1763.076mil|Location2.Y=1774.326mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.25mm &lt; 0.254mm) Between Pad IC2-2(13.194mm,19.825mm) on Top Layer And Track (14.294mm,14.675mm)(14.294mm,20.975mm) on Top Overlay [Top Overlay] to [Top Solder] clearance [0.25mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1814.021mil|Location2.X=1825.271mil|Location1.Y=1692.21mil|Location2.Y=1703.46mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1814.021mil|Location2.X=1825.271mil|Location1.Y=1692.21mil|Location2.Y=1703.46mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.25mm &lt; 0.254mm) Between Pad IC2-20(21.694mm,17.425mm) on Top Layer And Track (20.594mm,14.675mm)(20.594mm,20.975mm) on Top Overlay [Top Overlay] to [Top Solder] clearance [0.25mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1814.021mil|Location2.X=1825.271mil|Location1.Y=1723.706mil|Location2.Y=1734.956mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1814.021mil|Location2.X=1825.271mil|Location1.Y=1723.706mil|Location2.Y=1734.956mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.25mm &lt; 0.254mm) Between Pad IC2-21(21.694mm,18.225mm) on Top Layer And Track (20.594mm,14.675mm)(20.594mm,20.975mm) on Top Overlay [Top Overlay] to [Top Solder] clearance [0.25mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1814.021mil|Location2.X=1825.271mil|Location1.Y=1755.202mil|Location2.Y=1766.452mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1814.021mil|Location2.X=1825.271mil|Location1.Y=1755.202mil|Location2.Y=1766.452mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.25mm &lt; 0.254mm) Between Pad IC2-22(21.694mm,19.025mm) on Top Layer And Track (20.594mm,14.675mm)(20.594mm,20.975mm) on Top Overlay [Top Overlay] to [Top Solder] clearance [0.25mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1814.021mil|Location2.X=1825.271mil|Location1.Y=1786.698mil|Location2.Y=1797.948mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1814.021mil|Location2.X=1825.271mil|Location1.Y=1786.698mil|Location2.Y=1797.948mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.25mm &lt; 0.254mm) Between Pad IC2-23(21.694mm,19.825mm) on Top Layer And Track (20.594mm,14.675mm)(20.594mm,20.975mm) on Top Overlay [Top Overlay] to [Top Solder] clearance [0.25mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1814.001mil|Location2.X=1825.251mil|Location1.Y=1818.9mil|Location2.Y=1830.15mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1814.001mil|Location2.X=1825.251mil|Location1.Y=1818.9mil|Location2.Y=1830.15mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.254mm &lt; 0.254mm) Between Pad IC2-24(21.694mm,20.625mm) on Top Layer And Track (14.294mm,20.975mm)(20.594mm,20.975mm) on Top Overlay [Top Overlay] to [Top Solder] clearance [0.254mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1814.021mil|Location2.X=1825.271mil|Location1.Y=1818.194mil|Location2.Y=1829.444mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1814.021mil|Location2.X=1825.271mil|Location1.Y=1818.194mil|Location2.Y=1829.444mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.25mm &lt; 0.254mm) Between Pad IC2-24(21.694mm,20.625mm) on Top Layer And Track (20.594mm,14.675mm)(20.594mm,20.975mm) on Top Overlay [Top Overlay] to [Top Solder] clearance [0.25mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1779.572mil|Location2.X=1790.822mil|Location1.Y=1894.217mil|Location2.Y=1905.467mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1779.572mil|Location2.X=1790.822mil|Location1.Y=1894.217mil|Location2.Y=1905.467mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.062mm &lt; 0.254mm) Between Pad IC2-25(20.244mm,22.075mm) on Top Layer And Track (11.684mm,22.987mm)(32.004mm,22.987mm) on Top Overlay [Top Overlay] to [Top Solder] clearance [0.062mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1803.194mil|Location2.X=1814.444mil|Location1.Y=1829.021mil|Location2.Y=1840.271mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1803.194mil|Location2.X=1814.444mil|Location1.Y=1829.021mil|Location2.Y=1840.271mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.25mm &lt; 0.254mm) Between Pad IC2-25(20.244mm,22.075mm) on Top Layer And Track (14.294mm,20.975mm)(20.594mm,20.975mm) on Top Overlay [Top Overlay] to [Top Solder] clearance [0.25mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1803.9mil|Location2.X=1815.15mil|Location1.Y=1829.001mil|Location2.Y=1840.251mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1803.9mil|Location2.X=1815.15mil|Location1.Y=1829.001mil|Location2.Y=1840.251mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.254mm &lt; 0.254mm) Between Pad IC2-25(20.244mm,22.075mm) on Top Layer And Track (20.594mm,14.675mm)(20.594mm,20.975mm) on Top Overlay [Top Overlay] to [Top Solder] clearance [0.254mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1748.076mil|Location2.X=1759.326mil|Location1.Y=1894.217mil|Location2.Y=1905.467mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1748.076mil|Location2.X=1759.326mil|Location1.Y=1894.217mil|Location2.Y=1905.467mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.062mm &lt; 0.254mm) Between Pad IC2-26(19.444mm,22.075mm) on Top Layer And Track (11.684mm,22.987mm)(32.004mm,22.987mm) on Top Overlay [Top Overlay] to [Top Solder] clearance [0.062mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1771.698mil|Location2.X=1782.948mil|Location1.Y=1829.021mil|Location2.Y=1840.271mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1771.698mil|Location2.X=1782.948mil|Location1.Y=1829.021mil|Location2.Y=1840.271mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.25mm &lt; 0.254mm) Between Pad IC2-26(19.444mm,22.075mm) on Top Layer And Track (14.294mm,20.975mm)(20.594mm,20.975mm) on Top Overlay [Top Overlay] to [Top Solder] clearance [0.25mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1716.58mil|Location2.X=1727.83mil|Location1.Y=1894.217mil|Location2.Y=1905.467mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1716.58mil|Location2.X=1727.83mil|Location1.Y=1894.217mil|Location2.Y=1905.467mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.062mm &lt; 0.254mm) Between Pad IC2-27(18.644mm,22.075mm) on Top Layer And Track (11.684mm,22.987mm)(32.004mm,22.987mm) on Top Overlay [Top Overlay] to [Top Solder] clearance [0.062mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1740.202mil|Location2.X=1751.452mil|Location1.Y=1829.021mil|Location2.Y=1840.271mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1740.202mil|Location2.X=1751.452mil|Location1.Y=1829.021mil|Location2.Y=1840.271mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.25mm &lt; 0.254mm) Between Pad IC2-27(18.644mm,22.075mm) on Top Layer And Track (14.294mm,20.975mm)(20.594mm,20.975mm) on Top Overlay [Top Overlay] to [Top Solder] clearance [0.25mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1685.084mil|Location2.X=1696.334mil|Location1.Y=1894.217mil|Location2.Y=1905.467mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1685.084mil|Location2.X=1696.334mil|Location1.Y=1894.217mil|Location2.Y=1905.467mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.062mm &lt; 0.254mm) Between Pad IC2-28(17.844mm,22.075mm) on Top Layer And Track (11.684mm,22.987mm)(32.004mm,22.987mm) on Top Overlay [Top Overlay] to [Top Solder] clearance [0.062mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1708.706mil|Location2.X=1719.956mil|Location1.Y=1829.021mil|Location2.Y=1840.271mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1708.706mil|Location2.X=1719.956mil|Location1.Y=1829.021mil|Location2.Y=1840.271mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.25mm &lt; 0.254mm) Between Pad IC2-28(17.844mm,22.075mm) on Top Layer And Track (14.294mm,20.975mm)(20.594mm,20.975mm) on Top Overlay [Top Overlay] to [Top Solder] clearance [0.25mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1653.588mil|Location2.X=1664.838mil|Location1.Y=1894.217mil|Location2.Y=1905.467mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1653.588mil|Location2.X=1664.838mil|Location1.Y=1894.217mil|Location2.Y=1905.467mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.062mm &lt; 0.254mm) Between Pad IC2-29(17.044mm,22.075mm) on Top Layer And Track (11.684mm,22.987mm)(32.004mm,22.987mm) on Top Overlay [Top Overlay] to [Top Solder] clearance [0.062mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1677.21mil|Location2.X=1688.46mil|Location1.Y=1829.021mil|Location2.Y=1840.271mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1677.21mil|Location2.X=1688.46mil|Location1.Y=1829.021mil|Location2.Y=1840.271mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.25mm &lt; 0.254mm) Between Pad IC2-29(17.044mm,22.075mm) on Top Layer And Track (14.294mm,20.975mm)(20.594mm,20.975mm) on Top Overlay [Top Overlay] to [Top Solder] clearance [0.25mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1548.273mil|Location2.X=1559.523mil|Location1.Y=1731.58mil|Location2.Y=1742.83mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1548.273mil|Location2.X=1559.523mil|Location1.Y=1731.58mil|Location2.Y=1742.83mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.25mm &lt; 0.254mm) Between Pad IC2-3(13.194mm,19.025mm) on Top Layer And Track (14.294mm,14.675mm)(14.294mm,20.975mm) on Top Overlay [Top Overlay] to [Top Solder] clearance [0.25mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1622.092mil|Location2.X=1633.342mil|Location1.Y=1894.217mil|Location2.Y=1905.467mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1622.092mil|Location2.X=1633.342mil|Location1.Y=1894.217mil|Location2.Y=1905.467mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.062mm &lt; 0.254mm) Between Pad IC2-30(16.244mm,22.075mm) on Top Layer And Track (11.684mm,22.987mm)(32.004mm,22.987mm) on Top Overlay [Top Overlay] to [Top Solder] clearance [0.062mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1645.714mil|Location2.X=1656.964mil|Location1.Y=1829.021mil|Location2.Y=1840.271mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1645.714mil|Location2.X=1656.964mil|Location1.Y=1829.021mil|Location2.Y=1840.271mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.25mm &lt; 0.254mm) Between Pad IC2-30(16.244mm,22.075mm) on Top Layer And Track (14.294mm,20.975mm)(20.594mm,20.975mm) on Top Overlay [Top Overlay] to [Top Solder] clearance [0.25mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1590.595mil|Location2.X=1601.845mil|Location1.Y=1894.217mil|Location2.Y=1905.467mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1590.595mil|Location2.X=1601.845mil|Location1.Y=1894.217mil|Location2.Y=1905.467mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.062mm &lt; 0.254mm) Between Pad IC2-31(15.444mm,22.075mm) on Top Layer And Track (11.684mm,22.987mm)(32.004mm,22.987mm) on Top Overlay [Top Overlay] to [Top Solder] clearance [0.062mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1614.217mil|Location2.X=1625.467mil|Location1.Y=1829.021mil|Location2.Y=1840.271mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1614.217mil|Location2.X=1625.467mil|Location1.Y=1829.021mil|Location2.Y=1840.271mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.25mm &lt; 0.254mm) Between Pad IC2-31(15.444mm,22.075mm) on Top Layer And Track (14.294mm,20.975mm)(20.594mm,20.975mm) on Top Overlay [Top Overlay] to [Top Solder] clearance [0.25mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1559.1mil|Location2.X=1570.35mil|Location1.Y=1894.217mil|Location2.Y=1905.467mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1559.1mil|Location2.X=1570.35mil|Location1.Y=1894.217mil|Location2.Y=1905.467mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.062mm &lt; 0.254mm) Between Pad IC2-32(14.644mm,22.075mm) on Top Layer And Track (11.684mm,22.987mm)(32.004mm,22.987mm) on Top Overlay [Top Overlay] to [Top Solder] clearance [0.062mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1558.394mil|Location2.X=1569.644mil|Location1.Y=1829.001mil|Location2.Y=1840.251mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1558.394mil|Location2.X=1569.644mil|Location1.Y=1829.001mil|Location2.Y=1840.251mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.254mm &lt; 0.254mm) Between Pad IC2-32(14.644mm,22.075mm) on Top Layer And Track (14.294mm,14.675mm)(14.294mm,20.975mm) on Top Overlay [Top Overlay] to [Top Solder] clearance [0.254mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1582.722mil|Location2.X=1593.972mil|Location1.Y=1829.021mil|Location2.Y=1840.271mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1582.722mil|Location2.X=1593.972mil|Location1.Y=1829.021mil|Location2.Y=1840.271mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.25mm &lt; 0.254mm) Between Pad IC2-32(14.644mm,22.075mm) on Top Layer And Track (14.294mm,20.975mm)(20.594mm,20.975mm) on Top Overlay [Top Overlay] to [Top Solder] clearance [0.25mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1548.273mil|Location2.X=1559.523mil|Location1.Y=1700.084mil|Location2.Y=1711.334mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1548.273mil|Location2.X=1559.523mil|Location1.Y=1700.084mil|Location2.Y=1711.334mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.25mm &lt; 0.254mm) Between Pad IC2-4(13.194mm,18.225mm) on Top Layer And Track (14.294mm,14.675mm)(14.294mm,20.975mm) on Top Overlay [Top Overlay] to [Top Solder] clearance [0.25mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1548.273mil|Location2.X=1559.523mil|Location1.Y=1668.588mil|Location2.Y=1679.838mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1548.273mil|Location2.X=1559.523mil|Location1.Y=1668.588mil|Location2.Y=1679.838mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.25mm &lt; 0.254mm) Between Pad IC2-5(13.194mm,17.425mm) on Top Layer And Track (14.294mm,14.675mm)(14.294mm,20.975mm) on Top Overlay [Top Overlay] to [Top Solder] clearance [0.25mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1548.273mil|Location2.X=1559.523mil|Location1.Y=1637.092mil|Location2.Y=1648.342mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1548.273mil|Location2.X=1559.523mil|Location1.Y=1637.092mil|Location2.Y=1648.342mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.25mm &lt; 0.254mm) Between Pad IC2-6(13.194mm,16.625mm) on Top Layer And Track (14.294mm,14.675mm)(14.294mm,20.975mm) on Top Overlay [Top Overlay] to [Top Solder] clearance [0.25mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1548.273mil|Location2.X=1559.523mil|Location1.Y=1605.595mil|Location2.Y=1616.845mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1548.273mil|Location2.X=1559.523mil|Location1.Y=1605.595mil|Location2.Y=1616.845mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.25mm &lt; 0.254mm) Between Pad IC2-7(13.194mm,15.825mm) on Top Layer And Track (14.294mm,14.675mm)(14.294mm,20.975mm) on Top Overlay [Top Overlay] to [Top Solder] clearance [0.25mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1548.273mil|Location2.X=1559.523mil|Location1.Y=1574.1mil|Location2.Y=1585.35mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1548.273mil|Location2.X=1559.523mil|Location1.Y=1574.1mil|Location2.Y=1585.35mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.25mm &lt; 0.254mm) Between Pad IC2-8(13.194mm,15.025mm) on Top Layer And Track (14.294mm,14.675mm)(14.294mm,20.975mm) on Top Overlay [Top Overlay] to [Top Solder] clearance [0.25mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1548.293mil|Location2.X=1559.543mil|Location1.Y=1573.394mil|Location2.Y=1584.644mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1548.293mil|Location2.X=1559.543mil|Location1.Y=1573.394mil|Location2.Y=1584.644mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.254mm &lt; 0.254mm) Between Pad IC2-8(13.194mm,15.025mm) on Top Layer And Track (14.294mm,14.675mm)(20.594mm,14.675mm) on Top Overlay [Top Overlay] to [Top Solder] clearance [0.254mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1584.482mil|Location2.X=1592.148mil|Location1.Y=1501.167mil|Location2.Y=1508.833mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1584.482mil|Location2.X=1592.148mil|Location1.Y=1501.167mil|Location2.Y=1508.833mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (Collision &lt; 0.254mm) Between Pad IC2-9(14.644mm,13.575mm) on Top Layer And Track (11.684mm,12.827mm)(32.004mm,12.827mm) on Top Overlay [Top Overlay] to [Top Solder] clearance [0mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1558.394mil|Location2.X=1569.644mil|Location1.Y=1563.293mil|Location2.Y=1574.543mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1558.394mil|Location2.X=1569.644mil|Location1.Y=1563.293mil|Location2.Y=1574.543mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.254mm &lt; 0.254mm) Between Pad IC2-9(14.644mm,13.575mm) on Top Layer And Track (14.294mm,14.675mm)(14.294mm,20.975mm) on Top Overlay [Top Overlay] to [Top Solder] clearance [0.254mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1559.1mil|Location2.X=1570.35mil|Location1.Y=1563.273mil|Location2.Y=1574.523mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1559.1mil|Location2.X=1570.35mil|Location1.Y=1563.273mil|Location2.Y=1574.523mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.25mm &lt; 0.254mm) Between Pad IC2-9(14.644mm,13.575mm) on Top Layer And Track (14.294mm,14.675mm)(20.594mm,14.675mm) on Top Overlay [Top Overlay] to [Top Solder] clearance [0.25mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1478.875mil|Location2.X=1490.125mil|Location1.Y=2074.375mil|Location2.Y=2085.625mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1478.875mil|Location2.X=1490.125mil|Location1.Y=2074.375mil|Location2.Y=2085.625mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.025mm &lt; 0.254mm) Between Pad R1-1(13.081mm,26.924mm) on Bottom Layer And Track (12.192mm,26.289mm)(12.192mm,29.591mm) on Bottom Overlay [Bottom Overlay] to [Bottom Solder] clearance [0.025mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1539.375mil|Location2.X=1550.625mil|Location1.Y=2033.875mil|Location2.Y=2045.125mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1539.375mil|Location2.X=1550.625mil|Location1.Y=2033.875mil|Location2.Y=2045.125mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.025mm &lt; 0.254mm) Between Pad R1-1(13.081mm,26.924mm) on Bottom Layer And Track (12.192mm,26.289mm)(13.97mm,26.289mm) on Bottom Overlay [Bottom Overlay] to [Bottom Solder] clearance [0.025mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1539.875mil|Location2.X=1551.125mil|Location1.Y=2034.375mil|Location2.Y=2045.625mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1539.875mil|Location2.X=1551.125mil|Location1.Y=2034.375mil|Location2.Y=2045.625mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.025mm &lt; 0.254mm) Between Pad R1-1(13.081mm,26.924mm) on Bottom Layer And Track (13.97mm,26.289mm)(13.97mm,29.591mm) on Bottom Overlay [Bottom Overlay] to [Bottom Solder] clearance [0.025mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1478.875mil|Location2.X=1490.125mil|Location1.Y=2154.375mil|Location2.Y=2165.625mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1478.875mil|Location2.X=1490.125mil|Location1.Y=2154.375mil|Location2.Y=2165.625mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.025mm &lt; 0.254mm) Between Pad R1-2(13.081mm,28.956mm) on Bottom Layer And Track (12.192mm,26.289mm)(12.192mm,29.591mm) on Bottom Overlay [Bottom Overlay] to [Bottom Solder] clearance [0.025mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1479.375mil|Location2.X=1490.625mil|Location1.Y=2154.875mil|Location2.Y=2166.125mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1479.375mil|Location2.X=1490.625mil|Location1.Y=2154.875mil|Location2.Y=2166.125mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.025mm &lt; 0.254mm) Between Pad R1-2(13.081mm,28.956mm) on Bottom Layer And Track (12.192mm,29.591mm)(13.97mm,29.591mm) on Bottom Overlay [Bottom Overlay] to [Bottom Solder] clearance [0.025mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1539.875mil|Location2.X=1551.125mil|Location1.Y=2114.375mil|Location2.Y=2125.625mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1539.875mil|Location2.X=1551.125mil|Location1.Y=2114.375mil|Location2.Y=2125.625mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.025mm &lt; 0.254mm) Between Pad R1-2(13.081mm,28.956mm) on Bottom Layer And Track (13.97mm,26.289mm)(13.97mm,29.591mm) on Bottom Overlay [Bottom Overlay] to [Bottom Solder] clearance [0.025mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1573.875mil|Location2.X=1585.125mil|Location1.Y=2074.375mil|Location2.Y=2085.625mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1573.875mil|Location2.X=1585.125mil|Location1.Y=2074.375mil|Location2.Y=2085.625mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.025mm &lt; 0.254mm) Between Pad R2-1(15.494mm,26.924mm) on Bottom Layer And Track (14.605mm,26.289mm)(14.605mm,29.591mm) on Bottom Overlay [Bottom Overlay] to [Bottom Solder] clearance [0.025mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1634.375mil|Location2.X=1645.625mil|Location1.Y=2033.875mil|Location2.Y=2045.125mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1634.375mil|Location2.X=1645.625mil|Location1.Y=2033.875mil|Location2.Y=2045.125mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.025mm &lt; 0.254mm) Between Pad R2-1(15.494mm,26.924mm) on Bottom Layer And Track (14.605mm,26.289mm)(16.383mm,26.289mm) on Bottom Overlay [Bottom Overlay] to [Bottom Solder] clearance [0.025mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1634.875mil|Location2.X=1646.125mil|Location1.Y=2034.375mil|Location2.Y=2045.625mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1634.875mil|Location2.X=1646.125mil|Location1.Y=2034.375mil|Location2.Y=2045.625mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.025mm &lt; 0.254mm) Between Pad R2-1(15.494mm,26.924mm) on Bottom Layer And Track (16.383mm,26.289mm)(16.383mm,29.591mm) on Bottom Overlay [Bottom Overlay] to [Bottom Solder] clearance [0.025mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1573.875mil|Location2.X=1585.125mil|Location1.Y=2154.375mil|Location2.Y=2165.625mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1573.875mil|Location2.X=1585.125mil|Location1.Y=2154.375mil|Location2.Y=2165.625mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.025mm &lt; 0.254mm) Between Pad R2-2(15.494mm,28.956mm) on Bottom Layer And Track (14.605mm,26.289mm)(14.605mm,29.591mm) on Bottom Overlay [Bottom Overlay] to [Bottom Solder] clearance [0.025mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1574.375mil|Location2.X=1585.625mil|Location1.Y=2154.875mil|Location2.Y=2166.125mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1574.375mil|Location2.X=1585.625mil|Location1.Y=2154.875mil|Location2.Y=2166.125mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.025mm &lt; 0.254mm) Between Pad R2-2(15.494mm,28.956mm) on Bottom Layer And Track (14.605mm,29.591mm)(16.383mm,29.591mm) on Bottom Overlay [Bottom Overlay] to [Bottom Solder] clearance [0.025mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1634.875mil|Location2.X=1646.125mil|Location1.Y=2114.375mil|Location2.Y=2125.625mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1634.875mil|Location2.X=1646.125mil|Location1.Y=2114.375mil|Location2.Y=2125.625mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.025mm &lt; 0.254mm) Between Pad R2-2(15.494mm,28.956mm) on Bottom Layer And Track (16.383mm,26.289mm)(16.383mm,29.591mm) on Bottom Overlay [Bottom Overlay] to [Bottom Solder] clearance [0.025mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1484.875mil|Location2.X=1496.125mil|Location1.Y=1789.375mil|Location2.Y=1800.625mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1484.875mil|Location2.X=1496.125mil|Location1.Y=1789.375mil|Location2.Y=1800.625mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.025mm &lt; 0.254mm) Between Pad R3-1(11.938mm,20.955mm) on Bottom Layer And Track (12.573mm,20.066mm)(12.573mm,21.844mm) on Bottom Overlay [Bottom Overlay] to [Bottom Solder] clearance [0.025mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1484.375mil|Location2.X=1495.625mil|Location1.Y=1788.875mil|Location2.Y=1800.125mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1484.375mil|Location2.X=1495.625mil|Location1.Y=1788.875mil|Location2.Y=1800.125mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.025mm &lt; 0.254mm) Between Pad R3-1(11.938mm,20.955mm) on Bottom Layer And Track (9.271mm,20.066mm)(12.573mm,20.066mm) on Bottom Overlay [Bottom Overlay] to [Bottom Solder] clearance [0.025mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1444.375mil|Location2.X=1455.625mil|Location1.Y=1849.875mil|Location2.Y=1861.125mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1444.375mil|Location2.X=1455.625mil|Location1.Y=1849.875mil|Location2.Y=1861.125mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.025mm &lt; 0.254mm) Between Pad R3-1(11.938mm,20.955mm) on Bottom Layer And Track (9.271mm,21.844mm)(12.573mm,21.844mm) on Bottom Overlay [Bottom Overlay] to [Bottom Solder] clearance [0.025mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1404.375mil|Location2.X=1415.625mil|Location1.Y=1788.875mil|Location2.Y=1800.125mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1404.375mil|Location2.X=1415.625mil|Location1.Y=1788.875mil|Location2.Y=1800.125mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.025mm &lt; 0.254mm) Between Pad R3-2(9.906mm,20.955mm) on Bottom Layer And Track (9.271mm,20.066mm)(12.573mm,20.066mm) on Bottom Overlay [Bottom Overlay] to [Bottom Solder] clearance [0.025mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1363.875mil|Location2.X=1375.125mil|Location1.Y=1849.375mil|Location2.Y=1860.625mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1363.875mil|Location2.X=1375.125mil|Location1.Y=1849.375mil|Location2.Y=1860.625mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.025mm &lt; 0.254mm) Between Pad R3-2(9.906mm,20.955mm) on Bottom Layer And Track (9.271mm,20.066mm)(9.271mm,21.844mm) on Bottom Overlay [Bottom Overlay] to [Bottom Solder] clearance [0.025mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1364.375mil|Location2.X=1375.625mil|Location1.Y=1849.875mil|Location2.Y=1861.125mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1364.375mil|Location2.X=1375.625mil|Location1.Y=1849.875mil|Location2.Y=1861.125mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.025mm &lt; 0.254mm) Between Pad R3-2(9.906mm,20.955mm) on Bottom Layer And Track (9.271mm,21.844mm)(12.573mm,21.844mm) on Bottom Overlay [Bottom Overlay] to [Bottom Solder] clearance [0.025mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1484.875mil|Location2.X=1496.125mil|Location1.Y=1681.875mil|Location2.Y=1693.125mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1484.875mil|Location2.X=1496.125mil|Location1.Y=1681.875mil|Location2.Y=1693.125mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.025mm &lt; 0.254mm) Between Pad R4-1(11.938mm,18.224mm) on Bottom Layer And Track (12.573mm,17.335mm)(12.573mm,19.113mm) on Bottom Overlay [Bottom Overlay] to [Bottom Solder] clearance [0.025mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1484.375mil|Location2.X=1495.625mil|Location1.Y=1681.375mil|Location2.Y=1692.625mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1484.375mil|Location2.X=1495.625mil|Location1.Y=1681.375mil|Location2.Y=1692.625mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.025mm &lt; 0.254mm) Between Pad R4-1(11.938mm,18.224mm) on Bottom Layer And Track (9.271mm,17.335mm)(12.573mm,17.335mm) on Bottom Overlay [Bottom Overlay] to [Bottom Solder] clearance [0.025mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1444.375mil|Location2.X=1455.625mil|Location1.Y=1742.375mil|Location2.Y=1753.625mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1444.375mil|Location2.X=1455.625mil|Location1.Y=1742.375mil|Location2.Y=1753.625mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.025mm &lt; 0.254mm) Between Pad R4-1(11.938mm,18.224mm) on Bottom Layer And Track (9.271mm,19.113mm)(12.573mm,19.113mm) on Bottom Overlay [Bottom Overlay] to [Bottom Solder] clearance [0.025mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1404.375mil|Location2.X=1415.625mil|Location1.Y=1681.375mil|Location2.Y=1692.625mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1404.375mil|Location2.X=1415.625mil|Location1.Y=1681.375mil|Location2.Y=1692.625mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.025mm &lt; 0.254mm) Between Pad R4-2(9.906mm,18.224mm) on Bottom Layer And Track (9.271mm,17.335mm)(12.573mm,17.335mm) on Bottom Overlay [Bottom Overlay] to [Bottom Solder] clearance [0.025mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1363.875mil|Location2.X=1375.125mil|Location1.Y=1741.875mil|Location2.Y=1753.125mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1363.875mil|Location2.X=1375.125mil|Location1.Y=1741.875mil|Location2.Y=1753.125mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.025mm &lt; 0.254mm) Between Pad R4-2(9.906mm,18.224mm) on Bottom Layer And Track (9.271mm,17.335mm)(9.271mm,19.113mm) on Bottom Overlay [Bottom Overlay] to [Bottom Solder] clearance [0.025mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1364.375mil|Location2.X=1375.625mil|Location1.Y=1742.375mil|Location2.Y=1753.625mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1364.375mil|Location2.X=1375.625mil|Location1.Y=1742.375mil|Location2.Y=1753.625mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.025mm &lt; 0.254mm) Between Pad R4-2(9.906mm,18.224mm) on Bottom Layer And Track (9.271mm,19.113mm)(12.573mm,19.113mm) on Bottom Overlay [Bottom Overlay] to [Bottom Solder] clearance [0.025mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1404.375mil|Location2.X=1415.625mil|Location1.Y=1573.875mil|Location2.Y=1585.125mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1404.375mil|Location2.X=1415.625mil|Location1.Y=1573.875mil|Location2.Y=1585.125mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.025mm &lt; 0.254mm) Between Pad R5-1(9.906mm,15.494mm) on Bottom Layer And Track (9.271mm,14.605mm)(12.573mm,14.605mm) on Bottom Overlay [Bottom Overlay] to [Bottom Solder] clearance [0.025mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1363.875mil|Location2.X=1375.125mil|Location1.Y=1634.375mil|Location2.Y=1645.625mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1363.875mil|Location2.X=1375.125mil|Location1.Y=1634.375mil|Location2.Y=1645.625mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.025mm &lt; 0.254mm) Between Pad R5-1(9.906mm,15.494mm) on Bottom Layer And Track (9.271mm,14.605mm)(9.271mm,16.383mm) on Bottom Overlay [Bottom Overlay] to [Bottom Solder] clearance [0.025mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1364.375mil|Location2.X=1375.625mil|Location1.Y=1634.875mil|Location2.Y=1646.125mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1364.375mil|Location2.X=1375.625mil|Location1.Y=1634.875mil|Location2.Y=1646.125mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.025mm &lt; 0.254mm) Between Pad R5-1(9.906mm,15.494mm) on Bottom Layer And Track (9.271mm,16.383mm)(12.573mm,16.383mm) on Bottom Overlay [Bottom Overlay] to [Bottom Solder] clearance [0.025mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1484.875mil|Location2.X=1496.125mil|Location1.Y=1574.375mil|Location2.Y=1585.625mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1484.875mil|Location2.X=1496.125mil|Location1.Y=1574.375mil|Location2.Y=1585.625mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.025mm &lt; 0.254mm) Between Pad R5-2(11.938mm,15.494mm) on Bottom Layer And Track (12.573mm,14.605mm)(12.573mm,16.383mm) on Bottom Overlay [Bottom Overlay] to [Bottom Solder] clearance [0.025mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1484.375mil|Location2.X=1495.625mil|Location1.Y=1573.875mil|Location2.Y=1585.125mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1484.375mil|Location2.X=1495.625mil|Location1.Y=1573.875mil|Location2.Y=1585.125mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.025mm &lt; 0.254mm) Between Pad R5-2(11.938mm,15.494mm) on Bottom Layer And Track (9.271mm,14.605mm)(12.573mm,14.605mm) on Bottom Overlay [Bottom Overlay] to [Bottom Solder] clearance [0.025mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1444.375mil|Location2.X=1455.625mil|Location1.Y=1634.875mil|Location2.Y=1646.125mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1444.375mil|Location2.X=1455.625mil|Location1.Y=1634.875mil|Location2.Y=1646.125mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.025mm &lt; 0.254mm) Between Pad R5-2(11.938mm,15.494mm) on Bottom Layer And Track (9.271mm,16.383mm)(12.573mm,16.383mm) on Bottom Overlay [Bottom Overlay] to [Bottom Solder] clearance [0.025mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1918.875mil|Location2.X=1930.125mil|Location1.Y=1879.375mil|Location2.Y=1890.625mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1918.875mil|Location2.X=1930.125mil|Location1.Y=1879.375mil|Location2.Y=1890.625mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.025mm &lt; 0.254mm) Between Pad R6-1(24.003mm,21.717mm) on Top Layer And Track (23.368mm,20.828mm)(23.368mm,22.606mm) on Top Overlay [Top Overlay] to [Top Solder] clearance [0.025mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1959.375mil|Location2.X=1970.625mil|Location1.Y=1818.875mil|Location2.Y=1830.125mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1959.375mil|Location2.X=1970.625mil|Location1.Y=1818.875mil|Location2.Y=1830.125mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.025mm &lt; 0.254mm) Between Pad R6-1(24.003mm,21.717mm) on Top Layer And Track (23.368mm,20.828mm)(26.67mm,20.828mm) on Top Overlay [Top Overlay] to [Top Solder] clearance [0.025mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1919.375mil|Location2.X=1930.625mil|Location1.Y=1879.875mil|Location2.Y=1891.125mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1919.375mil|Location2.X=1930.625mil|Location1.Y=1879.875mil|Location2.Y=1891.125mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.025mm &lt; 0.254mm) Between Pad R6-1(24.003mm,21.717mm) on Top Layer And Track (23.368mm,22.606mm)(26.67mm,22.606mm) on Top Overlay [Top Overlay] to [Top Solder] clearance [0.025mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=2039.375mil|Location2.X=2050.625mil|Location1.Y=1818.875mil|Location2.Y=1830.125mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=2039.375mil|Location2.X=2050.625mil|Location1.Y=1818.875mil|Location2.Y=1830.125mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.025mm &lt; 0.254mm) Between Pad R6-2(26.035mm,21.717mm) on Top Layer And Track (23.368mm,20.828mm)(26.67mm,20.828mm) on Top Overlay [Top Overlay] to [Top Solder] clearance [0.025mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1999.375mil|Location2.X=2010.625mil|Location1.Y=1879.875mil|Location2.Y=1891.125mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1999.375mil|Location2.X=2010.625mil|Location1.Y=1879.875mil|Location2.Y=1891.125mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.025mm &lt; 0.254mm) Between Pad R6-2(26.035mm,21.717mm) on Top Layer And Track (23.368mm,22.606mm)(26.67mm,22.606mm) on Top Overlay [Top Overlay] to [Top Solder] clearance [0.025mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=2039.875mil|Location2.X=2051.125mil|Location1.Y=1819.375mil|Location2.Y=1830.625mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=2039.875mil|Location2.X=2051.125mil|Location1.Y=1819.375mil|Location2.Y=1830.625mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.025mm &lt; 0.254mm) Between Pad R6-2(26.035mm,21.717mm) on Top Layer And Track (26.67mm,20.828mm)(26.67mm,22.606mm) on Top Overlay [Top Overlay] to [Top Solder] clearance [0.025mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1923.875mil|Location2.X=1935.125mil|Location1.Y=1734.375mil|Location2.Y=1745.625mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1923.875mil|Location2.X=1935.125mil|Location1.Y=1734.375mil|Location2.Y=1745.625mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.025mm &lt; 0.254mm) Between Pad R7-1(24.13mm,18.034mm) on Bottom Layer And Track (23.495mm,17.145mm)(23.495mm,18.923mm) on Bottom Overlay [Bottom Overlay] to [Bottom Solder] clearance [0.025mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1964.375mil|Location2.X=1975.625mil|Location1.Y=1673.875mil|Location2.Y=1685.125mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1964.375mil|Location2.X=1975.625mil|Location1.Y=1673.875mil|Location2.Y=1685.125mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.025mm &lt; 0.254mm) Between Pad R7-1(24.13mm,18.034mm) on Bottom Layer And Track (23.495mm,17.145mm)(26.797mm,17.145mm) on Bottom Overlay [Bottom Overlay] to [Bottom Solder] clearance [0.025mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1924.375mil|Location2.X=1935.625mil|Location1.Y=1734.875mil|Location2.Y=1746.125mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1924.375mil|Location2.X=1935.625mil|Location1.Y=1734.875mil|Location2.Y=1746.125mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.025mm &lt; 0.254mm) Between Pad R7-1(24.13mm,18.034mm) on Bottom Layer And Track (23.495mm,18.923mm)(26.797mm,18.923mm) on Bottom Overlay [Bottom Overlay] to [Bottom Solder] clearance [0.025mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=2044.375mil|Location2.X=2055.625mil|Location1.Y=1673.875mil|Location2.Y=1685.125mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=2044.375mil|Location2.X=2055.625mil|Location1.Y=1673.875mil|Location2.Y=1685.125mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.025mm &lt; 0.254mm) Between Pad R7-2(26.162mm,18.034mm) on Bottom Layer And Track (23.495mm,17.145mm)(26.797mm,17.145mm) on Bottom Overlay [Bottom Overlay] to [Bottom Solder] clearance [0.025mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=2004.375mil|Location2.X=2015.625mil|Location1.Y=1734.875mil|Location2.Y=1746.125mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=2004.375mil|Location2.X=2015.625mil|Location1.Y=1734.875mil|Location2.Y=1746.125mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.025mm &lt; 0.254mm) Between Pad R7-2(26.162mm,18.034mm) on Bottom Layer And Track (23.495mm,18.923mm)(26.797mm,18.923mm) on Bottom Overlay [Bottom Overlay] to [Bottom Solder] clearance [0.025mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=2044.875mil|Location2.X=2056.125mil|Location1.Y=1674.375mil|Location2.Y=1685.625mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=2044.875mil|Location2.X=2056.125mil|Location1.Y=1674.375mil|Location2.Y=1685.625mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.025mm &lt; 0.254mm) Between Pad R7-2(26.162mm,18.034mm) on Bottom Layer And Track (26.797mm,17.145mm)(26.797mm,18.923mm) on Bottom Overlay [Bottom Overlay] to [Bottom Solder] clearance [0.025mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=2044.375mil|Location2.X=2055.625mil|Location1.Y=1591.375mil|Location2.Y=1602.625mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=2044.375mil|Location2.X=2055.625mil|Location1.Y=1591.375mil|Location2.Y=1602.625mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.025mm &lt; 0.254mm) Between Pad R8-1(26.162mm,15.938mm) on Bottom Layer And Track (23.495mm,15.05mm)(26.797mm,15.05mm) on Bottom Overlay [Bottom Overlay] to [Bottom Solder] clearance [0.025mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=2004.375mil|Location2.X=2015.625mil|Location1.Y=1652.375mil|Location2.Y=1663.625mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=2004.375mil|Location2.X=2015.625mil|Location1.Y=1652.375mil|Location2.Y=1663.625mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.025mm &lt; 0.254mm) Between Pad R8-1(26.162mm,15.938mm) on Bottom Layer And Track (23.495mm,16.828mm)(26.797mm,16.828mm) on Bottom Overlay [Bottom Overlay] to [Bottom Solder] clearance [0.025mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=2044.875mil|Location2.X=2056.125mil|Location1.Y=1591.875mil|Location2.Y=1603.125mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=2044.875mil|Location2.X=2056.125mil|Location1.Y=1591.875mil|Location2.Y=1603.125mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.025mm &lt; 0.254mm) Between Pad R8-1(26.162mm,15.938mm) on Bottom Layer And Track (26.797mm,15.05mm)(26.797mm,16.828mm) on Bottom Overlay [Bottom Overlay] to [Bottom Solder] clearance [0.025mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1923.875mil|Location2.X=1935.125mil|Location1.Y=1651.875mil|Location2.Y=1663.125mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1923.875mil|Location2.X=1935.125mil|Location1.Y=1651.875mil|Location2.Y=1663.125mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.025mm &lt; 0.254mm) Between Pad R8-2(24.13mm,15.938mm) on Bottom Layer And Track (23.495mm,15.05mm)(23.495mm,16.828mm) on Bottom Overlay [Bottom Overlay] to [Bottom Solder] clearance [0.025mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1964.375mil|Location2.X=1975.625mil|Location1.Y=1591.375mil|Location2.Y=1602.625mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1964.375mil|Location2.X=1975.625mil|Location1.Y=1591.375mil|Location2.Y=1602.625mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.025mm &lt; 0.254mm) Between Pad R8-2(24.13mm,15.938mm) on Bottom Layer And Track (23.495mm,15.05mm)(26.797mm,15.05mm) on Bottom Overlay [Bottom Overlay] to [Bottom Solder] clearance [0.025mm]</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=D:\1Side Project\.%E5%A4%A7%E5%AD%B8%E5%B0%88%E9%A1%8C\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1924.375mil|Location2.X=1935.625mil|Location1.Y=1652.375mil|Location2.Y=1663.625mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=D:\1Side Project\.大學專題\3d-printing-with-moveo\circuit\35stepper\uStepper.PcbDoc;viewname=PCBEditor;Action=AREA_DYNAMICZOOM|Location1.X=1924.375mil|Location2.X=1935.625mil|Location1.Y=1652.375mil|Location2.Y=1663.625mil|Absolute=True">Silk To Solder Mask Clearance Constraint: (0.025mm &lt; 0.254mm) Between Pad R8-2(24.13mm,15.938mm) on Bottom Layer And Track (23.495mm,16.828mm)(26.797mm,16.828mm) on Bottom Overlay [Bottom Overlay] to [Bottom Solder] clearance [0.025mm]</acronym></a><br></td>
+</tr>
+</table></a><hr color="#EEEEEE"><a href="#top" style="font-size: 0.9em">Back to top</a><br><br></body>
+</html>
