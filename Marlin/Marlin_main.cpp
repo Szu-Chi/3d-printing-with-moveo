@@ -1977,6 +1977,7 @@ inline float get_homing_bump_feedrate_Joint(const JointEnum axis) {
     SERIAL_ECHO_START();
     SERIAL_ECHOLNPGM("Warning: Homing Bump Divisor < 1");
   }
+  
   return (float)(homing_feedrate_Joint(axis) / hbd);
 }
 
@@ -4121,7 +4122,7 @@ static void do_homing_move_Joint(const JointEnum axis, const float distance, con
     sync_plan_position();
     current_position_Joint[axis] = distance; // Set delta/cartesian axes directly
     planner.buffer_line_joint(0,0,0,current_position_Joint[Joint1_AXIS], current_position_Joint[Joint2_AXIS],
-      current_position_Joint[Joint3_AXIS], current_position_Joint[Joint4_AXIS], current_position_Joint[Joint5_AXIS],0, fr_mm_s ? fr_mm_s : homing_feedrate_Joint(axis), active_extruder);
+      current_position_Joint[Joint3_AXIS], current_position_Joint[Joint4_AXIS], current_position_Joint[Joint5_AXIS],0, fr_mm_s ? fr_mm_s : (homing_feedrate_Joint(axis)/10), active_extruder);
   #endif
 
   planner.synchronize();
@@ -4420,7 +4421,7 @@ static void homeJoint(const JointEnum axis) {
     if (axis == Z_AXIS && set_bltouch_deployed(true)) return;
   #endif
 
-  //*
+  /*
   SERIAL_ECHOLNPAIR("Joint_home_dir:",Joint_home_dir);
   SERIAL_ECHOPAIR("max_length_Joint(",Joint_codes[axis]);
   SERIAL_ECHOLNPAIR("):",max_length_Joint(axis));
@@ -4443,7 +4444,7 @@ static void homeJoint(const JointEnum axis) {
   SERIAL_ECHOPAIR(", Joint3_MAX_LENGTH:",base_max_pos_Joint(2)-base_min_pos_Joint(2));
   SERIAL_ECHOPAIR(", Joint4_MAX_LENGTH:",base_max_pos_Joint(3)-base_min_pos_Joint(3));
   SERIAL_ECHOLNPAIR(", Joint5_MAX_LENGTH:",base_max_pos_Joint(4)-base_min_pos_Joint(4));
-  //*/
+  /*/
 
   do_homing_move_Joint(axis, 1.5f * max_length_Joint(axis) * Joint_home_dir, manual_feedrate_mm_m_joint[axis]);
   //do_homing_move_Joint(axis, 1.5f * (base_max_pos_Joint(axis)-base_min_pos_Joint(axis)) * Joint_home_dir);
@@ -4482,7 +4483,6 @@ static void homeJoint(const JointEnum axis) {
       // BLTOUCH needs to be deployed every time
       if (axis == Z_AXIS && set_bltouch_deployed(true)) return;
     #endif
-
     do_homing_move_Joint(axis, 2 * bump , get_homing_bump_feedrate_Joint(axis));
 
     #if HOMING_Z_WITH_PROBE && ENABLED(BLTOUCH)
