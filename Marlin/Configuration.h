@@ -181,10 +181,7 @@
 //#define SWITCHING_EXTRUDER
 #if ENABLED(SWITCHING_EXTRUDER)
 #define SWITCHING_EXTRUDER_SERVO_NR 0
-#define SWITCHING_EXTRUDER_SERVO_ANGLES                                                                                                                        \
-  {                                                                                                                                                            \
-    0, 90                                                                                                                                                      \
-  } // Angles for E0, E1[, E2, E3]
+#define SWITCHING_EXTRUDER_SERVO_ANGLES{0, 90} // Angles for E0, E1[, E2, E3]
 #if EXTRUDERS > 3
 #define SWITCHING_EXTRUDER_E23_SERVO_NR 1
 #endif
@@ -194,10 +191,7 @@
 //#define SWITCHING_NOZZLE
 #if ENABLED(SWITCHING_NOZZLE)
 #define SWITCHING_NOZZLE_SERVO_NR 0
-#define SWITCHING_NOZZLE_SERVO_ANGLES                                                                                                                          \
-  {                                                                                                                                                            \
-    0, 90                                                                                                                                                      \
-  } // Angles for E0, E1
+#define SWITCHING_NOZZLE_SERVO_ANGLES {0, 90} // Angles for E0, E1
 //#define HOTEND_OFFSET_Z { 0.0, 0.0 }
 #endif
 
@@ -211,16 +205,10 @@
                                                    // magnetized with applied voltage
 #define PARKING_EXTRUDER_SOLENOIDS_PINS_ACTIVE LOW // LOW or HIGH pin signal energizes the coil
 #define PARKING_EXTRUDER_SOLENOIDS_DELAY       250 // Delay (ms) for magnetic field. No delay if 0 or not defined.
-#define PARKING_EXTRUDER_PARKING_X                                                                                                                             \
-  {                                                                                                                                                            \
-    -78, 184                                                                                                                                                   \
-  }                                       // X positions for parking the extruders
+#define PARKING_EXTRUDER_PARKING_X {-78, 184}                                       // X positions for parking the extruders
 #define PARKING_EXTRUDER_GRAB_DISTANCE  1 // mm to move beyond the parking point to grab the extruder
 #define PARKING_EXTRUDER_SECURITY_RAISE 5 // Z-raise before parking
-#define HOTEND_OFFSET_Z                                                                                                                                        \
-  {                                                                                                                                                            \
-    0.0, 1.3                                                                                                                                                   \
-  } // Z-offsets of the two hotends. The first must be 0.
+#define HOTEND_OFFSET_Z {0.0, 1.3} // Z-offsets of the two hotends. The first must be 0.
 #endif
 
 /**
@@ -411,10 +399,10 @@
 
 // Comment the following line to disable PID and enable bang-bang.
 #define PIDTEMP
-#define BANG_MAX 255      // Limits current to nozzle while in bang-bang mode; 255=full current
-#define PID_MAX  BANG_MAX // Limits current to nozzle while PID is active (see
-                          // PID_FUNCTIONAL_RANGE below); 255=full current
-#define PID_K1 0.95       // Smoothing factor within any PID loop
+#define BANG_MAX 255 // Limits current to nozzle while in bang-bang mode; 255=full current
+#define PID_MAX BANG_MAX// Limits current to nozzle while PID is active (see 
+                    // PID_FUNCTIONAL_RANGE below); 255=full current
+#define PID_K1 0.95 // Smoothing factor within any PID loop
 #if ENABLED(PIDTEMP)
 //#define PID_AUTOTUNE_MENU // Add PID Autotune to the LCD "Temperature" menu to
 // run M303 and apply the result. #define PID_DEBUG // Sends debug data to the
@@ -424,9 +412,8 @@
 // useful for heaters driven by a relay #define PID_PARAMS_PER_HOTEND // Uses
 // separate PID parameters for each extruder (useful for mismatched extruders)
 // Set/get with gcode: M301 E[extruder number, 0-2]
-#define PID_FUNCTIONAL_RANGE                                                                                                                                   \
-  10 // If the temperature difference between the target temperature and the actual temperature
-     // is more than PID_FUNCTIONAL_RANGE then the PID will be shut off and the heater will be set to min/max.
+#define PID_FUNCTIONAL_RANGE 10  // If the temperature difference between the target temperature and the actual temperature 
+      // is more than PID_FUNCTIONAL_RANGE then the PID will be shut off and the heater will be set to min/max.
 
 // If you are using a pre-configured hotend then you can use one of the value
 // sets by uncommenting it
@@ -538,7 +525,7 @@
  * details can be tuned in Configuration_adv.h
  */
 
-#define THERMAL_PROTECTION_HOTENDS // Enable thermal protection for all
+#define THERMAL_PROTECTION_HOTENDS // Enable thermal protection for all 
                                    // extruders
 #define THERMAL_PROTECTION_BED     // Enable thermal protection for the heated bed
 
@@ -705,20 +692,14 @@
  *                                      X, Y, Z, E0 [, E1[, E2[, E3[, E4]]]]
  */
 
-#define DEFAULT_AXIS_STEPS_PER_UNIT                                                                                                                            \
-  {                                                                                                                                                            \
-    80, 80, 4000, 418.5                                                                                                                                        \
-  }
+#define DEFAULT_AXIS_STEPS_PER_UNIT {80, 80, 4000, 418.5}
 
 /**
  * Default Max Feed Rate (mm/s)
  * Override with M203
  *                                      X, Y, Z, E0 [, E1[, E2[, E3[, E4]]]]
  */
-#define DEFAULT_MAX_FEEDRATE                                                                                                                                   \
-  {                                                                                                                                                            \
-    300, 300, 5, 25                                                                                                                                            \
-  }
+#define DEFAULT_MAX_FEEDRATE {300, 300, 5, 25}
 
 /**
  * Default Max Acceleration (change/s) change = mm/s
@@ -726,10 +707,7 @@
  * Override with M201
  *                                      X, Y, Z, E0 [, E1[, E2[, E3[, E4]]]]
  */
-#define DEFAULT_MAX_ACCELERATION                                                                                                                               \
-  {                                                                                                                                                            \
-    3000, 3000, 100, 10000                                                                                                                                     \
-  }
+#define DEFAULT_MAX_ACCELERATION {3000, 3000, 100, 10000}
 
 /**
  * Default Acceleration (change/s) change = mm/s
@@ -828,10 +806,7 @@
  * Z Servo Probe, such as an endstop switch on a rotating arm.
  */
 #define Z_PROBE_SERVO_NR 0 // Defaults to SERVO 0 connector.
-#define Z_SERVO_ANGLES                                                                                                                                         \
-  {                                                                                                                                                            \
-    70, 0                                                                                                                                                      \
-  } // Z Servo Deploy and Stow angles
+#define Z_SERVO_ANGLES {70, 0} // Z Servo Deploy and Stow angles
 
 /**
  * The BLTouch probe uses a Hall effect sensor and emulates a servo.
@@ -1108,7 +1083,7 @@
  */
 //#define FILAMENT_RUNOUT_SENSOR
 #if ENABLED(FILAMENT_RUNOUT_SENSOR)
-#define NUM_RUNOUT_SENSORS 1         // Number of sensors, up to one per extruder. Define a FIL_RUNOUT#_PIN for
+#define NUM_RUNOUT_SENSORS 1        // Number of sensors, up to one per extruder. Define a FIL_RUNOUT#_PIN for 
                                      // each.
 #define FIL_RUNOUT_INVERTING   false // set to true to invert the logic of the sensor.
 #define FIL_RUNOUT_PULLUP            // Use internal pullup for filament runout pins.
@@ -1243,9 +1218,9 @@
 #define GRID_MAX_POINTS_X 10 // Don't use more than 15 points per axis, implementation limited.
 #define GRID_MAX_POINTS_Y GRID_MAX_POINTS_X
 
-#define UBL_MESH_EDIT_MOVES_Z   // Sophisticated users prefer no movement of
+#define UBL_MESH_EDIT_MOVES_Z   // Sophisticated users prefer no movement of 
                                 // nozzle
-#define UBL_SAVE_ACTIVE_ON_M500 // Save the currently active mesh in the current
+#define UBL_SAVE_ACTIVE_ON_M500 // Save the currently active mesh in the current 
                                 // slot on M500
 
 //#define UBL_Z_RAISE_WHEN_OFF_MESH 2.5 // When the nozzle is off the mesh, this
@@ -1416,7 +1391,7 @@
 //
 #define EEPROM_SETTINGS // Enable for M500 and M501 commands
 #define DISABLE_M503    // Saves ~2700 bytes of PROGMEM. Disable for release!
-#define EEPROM_CHITCHAT // Give feedback on EEPROM commands. Disable to save
+#define EEPROM_CHITCHAT // Give feedback on EEPROM commands. Disable to save 
                         // PROGMEM.
 
 //
@@ -1425,10 +1400,10 @@
 // When enabled Marlin will send a busy status message to the host
 // every couple of seconds when it can't accept commands.
 //
-#define HOST_KEEPALIVE_FEATURE       // Disable this if your host doesn't like
+#define HOST_KEEPALIVE_FEATURE       // Disable this if your host doesn't like 
                                      // keepalive messages
 #define DEFAULT_KEEPALIVE_INTERVAL 2 // Number of seconds between "busy" messages. Set with M113.
-#define BUSY_WHILE_HEATING           // Some hosts require "busy" messages even during
+#define BUSY_WHILE_HEATING           // Some hosts require "busy" messages even during 
                                      // heating
 
 //
@@ -1473,10 +1448,7 @@
 
 #if ENABLED(NOZZLE_PARK_FEATURE)
 // Specify a park position as { X, Y, Z }
-#define NOZZLE_PARK_POINT                                                                                                                                      \
-  {                                                                                                                                                            \
-    (X_MIN_POS + 10), (Y_MAX_POS - 10), 20                                                                                                                     \
-  }
+#define NOZZLE_PARK_POINT {(X_MIN_POS + 10), (Y_MAX_POS - 10), 20}
 #define NOZZLE_PARK_XY_FEEDRATE 100 // X and Y axes feedrate in mm/s (also used for delta printers Z axis)
 #define NOZZLE_PARK_Z_FEEDRATE  5   // Z axis feedrate in mm/s (not used for delta printers)
 #endif
@@ -1529,14 +1501,8 @@
 #define NOZZLE_CLEAN_TRIANGLES 3
 
 // Specify positions as { X, Y, Z }
-#define NOZZLE_CLEAN_START_POINT                                                                                                                               \
-  {                                                                                                                                                            \
-    30, 30, (Z_MIN_POS + 1)                                                                                                                                    \
-  }
-#define NOZZLE_CLEAN_END_POINT                                                                                                                                 \
-  {                                                                                                                                                            \
-    100, 60, (Z_MIN_POS + 1)                                                                                                                                   \
-  }
+#define NOZZLE_CLEAN_START_POINT {0, 30, (Z_MIN_POS + 1)}
+#define NOZZLE_CLEAN_END_POINT {100, 60, (Z_MIN_POS + 1)}
 
 // Circular pattern radius
 #define NOZZLE_CLEAN_CIRCLE_RADIUS 6.5
@@ -2100,13 +2066,13 @@
 // Support for Adafruit Neopixel LED driver
 //#define NEOPIXEL_LED
 #if ENABLED(NEOPIXEL_LED)
-#define NEOPIXEL_TYPE NEO_GRBW    // NEO_GRBW / NEO_GRB - four/three channel driver type (defined in
-                                  // Adafruit_NeoPixel.h)
-#define NEOPIXEL_PIN 4            // LED driving pin on motherboard 4 => D4 (EXP2-5 on Printrboard) / 30 =>
+#define NEOPIXEL_TYPE NEO_GRBW // NEO_GRBW / NEO_GRB - four/three channel driver type (defined in 
+           // Adafruit_NeoPixel.h)
+#define NEOPIXEL_PIN 4                               // LED driving pin on motherboard 4 => D4 (EXP2-5 on Printrboard) / 30 => 
                                   // PC7 (EXP3-13 on Rumba)
 #define NEOPIXEL_PIXELS        30 // Number of LEDs in the strip
-#define NEOPIXEL_IS_SEQUENTIAL    // Sequential display for temperature change -
-                                  // LED by LED. Disable to change all LEDs at
+#define NEOPIXEL_IS_SEQUENTIAL    // Sequential display for temperature change - 
+                                  // LED by LED. Disable to change all LEDs at   
                                   // once.
 #define NEOPIXEL_BRIGHTNESS 127   // Initial brightness (0-255)
 //#define NEOPIXEL_STARTUP_TEST  // Cycle through colors at startup
@@ -2144,10 +2110,7 @@
 // Delay (in milliseconds) before the next move will start, to give the servo
 // time to reach its target angle. 300ms is a good value but you can try less
 // delay. If the servo can't reach the requested position, increase it.
-#define SERVO_DELAY                                                                                                                                            \
-  {                                                                                                                                                            \
-    300                                                                                                                                                        \
-  }
+#define SERVO_DELAY {300}
 //#define DEACTIVATE_SERVOS_AFTER_MOVE
 
 #endif // CONFIGURATION_H
