@@ -72,6 +72,9 @@ void safe_delay(millis_t ms);
   // Convert signed float to string with +123.45 format
   char* ftostr52sign(const float &x);
 
+  // Convert signed float to string with +123456 format
+  char* ftostr6sign(const int32_t &f);
+
   // Convert unsigned float to string with 1234.56 format omitting trailing zeros
   char* ftostr62rj(const float &x);
 

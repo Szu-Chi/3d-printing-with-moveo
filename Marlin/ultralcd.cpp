@@ -2979,14 +2979,9 @@ void lcd_quick_feedback(const bool clear_buttons) {
     if (processing_manual_move) return;
 
     if (manual_move_joint != (int8_t)NO_AXIS && ELAPSED(millis(), manual_move_start_time) && !planner.is_full()) {
-      
-      /*stepper.set_position_Joint_manual(current_position_Joint[Joint1_AXIS],
-                                        current_position_Joint[Joint2_AXIS],
-                                        current_position_Joint[Joint3_AXIS],
-                                        current_position_Joint[Joint4_AXIS],
-                                        current_position_Joint[Joint5_AXIS]
-                                      );*/
-        planner.buffer_line_kinematic_joint(current_position_Joint, MMM_TO_MMS(manual_feedrate_mm_m_joint[manual_move_joint]), manual_move_axis == E_AXIS ? manual_move_e_index : active_extruder);
+        planner.buffer_line_kinematic_joint(current_position_Joint, 
+                                            MMM_TO_MMS(manual_feedrate_mm_m_joint[manual_move_joint]), 
+                                            manual_move_axis == E_AXIS ? manual_move_e_index : active_extruder);
         manual_move_joint = (int8_t)NO_AXIS;
     }
   }
@@ -3160,8 +3155,8 @@ void lcd_quick_feedback(const bool clear_buttons) {
     ENCODER_DIRECTION_NORMAL();
     if (encoderPosition && !processing_manual_move) {      
       // Start with no limits to movement
-      float min = current_position[axis] - 1000,
-            max = current_position[axis] + 1000;
+      float min = current_position[axis] - 100,
+            max = current_position[axis] + 100;
 
       // Limit to software endstops, if enabled
       #if ENABLED(MIN_SOFTWARE_ENDSTOPS) || ENABLED(MAX_SOFTWARE_ENDSTOPS)
@@ -3219,7 +3214,7 @@ void lcd_quick_feedback(const bool clear_buttons) {
         NOLESS(current_position_Joint[axis], min);
       else
         NOMORE(current_position_Joint[axis], max);
-    
+
       manual_move_to_current_Joint(axis);
       lcdDrawUpdate = LCDVIEW_REDRAW_NOW;
     }
@@ -3230,7 +3225,7 @@ void lcd_quick_feedback(const bool clear_buttons) {
           + manual_move_offset
         #endif
       , axis);
-      lcd_implementation_drawedit(name, ftostr5sign(pos));
+      lcd_implementation_drawedit(name, ftostr6sign(pos));
     }
   }
 
@@ -3439,7 +3434,7 @@ void lcd_quick_feedback(const bool clear_buttons) {
     #endif
 
     if (_MOVE_XYZ_ALLOWED) {
-      if (_MOVE_XY_ALLOWED) {
+      /*if (_MOVE_XY_ALLOWED) {
         MENU_ITEM(submenu, MSG_MOVE_X, lcd_move_get_x_amount);
         MENU_ITEM(submenu, MSG_MOVE_Y, lcd_move_get_y_amount);
       }
@@ -3449,7 +3444,7 @@ void lcd_quick_feedback(const bool clear_buttons) {
       #endif
 
       MENU_ITEM(submenu, MSG_MOVE_Z, lcd_move_get_z_amount);
-
+      */
       //joint
       MENU_ITEM(submenu, MSG_MOVE_J, lcd_move_get_J_amount);
       MENU_ITEM(submenu, MSG_MOVE_A, lcd_move_get_A_amount);
