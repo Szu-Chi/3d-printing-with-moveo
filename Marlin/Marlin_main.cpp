@@ -6896,7 +6896,7 @@ void home_all_axes() { gcode_G28(true); }
 
               char str_G29[80];            
                 
-              dtostrf(diff, 5, 2, str_G29);
+              dtostrf(diff, 5, 5, str_G29);
               strcat(str_G29, " ");                           
               card.write_Str(str_G29);              
             } // xx
