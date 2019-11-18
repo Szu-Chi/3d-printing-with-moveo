@@ -39,6 +39,7 @@ public:
 
   void initsd();
   void write_command(char *buf);
+  void write_Str(char *buf);
 
   void beginautostart();
   void checkautostart();

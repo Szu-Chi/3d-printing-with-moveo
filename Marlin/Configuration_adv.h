@@ -503,18 +503,9 @@
 
 #if ENABLED(ULTIPANEL)
 
-#define MANUAL_FEEDRATE          \
-  {                              \
-    50 * 60, 50 * 60, 4 * 60, 60 \
-  } // Feedrates for manual moves along X, Y, Z, E from panel
-#define MANUAL1_FEEDRATE                    \
-  {                                         \
-    15 * 60, 60 * 60, 120 * 60, 50 * 60, 5 * 60\
-  }
-#define MANUAL2_FEEDRATE                    \
-  {                                         \
-    0.3 * 60, 1 * 60, 2 * 60, 2 * 60, 2 * 60\
-  }
+#define MANUAL_FEEDRATE {50 * 60, 50 * 60, 4 * 60, 60} // Feedrates for manual moves along X, Y, Z, E from panel
+#define MANUAL1_FEEDRATE {15 * 60, 60 * 60, 120 * 60, 50 * 60, 5 * 60}
+#define MANUAL2_FEEDRATE {0.3 * 60, 1 * 60, 2 * 60, 2 * 60, 2 * 60}
 #define ULTIPANEL_FEEDMULTIPLY // Comment to disable setting feedrate multiplier via encoder
 #endif
 

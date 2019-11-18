@@ -510,6 +510,9 @@
 #ifndef MSG_MOVE_100step
   #define MSG_MOVE_100step                    _UxGT("Move 100step")
 #endif
+#ifndef MSG_MOVE_1000step
+  #define MSG_MOVE_1000step                    _UxGT("Move 1000step")
+#endif
 
 
 #ifndef MSG_SPEED

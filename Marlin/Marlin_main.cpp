@@ -907,7 +907,7 @@ XYZ_CONSTS_FROM_CONFIG(signed char, home_dir, HOME_DIR);
 Joint_CONSTS_FROM_CONFIG(float, base_min_pos_Joint,   MIN_POS); 
 Joint_CONSTS_FROM_CONFIG(float, base_max_pos_Joint,   MAX_POS); 
 Joint_CONSTS_FROM_CONFIG(float, base_home_pos_Joint,  HOME_POS);
-Joint_CONSTS_FROM_CONFIG(float, max_length_Joint,     MAX_LENGTH); Joint1_MAX_LENGTH
+Joint_CONSTS_FROM_CONFIG(float, max_length_Joint,     MAX_LENGTH);
 Joint_CONSTS_FROM_CONFIG(float, home_bump_mm_Joint,   HOME_BUMP_MM);
 Joint_CONSTS_FROM_CONFIG(signed char, home_dir_Joint, HOME_DIR); 
 
