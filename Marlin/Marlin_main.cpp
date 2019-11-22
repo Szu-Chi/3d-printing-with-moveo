@@ -4135,6 +4135,7 @@ static void do_homing_move_Joint(const JointEnum axis, const float distance, con
   #else
     sync_plan_position();
     current_position_Joint[axis] = distance; // Set delta/cartesian axes directly
+    if(axis==Joint2_AXIS) current_position_Joint[Joint3_AXIS] = Joint2_MAX_POS/2;
     planner.buffer_line_joint(0,0,0,current_position_Joint[Joint1_AXIS], current_position_Joint[Joint2_AXIS],
       current_position_Joint[Joint3_AXIS], current_position_Joint[Joint4_AXIS], current_position_Joint[Joint5_AXIS],0, fr_mm_s ? fr_mm_s : (homing_feedrate_Joint(axis)/10), active_extruder);
   #endif
@@ -4186,6 +4187,7 @@ static void do_move_Joint(const JointEnum axis, const float distance, const floa
 
   sync_plan_position();
   current_position_Joint[axis] = distance; // Set delta/cartesian axes directly
+  if(axis==Joint2_AXIS) current_position_Joint[Joint3_AXIS] = distance;
   planner.buffer_line_joint(0,0,0,current_position_Joint[Joint1_AXIS], current_position_Joint[Joint2_AXIS],
                             current_position_Joint[Joint3_AXIS], current_position_Joint[Joint4_AXIS], current_position_Joint[Joint5_AXIS],0, fr_mm_s ? fr_mm_s : homing_feedrate_Joint(axis), active_extruder);
 
