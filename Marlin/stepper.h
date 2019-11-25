@@ -356,6 +356,8 @@ public:
   // Get the position of a stepper, in steps
   static int32_t position(const AxisEnum axis);
   static int32_t position_Joint(const JointEnum axis);
+
+  
   static void set_position_Joint_manual(const int32_t &J1, const int32_t &J2, const int32_t &J3, const int32_t &J4, const int32_t &J5);
 
   // Report the positions of the steppers, in steps
@@ -483,6 +485,7 @@ public:
       ENABLE_STEPPER_DRIVER_INTERRUPT();
   }
 
+  
 private:
   // Set the current position in steps
   static void _set_position(const int32_t &a, const int32_t &b, const int32_t &c

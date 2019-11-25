@@ -4120,7 +4120,7 @@ static void do_homing_move_Joint(const JointEnum axis, const float distance, con
   #else
     sync_plan_position();
     current_position_Joint[axis] = distance; // Set delta/cartesian axes directly
-    planner.buffer_line_joint(0,0,0,current_position_Joint[Joint1_AXIS], current_position_Joint[Joint2_AXIS],
+    planner.buffer_line_joint(46.027,88.366,0,current_position_Joint[Joint1_AXIS], current_position_Joint[Joint2_AXIS],
       current_position_Joint[Joint3_AXIS], current_position_Joint[Joint4_AXIS], current_position_Joint[Joint5_AXIS],0, fr_mm_s ? fr_mm_s : (homing_feedrate_Joint(axis)/10), active_extruder);
   #endif
 
@@ -4308,7 +4308,8 @@ static void homeaxis(const AxisEnum axis) {
       if (axis == X_AXIS) {
         const float adj = ABS(endstops.x_endstop_adj);
         if (adj) {
-          if (pos_dir ? (endstops.x_endstop_adj > 0) : (endstops.x_endstop_adj < 0)) stepper.set_x_lock(true); else stepper.set_x2_lock(true);
+          if (pos_dir ? (endstops.x_endstop_adj > 0) : (endstops.x_endstop_adj < 0)) stepper.set_x_lock(true); else 
+          set_x2_lock(true);
           do_homing_move(axis, pos_dir ? -adj : adj);
           stepper.set_x_lock(false);
           stepper.set_x2_lock(false);
@@ -4463,6 +4464,7 @@ static void homeJoint(const JointEnum axis) {
 
   // If a second homing move is configured...
   if (bump) {
+    SERIAL_ECHOLNPAIR("Joint1_Current_MIN_POS:",stepper.position_Joint(Joint4_AXIS));
     // Move away from the endstop by the axis HOME_BUMP_MM
     #if ENABLED(DEBUG_LEVELING_FEATURE)
       if (DEBUGGING(LEVELING)) SERIAL_ECHOLNPGM("Move Away:");
