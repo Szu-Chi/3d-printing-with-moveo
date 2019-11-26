@@ -3328,7 +3328,8 @@ void lcd_quick_feedback(const bool clear_buttons) {
   void lcd_move_menu_1mm()  { _goto_manual_move(1); }
   void lcd_move_menu_01mm() { _goto_manual_move(0.1f); }
 
-  void lcd_move_menu_1000step()  { _goto_manual_move(1000); }
+  void lcd_move_menu_1000step() { _goto_manual_move(1000); }
+  void lcd_move_menu_500step()  { _goto_manual_move(500); }
   void lcd_move_menu_100step()  { _goto_manual_move(100); }
   void lcd_move_menu_10step()   { _goto_manual_move(10); }
   void lcd_move_menu_1step()    { _goto_manual_move(1); }
@@ -3375,6 +3376,9 @@ void lcd_quick_feedback(const bool clear_buttons) {
     MENU_BACK(MSG_MOVE_AXIS);
     if(axis==Joint2_AXIS || axis==Joint3_AXIS || axis==Joint4_AXIS) {
       MENU_ITEM(submenu, MSG_MOVE_1000step, lcd_move_menu_1000step);
+    }
+    else if(axis==Joint5_AXIS) {
+      MENU_ITEM(submenu, MSG_MOVE_500step, lcd_move_menu_500step);
     }
     else{
       MENU_ITEM(submenu, MSG_MOVE_100step, lcd_move_menu_100step);

@@ -599,7 +599,7 @@ static const float homing_feedrate_mm_s_Joint[] PROGMEM = {
   MMM_TO_MMS(HOMING_FEEDRATE_Joint) 
 };
 FORCE_INLINE float homing_feedrate(const AxisEnum a) { return pgm_read_float(&homing_feedrate_mm_s[a]); }
-FORCE_INLINE float homing_feedrate_Joint(const JointEnum a) { return pgm_read_float(&homing_feedrate_mm_s_Joint[a]); }
+FORCE_INLINE float homing_feedrate_Joint(const JointEnum a) { return pgm_read_float(&homing_feedrate_mm_s_Joint[a])/10; }
 
 float feedrate_mm_s = MMM_TO_MMS(1500.0f);
 const float manual_feedrate_mm_m_joint[] = MANUAL2_FEEDRATE;
