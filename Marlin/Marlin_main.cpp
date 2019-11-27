@@ -4121,7 +4121,7 @@ static void do_homing_move_Joint(const JointEnum axis, const float distance, con
     sync_plan_position();
     current_position_Joint[axis] = distance; // Set delta/cartesian axes directly
     planner.buffer_line_joint(46.027,88.366,0,current_position_Joint[Joint1_AXIS], current_position_Joint[Joint2_AXIS],
-      current_position_Joint[Joint3_AXIS], current_position_Joint[Joint4_AXIS], current_position_Joint[Joint5_AXIS],0, fr_mm_s ? fr_mm_s : (homing_feedrate_Joint(axis)/10), active_extruder);
+      current_position_Joint[Joint3_AXIS], current_position_Joint[Joint4_AXIS], current_position_Joint[Joint5_AXIS],0, (fr_mm_s > 0) ? fr_mm_s : (homing_feedrate_Joint(axis)/10), active_extruder);
   #endif
 
   planner.synchronize();
@@ -4464,7 +4464,7 @@ static void homeJoint(const JointEnum axis) {
 
   // If a second homing move is configured...
   if (bump) {
-    SERIAL_ECHOLNPAIR("Joint1_Current_MIN_POS:",stepper.position_Joint(Joint4_AXIS));
+    //SERIAL_ECHOLNPAIR("Joint1_Current_MIN_POS:",stepper.position_Joint(Joint4_AXIS));
     // Move away from the endstop by the axis HOME_BUMP_MM
     #if ENABLED(DEBUG_LEVELING_FEATURE)
       if (DEBUGGING(LEVELING)) SERIAL_ECHOLNPGM("Move Away:");
@@ -4472,6 +4472,8 @@ static void homeJoint(const JointEnum axis) {
     do_homing_move_Joint(axis, -bump
       #if HOMING_Z_WITH_PROBE
         , axis == Z_AXIS ? MMM_TO_MMS(Z_PROBE_SPEED_FAST) : 0.00
+      #else
+      , manual_feedrate_mm_m_joint[axis]/1.6
       #endif
     );
 
