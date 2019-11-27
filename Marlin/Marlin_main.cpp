@@ -4461,6 +4461,10 @@ static void homeJoint(const JointEnum axis) {
   SERIAL_ECHOPAIR(", Joint4_MAX_LENGTH:",base_max_pos_Joint(3)-base_min_pos_Joint(3));
   SERIAL_ECHOLNPAIR(", Joint5_MAX_LENGTH:",base_max_pos_Joint(4)-base_min_pos_Joint(4));
   /*/
+   
+  if(axis==Joint2_AXIS)current_position_Joint[Joint3_AXIS]=Joint2_MAX_POS/2;
+  sync_plan_position_noprint();
+  buffer_line_to_current_position();
 
   do_homing_move_Joint(axis, 1.5f * max_length_Joint(axis) * Joint_home_dir, manual_feedrate_mm_m_joint[axis]);
   //do_homing_move_Joint(axis, 1.5f * (base_max_pos_Joint(axis)-base_min_pos_Joint(axis)) * Joint_home_dir);
