@@ -604,7 +604,7 @@ static const float homing_feedrate_mm_s_Joint[] PROGMEM = {
   MMM_TO_MMS(HOMING_FEEDRATE_Joint) 
 };
 FORCE_INLINE float homing_feedrate(const AxisEnum a) { return pgm_read_float(&homing_feedrate_mm_s[a]); }
-FORCE_INLINE float homing_feedrate_Joint(const JointEnum a) { return pgm_read_float(&homing_feedrate_mm_s_Joint[a]); }
+FORCE_INLINE float homing_feedrate_Joint(const JointEnum a) { return pgm_read_float(&homing_feedrate_mm_s_Joint[a])/10; }
 
 float feedrate_mm_s = MMM_TO_MMS(1500.0f);
 const float manual_feedrate_mm_m_joint[] = MANUAL2_FEEDRATE;
@@ -4136,7 +4136,7 @@ static void do_homing_move_Joint(const JointEnum axis, const float distance, con
     sync_plan_position();
     current_position_Joint[axis] = distance; // Set delta/cartesian axes directly
     if(axis==Joint2_AXIS) current_position_Joint[Joint3_AXIS] = Joint2_MAX_POS/2;
-    planner.buffer_line_joint(0,0,0,current_position_Joint[Joint1_AXIS], current_position_Joint[Joint2_AXIS],
+    planner.buffer_line_joint(46.027,88.366,0,current_position_Joint[Joint1_AXIS], current_position_Joint[Joint2_AXIS],
       current_position_Joint[Joint3_AXIS], current_position_Joint[Joint4_AXIS], current_position_Joint[Joint5_AXIS],0, fr_mm_s ? fr_mm_s : (homing_feedrate_Joint(axis)/10), active_extruder);
   #endif
 
@@ -4325,7 +4325,8 @@ static void homeaxis(const AxisEnum axis) {
       if (axis == X_AXIS) {
         const float adj = ABS(endstops.x_endstop_adj);
         if (adj) {
-          if (pos_dir ? (endstops.x_endstop_adj > 0) : (endstops.x_endstop_adj < 0)) stepper.set_x_lock(true); else stepper.set_x2_lock(true);
+          if (pos_dir ? (endstops.x_endstop_adj > 0) : (endstops.x_endstop_adj < 0)) stepper.set_x_lock(true); else 
+          set_x2_lock(true);
           do_homing_move(axis, pos_dir ? -adj : adj);
           stepper.set_x_lock(false);
           stepper.set_x2_lock(false);
@@ -4461,10 +4462,11 @@ static void homeJoint(const JointEnum axis) {
   SERIAL_ECHOPAIR(", Joint4_MAX_LENGTH:",base_max_pos_Joint(3)-base_min_pos_Joint(3));
   SERIAL_ECHOLNPAIR(", Joint5_MAX_LENGTH:",base_max_pos_Joint(4)-base_min_pos_Joint(4));
   /*/
-   
+  
   if(axis==Joint2_AXIS)current_position_Joint[Joint3_AXIS]=Joint2_MAX_POS/2;
   sync_plan_position_noprint();
   buffer_line_to_current_position();
+
 
   do_homing_move_Joint(axis, 1.5f * max_length_Joint(axis) * Joint_home_dir, manual_feedrate_mm_m_joint[axis]);
   //do_homing_move_Joint(axis, 1.5f * (base_max_pos_Joint(axis)-base_min_pos_Joint(axis)) * Joint_home_dir);
@@ -4484,6 +4486,7 @@ static void homeJoint(const JointEnum axis) {
 
   // If a second homing move is configured...
   if (bump) {
+    //SERIAL_ECHOLNPAIR("Joint1_Current_MIN_POS:",stepper.position_Joint(Joint4_AXIS));
     // Move away from the endstop by the axis HOME_BUMP_MM
     #if ENABLED(DEBUG_LEVELING_FEATURE)
       if (DEBUGGING(LEVELING)) SERIAL_ECHOLNPGM("Move Away:");
@@ -4491,6 +4494,8 @@ static void homeJoint(const JointEnum axis) {
     do_homing_move_Joint(axis, -bump
       #if HOMING_Z_WITH_PROBE
         , axis == Z_AXIS ? MMM_TO_MMS(Z_PROBE_SPEED_FAST) : 0.00
+      #else
+      , manual_feedrate_mm_m_joint[axis]/1.6
       #endif
     );
 
