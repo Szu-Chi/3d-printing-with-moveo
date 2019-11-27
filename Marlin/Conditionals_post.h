@@ -49,10 +49,10 @@
 //*/
 
 #define Joint1_MAX_LENGTH 49600
-#define Joint2_MAX_LENGTH 89200
-#define Joint3_MAX_LENGTH 243500
-#define Joint4_MAX_LENGTH 345600
-#define Joint5_MAX_LENGTH 81750
+#define Joint2_MAX_LENGTH 84000
+#define Joint3_MAX_LENGTH 220000
+#define Joint4_MAX_LENGTH 147500
+#define Joint5_MAX_LENGTH 38500
 
 // Defined only if the sanity-check is bypassed
 #ifndef X_BED_SIZE
