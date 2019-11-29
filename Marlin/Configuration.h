@@ -1007,9 +1007,9 @@
 #define Z_MAX_POS 200
 
 #define J_MIN_POS_step -24800
-#define A_MIN_POS_step -42000
-#define B_MIN_POS_step -110000
-#define C_MIN_POS_step -35690
+#define A_MIN_POS_step -43000
+#define B_MIN_POS_step -107000
+#define C_MIN_POS_step -36690
 #define D_MIN_POS_step -18000
 
 #define J_MAX_POS_step 24800
@@ -1020,9 +1020,9 @@
 
 // joint
 #define Joint1_MIN_POS -24800
-#define Joint2_MIN_POS -42000
-#define Joint3_MIN_POS -110000
-#define Joint4_MIN_POS -35690
+#define Joint2_MIN_POS -43000
+#define Joint3_MIN_POS -107000
+#define Joint4_MIN_POS -36690
 #define Joint5_MIN_POS -18000
 
 // joint
