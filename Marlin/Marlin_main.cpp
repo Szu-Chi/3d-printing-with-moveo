@@ -2418,18 +2418,26 @@ void do_blocking_move_to(const float rx, const float ry, const float rz, const f
   Set_current_Joint_Curve_More(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS]);
   buffer_line_to_current_position();
 
+  if (current_position[Z_AXIS] > rz) {
+      SERIAL_ECHOLNPGM("//To High//");
+      feedrate_mm_s = z_feedrate;
+      current_position[Z_AXIS] = rz;
+      Set_current_Joint_Curve_More(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS]);
+      buffer_line_to_current_position();
+  }
+
   // If Z needs to lower, do it after moving XY
+  /*
   if (current_position[Z_AXIS] > rz) {
     feedrate_mm_s = z_feedrate;
 
     // Set_current_Joint_Slope(current_position_Joint,HOME_position_Slope,Delta_Z_01mm(current_position[Z_AXIS],rz));
     // Set_current_Joint_Slope(current_position_Joint,HOME_position_Slope,100);
     SERIAL_ECHOLNPGM("//To High//");
-
-    /*
+    
     current_position[Z_AXIS] = rz;
     buffer_line_to_current_position();
-    //*/
+    //
     bool probe_triggered1=0;    
     do
     { 
@@ -2442,6 +2450,7 @@ void do_blocking_move_to(const float rx, const float ry, const float rz, const f
       probe_triggered1 = TEST(endstops.trigger_state(),Z_MIN_PROBE);
     } while (current_position[Z_AXIS]>rz && probe_triggered1 == 0);
   }
+  //*/
   /*------------------------New------------------------*/
 
   #endif
@@ -2493,6 +2502,16 @@ void do_blocking_move_to_Joint(const float rx, const float ry, const float rz, c
   Set_current_Joint_Curve_More(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS]);
   buffer_line_to_current_position();
   // If Z needs to lower, do it after moving XY
+
+  if (current_position[Z_AXIS] > rz) {
+      SERIAL_ECHOLNPGM("//To High//");
+      feedrate_mm_s = z_feedrate;
+
+      current_position[Z_AXIS] = rz;
+      Set_current_Joint_Curve_More(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS]);
+      buffer_line_to_current_position();
+  }
+  /*
   if (current_position[Z_AXIS] > rz) {
     feedrate_mm_s = z_feedrate;
 
@@ -2500,13 +2519,14 @@ void do_blocking_move_to_Joint(const float rx, const float ry, const float rz, c
     // Set_current_Joint_Slope(current_position_Joint,HOME_position_Slope,100);
     SERIAL_ECHOLNPGM("//To High//");
 
-    /*
-    current_position[Z_AXIS] = rz;
-    buffer_line_to_current_position();
-    //*/
+    
+    // current_position[Z_AXIS] = rz;
+    // buffer_line_to_current_position();
+    
+    
     bool probe_triggered1=0;    
     do
-    { 
+    {
       current_position[Z_AXIS] -= 0.01;
       Set_current_Joint_Curve_More(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS]);
       SERIAL_ECHOLN(current_position[Z_AXIS]);
@@ -2514,8 +2534,9 @@ void do_blocking_move_to_Joint(const float rx, const float ry, const float rz, c
       sync_plan_position_noprint();
       buffer_line_to_current_position();
       probe_triggered1 = TEST(endstops.trigger_state(),Z_MIN_PROBE);
-    } while (current_position[Z_AXIS]>rz && probe_triggered1 == 0);
+    } while (current_position[Z_AXIS]>rz && probe_triggered1 == 0);  
   }
+  //*/
 
   planner.synchronize();
 
@@ -3260,7 +3281,15 @@ void clean_up_after_endstop_or_probe_move() {
     #endif
 
     // Move down until probe triggered
-    do_blocking_move_to_z(z, fr_mm_s);
+    while( (current_position[Z_AXIS]>=z) && !(TEST(endstops.trigger_state(),Z_MIN_PROBE) != 0) )
+    {
+      current_position[Z_AXIS]=current_position[Z_AXIS]-0.01;
+      do_blocking_move_to_z(current_position[Z_AXIS], fr_mm_s);
+    }
+
+    SERIAL_ECHOLNPAIR("current_position[Z_AXIS]:",current_position[Z_AXIS]);
+    sync_plan_position();
+    // do_blocking_move_to_z(z, fr_mm_s);
 
     // Check to see if the probe was triggered
     const bool probe_triggered = TEST(endstops.trigger_state(),
@@ -3270,6 +3299,7 @@ void clean_up_after_endstop_or_probe_move() {
         Z_MIN_PROBE
       #endif
     );
+    
 
     /*SERIAL_ECHOPAIR("hit_state:",endstops.trigger_state());
     SERIAL_ECHOLNPAIR("  probe_triggered:",probe_triggered);*/
