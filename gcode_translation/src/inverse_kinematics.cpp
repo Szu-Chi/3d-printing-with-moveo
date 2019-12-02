@@ -21,6 +21,27 @@
 
 #include <stdio.h>
 #include <unistd.h>
+int decimal_point(double &A){
+  std::string change = std::to_string(A);
+  bool point = 0;
+  for(int i = 0;i<change.size();i++){
+    if(change[i] == '.'){
+      point = 1;
+    }
+    if(point == 1){
+      if(change[i+3] == '0'){
+        if(change[i+2] == '0'){
+          if(change[i+1] == '0'){
+            return 0;
+          }
+          return 1;
+        }
+        return 2;
+      }
+      return 3;
+    }
+  }
+}
 bool check_trac_ik_valid(TRAC_IK::TRAC_IK &tracik_solver,KDL::Chain &chain, KDL::JntArray &ll, KDL::JntArray &ul){
   bool valid = tracik_solver.getKDLChain(chain);
   //ROS_INFO_NAMED("moveo", "TRAC-IK setup");
@@ -37,9 +58,15 @@ bool check_trac_ik_valid(TRAC_IK::TRAC_IK &tracik_solver,KDL::Chain &chain, KDL:
   }
   return true;
 }
-
+//1028.57143*4*4.523809*0.95/5.18*100
 void motor_setep_convert(Eigen::VectorXd &data){
-  static const double joint_division[6] = {200*32*10.533*0.95, 200*128*5.71428*0.95, 1028.57143*16*4.523809*0.95/4/5.18*100, 200*32*27, 200*16*4.666*5};
+                                        // steps * micro_steps * belt * error
+  static const double joint_division[6] = {200          * 32  * 10.533   * 0.95,  //J
+                                           200          * 128 * 5.71428  * 0.95,  //A 
+                                           19810.111813 * 4   * 4.523809 * 0.95,  //B
+                                           5370.24793   * 32  * 1        * 1,     //C
+                                           1036.36364   * 16  * 4.666    * 1      //D
+                                           };
   for(int i = 0; i < 5; i++){
     data(i) = data(i)/(M_PI)*180 * joint_division[i]/360;
   }
@@ -69,6 +96,10 @@ int main(int argc, char **argv){
   node_handle.param("urdf_param", urdf_param, std::string("/robot_description"));
   node_handle.param("eps", eps, 1e-5);
   node_handle.param("num_threads", num_threads, omp_get_num_procs()*2);
+  double X_offset, Y_offset, Z_offset;
+  node_handle.param("X_offset", X_offset, 0.0);
+  node_handle.param("Y_offset", Y_offset, 0.3);
+  node_handle.param("Z_offset", Z_offset,-0.085);
 
   KDL::Chain chain;
   KDL::JntArray ll, ul; //lower joint limits, upper joint limits
@@ -105,13 +136,12 @@ int main(int argc, char **argv){
   node_handle.param("g_n_judge_Y", g_n_judge_Y, std::string("/g_n_judge_Y"));
   std::ifstream input_file_first(g_n_judge_Y);
   if(!input_file_first.is_open())ROS_ERROR_STREAM("Can't open " <<g_n_judge_Y);
-  double judge_Y[331002];
+  std::vector<double> judge_Y;
   std::string line;
   int all_line = 0;
   while(input_file_first){
     std::getline(input_file_first, line);
-    judge_Y[all_line] = stod(line.substr(0));
-    all_line++;
+    judge_Y.push_back(stod(line.substr(0)));
   }
   input_file_first.close();
   ROS_INFO_STREAM("Read judge_Y file success");
@@ -157,15 +187,15 @@ int main(int argc, char **argv){
             if(!line.compare(0,2,"G0") || !line.compare(0,2,"G1")){
               size_t colon_pos_X = line.find('X');
               if(colon_pos_X < 100){
-                end_effector_target_vol.data[0] = (stod(line.substr(colon_pos_X+1))*1e-3);//-0.0139
+                end_effector_target_vol.data[0] = (stod(line.substr(colon_pos_X+1))*1e-3)+X_offset;
               }
               size_t colon_pos_Y = line.find('Y');
               if(colon_pos_Y < 100){
-                end_effector_target_vol.data[1] = (stod(line.substr(colon_pos_Y+1))*1e-3)+0.3;//-0.3+0.25-0.0589
+                end_effector_target_vol.data[1] = (stod(line.substr(colon_pos_Y+1))*1e-3)+Y_offset;
               }
               size_t colon_pos_Z = line.find('Z');
               if(colon_pos_Z < 100){
-                end_effector_target_vol.data[2] = (stod(line.substr(colon_pos_Z+1))*1e-3)-0.085;//+0.085+0.09
+                end_effector_target_vol.data[2] = (stod(line.substr(colon_pos_Z+1))*1e-3)+Z_offset;
               }
               find_end_effector_target_vol.push_back(end_effector_target_vol);
               save_place.push_back(i);
@@ -268,7 +298,6 @@ int main(int argc, char **argv){
             planning_scene.checkSelfCollision(collision_request, collision_result);
             if(collision_result.collision == 0){
               motor_setep_convert(save_result.at(pop_out).data);
-              output_file  << " " << save_p_or_n[pop_out];
               bool need_change = 0;
               if(pop_out > 0){
                 previous_save_p_or_n = save_p_or_n[pop_out-1];
@@ -308,8 +337,10 @@ int main(int argc, char **argv){
                     output_file << " " << joint_code[i] << int(result.data(i));
                   }
                   if(save_p_or_n[pop_out] == 0){
-                    output_file << std::fixed << std::setprecision(3) << " X" << (output_end_effector_target_vol.data[0])*1e3 << std::defaultfloat;//+0.0139
-                    output_file << std::fixed << std::setprecision(3) << " Y" << (output_end_effector_target_vol.data[1]-0.3)*1e3 << std::defaultfloat;//+0.3-0.25+0.0589
+                    double decimal_x = (output_end_effector_target_vol.data[0]-X_offset)*1e3;
+                    double decimal_y = (output_end_effector_target_vol.data[1]-Y_offset)*1e3;
+                    output_file << std::fixed << std::setprecision(decimal_point(decimal_x)) << " X" << (output_end_effector_target_vol.data[0]-X_offset)*1e3 << std::defaultfloat;
+                    output_file << std::fixed << std::setprecision(decimal_point(decimal_y)) << " Y" << (output_end_effector_target_vol.data[1]-Y_offset)*1e3 << std::defaultfloat;
                   }
                   else{
                     for(int j = 2;j < line.length(); j++){
@@ -318,7 +349,6 @@ int main(int argc, char **argv){
                   }
                   output_file << std::endl;
                   output_file << line[0] << line[1];
-                  output_file  << " " << save_p_or_n[pop_out];
                   for(int i = 0;i < chain.getNrOfJoints(); i++){
                     static const char joint_code[6] = {'J', 'A', 'B', 'C', 'D'};
                     output_file << " " << joint_code[i] << int(save_result.at(pop_out).data(i));
@@ -329,9 +359,10 @@ int main(int argc, char **argv){
                     }
                   }
                   else{
-                    output_file << std::fixed << std::setprecision(3) << " X" << (output_end_effector_target_vol.data[0])*1e3 << std::defaultfloat;//+0.0139
-                    output_file << std::fixed << std::setprecision(3) << " Y" << (output_end_effector_target_vol.data[1]-0.3)*1e3 << std::defaultfloat;//+0.3-0.25+0.0589
-                    output_file << " 111111111111111111111";
+                    double decimal_x = (output_end_effector_target_vol.data[0]-X_offset)*1e3;
+                    double decimal_y = (output_end_effector_target_vol.data[1]-Y_offset)*1e3;
+                    output_file << std::fixed << std::setprecision(decimal_point(decimal_x)) << " X" << (output_end_effector_target_vol.data[0]-X_offset)*1e3 << std::defaultfloat;
+                    output_file << std::fixed << std::setprecision(decimal_point(decimal_y)) << " Y" << (output_end_effector_target_vol.data[1]-Y_offset)*1e3 << std::defaultfloat;
                   }
                   output_file << std::endl;
                 }
@@ -389,6 +420,8 @@ int main(int argc, char **argv){
     ROS_INFO_STREAM("second_execution: " << second_execution);
     ROS_INFO_STREAM("can't exectution:" << error_num);
     ROS_INFO_STREAM("Exectution time (s): " << execution_time);
+    input_file.close();
+    output_file.close();
     ros::shutdown();
   }
   return 0;
