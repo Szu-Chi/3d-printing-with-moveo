@@ -806,7 +806,7 @@
  * Z Servo Probe, such as an endstop switch on a rotating arm.
  */
 #define Z_PROBE_SERVO_NR 0 // Defaults to SERVO 0 connector.
-#define Z_SERVO_ANGLES {70, 0} // Z Servo Deploy and Stow angles
+#define Z_SERVO_ANGLES {90, 0} // Z Servo Deploy and Stow angles
 
 /**
  * The BLTouch probe uses a Hall effect sensor and emulates a servo.
@@ -1008,9 +1008,9 @@
 
 #define J_MIN_POS_step -24800
 #define A_MIN_POS_step -43000
-#define B_MIN_POS_step -107000
-#define C_MIN_POS_step -36690
-#define D_MIN_POS_step -18000
+#define B_MIN_POS_step -120250
+#define C_MIN_POS_step -36940
+#define D_MIN_POS_step -19750
 
 #define J_MAX_POS_step 24800
 #define A_MAX_POS_step 42000
@@ -1021,12 +1021,11 @@
 // joint
 #define Joint1_MIN_POS -24800
 #define Joint2_MIN_POS -43000
-#define Joint3_MIN_POS -107000
-#define Joint4_MIN_POS -36690
-#define Joint5_MIN_POS -18000
+#define Joint3_MIN_POS -120250
+#define Joint4_MIN_POS -36940
+#define Joint5_MIN_POS -19750
 
 // joint
-
 #define Joint1_MAX_POS 24800
 #define Joint2_MAX_POS 42000
 #define Joint3_MAX_POS 110000

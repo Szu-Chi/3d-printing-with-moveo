@@ -2162,7 +2162,7 @@ void Set_current_Joint_Curve_More(float numberx,float numbery,float numberz){
   //int number = 0;
   // SERIAL_ECHOLNPAIR("number:", number);
   
-  DEBUG_POS_Joint("(Before)Set_current_Joint_Curve_More", current_position_Joint); 
+  //DEBUG_POS_Joint("(Before)Set_current_Joint_Curve_More", current_position_Joint); 
   float point1=numberz*100;
 
   //SERIAL_ECHOLNPAIR("Forward_Curve(2000,0,0)", Forward_Curve(2000,0,0));
@@ -2177,7 +2177,7 @@ void Set_current_Joint_Curve_More(float numberx,float numbery,float numberz){
   //SERIAL_ECHOPAIR(" x:", numberx);
   //SERIAL_ECHOPAIR("-y:", numbery);
 
-  DEBUG_POS_Joint("(After)Set_current_Joint_Curve_More", current_position_Joint);   
+  //DEBUG_POS_Joint("(After)Set_current_Joint_Curve_More", current_position_Joint);   
 }
 
 inline void Set_current_Joint_Slope(const int32_t (&Set_current_Joint_data)[Joint_All], const float (&Set_current_Joint_slope)[Joint_All], const float point){
@@ -2410,11 +2410,13 @@ void do_blocking_move_to(const float rx, const float ry, const float rz, const f
   //int tempp = X_Y_to_Number((int)rx,(int)ry);
   //int tempp=0;
 
+  /*
   SERIAL_ECHOPGM("//Move XY to ");
   SERIAL_ECHOPAIR("X:",rx);
   SERIAL_ECHOPAIR(" Y:",ry);
   SERIAL_ECHOLNPGM("//");  
-  
+  //*/
+
   Set_current_Joint_Curve_More(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS]);
   buffer_line_to_current_position();
 
@@ -2468,7 +2470,7 @@ void do_blocking_move_to_Joint(const float rx, const float ry, const float rz, c
   const float old_feedrate_mm_s = feedrate_mm_s;
 
   #if ENABLED(DEBUG_LEVELING_FEATURE)
-    if (DEBUGGING(LEVELING)) print_xyz(PSTR(">>> do_blocking_move_to_Joint"), NULL, LOGICAL_X_POSITION(rx), LOGICAL_Y_POSITION(ry), LOGICAL_Z_POSITION(rz));
+    // if (DEBUGGING(LEVELING)) print_xyz(PSTR(">>> do_blocking_move_to_Joint"), NULL, LOGICAL_X_POSITION(rx), LOGICAL_Y_POSITION(ry), LOGICAL_Z_POSITION(rz));
   #endif
 
   const float z_feedrate = fr_mm_s ? fr_mm_s : homing_feedrate_Joint(Joint1_AXIS);
@@ -2480,11 +2482,13 @@ void do_blocking_move_to_Joint(const float rx, const float ry, const float rz, c
     // Set_current_Joint_Slope(current_position_Joint,HOME_position_Slope,Delta_Z_01mm(current_position[Z_AXIS],rz));
     // Set_current_Joint_Slope(current_position_Joint,HOME_position_Slope,100);
     SERIAL_ECHOLNPGM("//To low//");
+    endstops.enable_z_probe(false);
     current_position[Z_AXIS] = rz;   
     Set_current_Joint_Curve_More(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS]);
     //Set_current_Joint(HOME_position_Z10_Joint);
 
-    buffer_line_to_current_position();    
+    buffer_line_to_current_position();
+    endstops.enable_z_probe(true);
   }
   
   feedrate_mm_s = fr_mm_s ? fr_mm_s : XY_PROBE_FEEDRATE_MM_S;
@@ -2494,11 +2498,13 @@ void do_blocking_move_to_Joint(const float rx, const float ry, const float rz, c
   //int tempp = X_Y_to_Number((int)rx,(int)ry);
   //int tempp=0;
 
+  /*
   SERIAL_ECHOPGM("//Move XY to ");
   SERIAL_ECHOPAIR("X:",rx);
   SERIAL_ECHOPAIR(" Y:",ry);
   SERIAL_ECHOLNPGM("//");  
-  
+  //*/
+
   Set_current_Joint_Curve_More(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS]);
   buffer_line_to_current_position();
   // If Z needs to lower, do it after moving XY
@@ -2521,8 +2527,7 @@ void do_blocking_move_to_Joint(const float rx, const float ry, const float rz, c
 
     
     // current_position[Z_AXIS] = rz;
-    // buffer_line_to_current_position();
-    
+    // buffer_line_to_current_position();    
     
     bool probe_triggered1=0;    
     do
@@ -2543,7 +2548,7 @@ void do_blocking_move_to_Joint(const float rx, const float ry, const float rz, c
   feedrate_mm_s = old_feedrate_mm_s;
 
   #if ENABLED(DEBUG_LEVELING_FEATURE)
-    if (DEBUGGING(LEVELING)) SERIAL_ECHOLNPGM("<<< do_blocking_move_to_Joint");
+    // if (DEBUGGING(LEVELING)) SERIAL_ECHOLNPGM("<<< do_blocking_move_to_Joint");
   #endif
 }
 
@@ -3284,7 +3289,7 @@ void clean_up_after_endstop_or_probe_move() {
     while( (current_position[Z_AXIS]>=z) && !(TEST(endstops.trigger_state(),Z_MIN_PROBE) != 0) )
     {
       current_position[Z_AXIS]=current_position[Z_AXIS]-0.01;
-      do_blocking_move_to_z(current_position[Z_AXIS], fr_mm_s);
+      do_blocking_move_to_z(current_position[Z_AXIS], fr_mm_s*2);
     }
 
     SERIAL_ECHOLNPAIR("current_position[Z_AXIS]:",current_position[Z_AXIS]);
@@ -3298,8 +3303,7 @@ void clean_up_after_endstop_or_probe_move() {
       #else
         Z_MIN_PROBE
       #endif
-    );
-    
+    );    
 
     /*SERIAL_ECHOPAIR("hit_state:",endstops.trigger_state());
     SERIAL_ECHOLNPAIR("  probe_triggered:",probe_triggered);*/
@@ -4491,7 +4495,7 @@ static void homeJoint(const JointEnum axis) {
   /*/
 
   sync_plan_position();
-  if(axis==Joint2_AXIS) current_position_Joint[Joint3_AXIS]=70000;
+  if(axis==Joint2_AXIS) current_position_Joint[Joint3_AXIS]=50000;
   buffer_line_to_current_position();
   planner.synchronize();
 
