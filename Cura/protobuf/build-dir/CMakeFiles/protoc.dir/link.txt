@@ -1,0 +1,1 @@
+/usr/bin/c++  -fPIC  -rdynamic CMakeFiles/protoc.dir/home/tiao/git_ws/moveo_moveit_ws/src/Cura/protobuf/src/google/protobuf/compiler/main.cc.o  -o protoc-3.11.0.1 -Wl,-rpath,:::::::::::::: libprotoc.a libprotobuf.a -lpthread /usr/lib/x86_64-linux-gnu/libz.so 

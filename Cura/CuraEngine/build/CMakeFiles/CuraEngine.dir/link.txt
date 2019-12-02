@@ -1,0 +1,1 @@
+/usr/bin/c++  -O3 -DNDEBUG -Wall -static-libstdc++ -fopenmp   CMakeFiles/CuraEngine.dir/src/main.cpp.o  -o CuraEngine -Wl,-rpath,/usr/local/lib: lib_CuraEngine.a libclipper.a /usr/local/lib/libArcus.so.1.1.0 /usr/local/lib/libprotobuf.a -lpthread -lpthread 

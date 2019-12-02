@@ -1,0 +1,67 @@
+@startuml
+
+hide footbox
+
+== Synchronous ==
+
+Client -> Request: Create
+activate Request
+Request --> Client
+
+Client -> Request: waitForFinished
+
+Request -> FileService: startRequest
+FileService --> Request: return requestId
+
+FileService -> Queue: enqueue
+Queue --> FileService
+
+Worker -> Queue: takeNext
+Queue --> Worker: job
+
+activate Worker
+Worker -> Worker: Process File
+
+Worker -> FileService: requestData(id, data)
+FileService -->>o Request: requestData(id, data)
+
+Worker -> FileService: requestFinished(id)
+FileService -->>o Request: requestFinished(id)
+deactivate Worker
+
+Request --> Client: data
+destroy Request
+
+== Asynchronous ==
+
+Client -> Request: Create
+activate Request
+Request --> Client
+
+Client -> Request: start
+Request --> Client
+
+Request -> FileService: startRequest
+FileService --> Request: return requestId
+
+FileService -> Queue: enqueue
+Queue --> FileService
+
+Worker -> Queue: takeNext
+Queue --> Worker: job
+
+activate Worker
+Worker -> Worker: Process File
+
+Worker -> FileService: requestData(id, data)
+FileService -->>o Request: requestData(id, data)
+Request -->>o Client: requestData(request, data)
+
+Worker -> FileService: requestFinished(id)
+FileService -->>o Request: requestFinished(id)
+deactivate Worker
+Request -->>o Client: requestFinished(request)
+
+destroy Request
+
+@enduml

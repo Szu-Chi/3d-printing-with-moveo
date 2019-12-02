@@ -1,0 +1,7 @@
+{
+    "name": "TestPlugin",
+    "api": 5,
+    "version": "1.0.0",
+    "i18n-catalog": "bla",
+    "description": "test"
+}
