@@ -48,21 +48,18 @@ int main(int argc, char **argv){
   std::string line;
   bool check = 0;
   bool check_distance = 0;
-  int second_execution = 0;
   double x = 0;
   double y = 0;
   double z = 0;
+  double E = 0;
   double pre_x = 0;
   double pre_y = 0;
   double pre_z = 0;
-  double F_out = 0;
-  double E_out = 0;
-  double pre_E_out = 0;
+  double pre_E = 0;
   while(input_file){
     std::getline(input_file, line);
-    if(!line.compare(0,2,"G0") && check ==0){
+    if(!line.compare(0,8,";LAYER:0")){
       check = 1;
-      output_file << line << std::endl;
     }
     if(check == 1 && (!line.compare(0,2,"G0") || !line.compare(0,2,"G1"))){
       size_t colon_pos_X = line.find('X');
@@ -78,20 +75,15 @@ int main(int argc, char **argv){
         z = stod(line.substr(colon_pos_Z+1));
       }
       size_t colon_pos_E = line.find('E');
-      if(colon_pos_E < 100){
-        if(stod(line.substr(colon_pos_E+1)) != 0){
-          E_out = stod(line.substr(colon_pos_E+1));
-        }
+      if(colon_pos_E < 100 && (stod(line.substr(colon_pos_E+1)) != 0)){
+        E = stod(line.substr(colon_pos_E+1));
       }
       if(check_distance == 1){
         output_file << line[0] << line[1];
         double X_diff = (x - pre_x);
         double Y_diff = (y - pre_y);
-        double E_diff = E_out - pre_E_out;
-        int cut_part = 1;
-        while(sqrt(pow(X_diff/cut_part,2)+pow(Y_diff/cut_part,2)) > 15){
-          cut_part++;
-        }
+        double E_diff = (E - pre_E);
+        int cut_part = ceil(sqrt(pow(X_diff,2)+pow(Y_diff,2))/15);
         if(cut_part > 1){
           size_t colon_pos_F = line.find('F');
           if(colon_pos_F < 100){
@@ -102,12 +94,12 @@ int main(int argc, char **argv){
           for(int i = 1; i < cut_part; i++){
             pre_x += X_diff/cut_part;
             pre_y += Y_diff/cut_part;
-            pre_E_out += E_diff/cut_part;
+            pre_E += E_diff/cut_part;
             output_file << std::fixed << std::setprecision(decimal_point(pre_x)) << " X" << pre_x << std::defaultfloat;
             output_file << std::fixed << std::setprecision(decimal_point(pre_y)) << " Y" << pre_y << std::defaultfloat;
             if(colon_pos_E < 100){
               if(stod(line.substr(colon_pos_E+1)) != 0){
-                output_file << std::fixed << std::setprecision(5) << " E" << pre_E_out << std::defaultfloat;
+                output_file << std::fixed << std::setprecision(5) << " E" << pre_E << std::defaultfloat;
               }
             }
             output_file << std::endl;
@@ -123,10 +115,8 @@ int main(int argc, char **argv){
             if(colon_pos_Z < 100){
               output_file << std::fixed << std::setprecision(decimal_point(z)) << " Z" << z << std::defaultfloat;
             }  
-            if(colon_pos_E < 100){
-              if(stod(line.substr(colon_pos_E+1)) != 0){
-                output_file << std::fixed << std::setprecision(5) << " E" << E_out << std::defaultfloat;
-              }
+            if(colon_pos_E < 100 && (stod(line.substr(colon_pos_E+1)) != 0)){
+              output_file << std::fixed << std::setprecision(5) << " E" << E << std::defaultfloat;
             }
           }
           else{
@@ -142,9 +132,12 @@ int main(int argc, char **argv){
         }
         output_file << std::endl;
       }
+      else{
+        output_file << line << std::endl;
+      }
       pre_x = x;
       pre_y = y;
-      pre_E_out = E_out;
+      pre_E = E;
       check_distance = 1;
     }
     else{
@@ -153,7 +146,7 @@ int main(int argc, char **argv){
   }
   end_ = ros::WallTime::now();
   double execution_time = (end_ - start_).toNSec() * 1e-9;
-  ROS_INFO_STREAM("Exectution time (ms): " << execution_time);
+  ROS_INFO_STREAM("Exectution time (s): " << execution_time);
   input_file.close();
   output_file.close();
   ros::shutdown();
