@@ -458,6 +458,10 @@ template<> BuildPlateShape Settings::get<BuildPlateShape>(const std::string& key
     {
         return BuildPlateShape::ELLIPTIC;
     }
+    else if (get<std::string>(key) == "moveo")
+    {
+        return BuildPlateShape::MOVEO;
+    }
     else //Default.
     {
         return BuildPlateShape::RECTANGULAR;

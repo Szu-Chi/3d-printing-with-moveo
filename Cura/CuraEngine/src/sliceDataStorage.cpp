@@ -629,6 +629,20 @@ Polygon SliceDataStorage::getMachineBorder(bool adhesion_offset) const
             }
             break;
         }
+        case BuildPlateShape::MOVEO://Need to check how to change
+        {
+            //Construct an ellipse to approximate the build volume.
+            const coord_t width = machine_size.max.x - machine_size.min.x;
+            const coord_t depth = machine_size.max.y - machine_size.min.y;
+            constexpr unsigned int circle_resolution = 50;
+            for (unsigned int i = 0; i < circle_resolution; i++)
+            {
+                const double angle = M_PI * 2 * i / circle_resolution;
+                border.emplace_back(machine_size.getMiddle().x + std::cos(angle) * width / 2,
+                                    machine_size.getMiddle().y + std::sin(angle) * depth / 2);
+            }
+            break;
+        }
         case BuildPlateShape::RECTANGULAR:
         default:
             border = machine_size.flatten().toPolygon();

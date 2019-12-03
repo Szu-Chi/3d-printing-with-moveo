@@ -174,6 +174,11 @@ msgid "Rectangular"
 msgstr ""
 
 #: fdmprinter.def.json
+msgctxt "machine_shape option moveo"
+msgid "Moveo"
+msgstr ""
+
+#: fdmprinter.def.json
 msgctxt "machine_shape option elliptic"
 msgid "Elliptic"
 msgstr ""

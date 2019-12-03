@@ -33,6 +33,7 @@ class LocalFileOutputDevice(OutputDevice):
         self.setIconName("save")
 
         self._writing = False
+        self._save_name = None
 
     ##  Request the specified nodes to be written to a file.
     #
@@ -158,6 +159,7 @@ class LocalFileOutputDevice(OutputDevice):
             job.setAddToRecentFiles(True)  # The file will be added into the "recent files" list upon success
             job.progress.connect(self._onJobProgress)
             job.finished.connect(self._onWriteJobFinished)
+            self._save_name = file_name
 
             message = Message(catalog.i18nc("@info:progress Don't translate the XML tags <filename>!", "Saving to <filename>{0}</filename>").format(file_name),
                               0, False, -1 , catalog.i18nc("@info:title", "Saving"))
@@ -186,6 +188,9 @@ class LocalFileOutputDevice(OutputDevice):
             message._folder = os.path.dirname(job.getFileName())
             message.actionTriggered.connect(self._onMessageActionTriggered)
             message.show()
+            if self._save_name is not None:
+                os.system("roslaunch gcode_translation split.launch gcode_in:="+ self._save_name)
+                #os.system("roslaunch gcode_translation inverse_kinematics.launch gcode_out:="+ self._save_name)
         else:
             message = Message(catalog.i18nc("@info:status Don't translate the XML tags <filename> or <message>!", "Could not save to <filename>{0}</filename>: <message>{1}</message>").format(job.getFileName(), str(job.getError())), lifetime = 0, title = catalog.i18nc("@info:title", "Warning"))
             message.show()

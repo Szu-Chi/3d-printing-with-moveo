@@ -87,8 +87,13 @@ class CuraSceneNode(SceneNode):
         ]
 
     ##  Return if any area collides with the convex hull of this scene node
-    def collidesWithAreas(self, areas: List[Polygon]) -> bool:
-        convex_hull = self.callDecoration("getConvexHull")
+    def collidesWithAreas(self, areas: List[Polygon], moveo_check_collidesWithAreas = None) -> bool:
+        if moveo_check_collidesWithAreas == 1:
+            convex_hull = self.callDecoration("getConvexHullForMoveo_XZ")
+        elif moveo_check_collidesWithAreas == 2:
+            convex_hull = self.callDecoration("getConvexHullForMoveo_YZ")
+        else: 
+            convex_hull = self.callDecoration("getConvexHull")
         if convex_hull:
             if not convex_hull.isValid():
                 return False

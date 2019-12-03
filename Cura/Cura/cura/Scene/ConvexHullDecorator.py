@@ -95,7 +95,32 @@ class ConvexHullDecorator(SceneNodeDecorator):
         if self._node.callDecoration("isNonPrintingMesh"):
             return None
         hull = self._compute2DConvexHull()
+        if self._global_stack and self._node is not None and hull is not None:
+            # Parent can be None if node is just loaded.
+            if self._global_stack.getProperty("print_sequence", "value") == "one_at_a_time" and not self.hasGroupAsParent(self._node):
+                hull = hull.getMinkowskiHull(Polygon(numpy.array(self._global_stack.getProperty("machine_head_polygon", "value"), numpy.float32)))
+                hull = self._add2DAdhesionMargin(hull)
+        return hull
 
+    def getConvexHullForMoveo_XZ(self) -> Optional[Polygon]:
+        if self._node is None:
+            return None
+        if self._node.callDecoration("isNonPrintingMesh"):
+            return None
+        hull = self._compute2DConvexHull(moveo_check_xz_or_yz = 2)
+        if self._global_stack and self._node is not None and hull is not None:
+            # Parent can be None if node is just loaded.
+            if self._global_stack.getProperty("print_sequence", "value") == "one_at_a_time" and not self.hasGroupAsParent(self._node):
+                hull = hull.getMinkowskiHull(Polygon(numpy.array(self._global_stack.getProperty("machine_head_polygon", "value"), numpy.float32)))
+                hull = self._add2DAdhesionMargin(hull)
+        return hull
+
+    def getConvexHullForMoveo_YZ(self) -> Optional[Polygon]:
+        if self._node is None:
+            return None
+        if self._node.callDecoration("isNonPrintingMesh"):
+            return None
+        hull = self._compute2DConvexHull(moveo_check_xz_or_yz = 1)
         if self._global_stack and self._node is not None and hull is not None:
             # Parent can be None if node is just loaded.
             if self._global_stack.getProperty("print_sequence", "value") == "one_at_a_time" and not self.hasGroupAsParent(self._node):
@@ -198,7 +223,7 @@ class ConvexHullDecorator(SceneNodeDecorator):
         self._2d_convex_hull_mesh_world_transform = None  # type: Optional[Matrix]
         self._2d_convex_hull_mesh_result = None  # type: Optional[Polygon]
 
-    def _compute2DConvexHull(self) -> Optional[Polygon]:
+    def _compute2DConvexHull(self, moveo_check_xz_or_yz = None) -> Optional[Polygon]:
         if self._node is None:
             return None
         if self._node.callDecoration("isGroup"):
@@ -237,8 +262,9 @@ class ConvexHullDecorator(SceneNodeDecorator):
             world_transform = self._node.getWorldTransformation()
 
             # Check the cache
-            if mesh is self._2d_convex_hull_mesh and world_transform == self._2d_convex_hull_mesh_world_transform:
-                return self._2d_convex_hull_mesh_result
+            if moveo_check_xz_or_yz != 1 and moveo_check_xz_or_yz != 2:
+                if mesh is self._2d_convex_hull_mesh and world_transform == self._2d_convex_hull_mesh_world_transform:
+                    return self._2d_convex_hull_mesh_result
 
             vertex_data = mesh.getConvexHullTransformedVertices(world_transform)
             # Don't use data below 0.
@@ -251,9 +277,12 @@ class ConvexHullDecorator(SceneNodeDecorator):
                 # This is done to greatly speed up further convex hull calculations as the convex hull
                 # becomes much less complex when dealing with highly detailed models.
                 vertex_data = numpy.round(vertex_data, 1)
-
-                vertex_data = vertex_data[:, [0, 2]]  # Drop the Y components to project to 2D.
-
+                if moveo_check_xz_or_yz == 1:
+                    vertex_data = vertex_data[:, [0, 1]]  # Drop the Z components to project to 2D.(Y)
+                elif moveo_check_xz_or_yz == 2:
+                    vertex_data = vertex_data[:, [2, 1]]  # Drop the X components to project to 2D.(X)
+                else:
+                    vertex_data = vertex_data[:, [0, 2]]  # Drop the Y components to project to 2D.(Z)
                 # Grab the set of unique points.
                 #
                 # This basically finds the unique rows in the array by treating them as opaque groups of bytes
@@ -271,9 +300,10 @@ class ConvexHullDecorator(SceneNodeDecorator):
                     offset_hull = self._offsetHull(convex_hull)
 
             # Store the result in the cache
-            self._2d_convex_hull_mesh = mesh
-            self._2d_convex_hull_mesh_world_transform = world_transform
-            self._2d_convex_hull_mesh_result = offset_hull
+            if moveo_check_xz_or_yz != 1 and moveo_check_xz_or_yz != 2:
+                self._2d_convex_hull_mesh = mesh
+                self._2d_convex_hull_mesh_world_transform = world_transform
+                self._2d_convex_hull_mesh_result = offset_hull
 
             return offset_hull
 

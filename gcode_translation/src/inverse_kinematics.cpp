@@ -61,9 +61,9 @@ bool check_trac_ik_valid(TRAC_IK::TRAC_IK &tracik_solver,KDL::Chain &chain, KDL:
 //1028.57143*4*4.523809*0.95/5.18*100
 void motor_setep_convert(Eigen::VectorXd &data){
                                         // steps * micro_steps * belt * error
-  static const double joint_division[6] = {200          * 32  * 10.533   * 0.95,  //J
-                                           200          * 128 * 5.71428  * 0.95,  //A 
-                                           19810.111813 * 4   * 4.523809 * 0.95,  //B
+  static const double joint_division[6] = {200          * 32  * 10.533   * 1,     //J
+                                           200          * 128 * 5.71428  * 1,     //A 
+                                           19810.111813 * 4   * 4.523809 * 1,     //B
                                            5370.24793   * 32  * 1        * 1,     //C
                                            1036.36364   * 16  * 4.666    * 1      //D
                                            };

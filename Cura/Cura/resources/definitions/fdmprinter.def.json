@@ -165,7 +165,8 @@
                     "options":
                     {
                         "rectangular": "Rectangular",
-                        "elliptic": "Elliptic"
+                        "elliptic": "Elliptic",
+                        "moveo": "Moveo"
                     },
                     "settable_per_mesh": false,
                     "settable_per_extruder": false,

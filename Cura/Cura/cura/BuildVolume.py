@@ -26,6 +26,7 @@ catalog = i18nCatalog("cura")
 
 import numpy
 import math
+import copy
 
 from typing import List, Optional, TYPE_CHECKING, Any, Set, cast, Iterable, Dict
 
@@ -70,6 +71,7 @@ class BuildVolume(SceneNode):
         self._grid_shader = None
 
         self._disallowed_areas = []  # type: List[Polygon]
+        self._disallowed_areas_for_moveo = []  # type: List[Polygon]
         self._disallowed_areas_no_brim = []  # type: List[Polygon]
         self._disallowed_area_mesh = None  # type: Optional[MeshData]
         self._disallowed_area_size = 0.
@@ -190,6 +192,9 @@ class BuildVolume(SceneNode):
     def getDisallowedAreas(self) -> List[Polygon]:
         return self._disallowed_areas
 
+    def getDisallowedAreasForMoveo(self) -> List[Polygon]:
+        return self._disallowed_areas_for_moveo
+
     def getDisallowedAreasNoBrim(self) -> List[Polygon]:
         return self._disallowed_areas_no_brim
 
@@ -253,6 +258,14 @@ class BuildVolume(SceneNode):
                 if node.collidesWithBbox(build_volume_bounding_box):
                     node.setOutsideBuildArea(True)
                     continue
+                if self._shape == "moveo":
+                    if node.collidesWithAreas(self.getDisallowedAreasForMoveo(), moveo_check_collidesWithAreas = 1):
+                        node.setOutsideBuildArea(True)
+                        continue
+
+                    if node.collidesWithAreas(self.getDisallowedAreasForMoveo(), moveo_check_collidesWithAreas = 2):
+                        node.setOutsideBuildArea(True)
+                        continue
 
                 if node.collidesWithAreas(self.getDisallowedAreas()):
                     node.setOutsideBuildArea(True)
@@ -323,7 +336,7 @@ class BuildVolume(SceneNode):
 
     def _buildGridMesh(self, min_w: float, max_w: float, min_h: float, max_h: float, min_d: float, max_d:float, z_fight_distance: float) -> MeshData:
         mb = MeshBuilder()
-        if self._shape != "elliptic":
+        if self._shape == "rectangular":
             # Build plate grid mesh
             mb.addQuad(
                 Vector(min_w, min_h - z_fight_distance, min_d),
@@ -336,6 +349,27 @@ class BuildVolume(SceneNode):
                 v = mb.getVertex(n)
                 mb.setVertexUVCoordinates(n, v[0], v[2])
             return mb.build()
+
+        elif self._shape == "moveo":
+            aspect = 1.0
+            scale_matrix = Matrix()
+            if self._width != 0:
+                scale_matrix.compose(scale=Vector(1, 1, aspect))
+            mb.addVertex(0, min_h - z_fight_distance, 0)
+            mb.addMoveoWorkSpace(175, 440.713, 0.01, center=Vector(0, min_h - z_fight_distance, 0))
+            sections = mb.getVertexCount() - 1  # Center point is not an arc section
+            indices = []
+            #draw grid
+            for n in range(0, sections - 1):
+                indices.append([0, n + 2 , n + 1])
+            mb.addIndices(numpy.asarray(indices, dtype=numpy.int32))
+            mb.calculateNormals()
+
+            for n in range(0, mb.getVertexCount()):
+                v = mb.getVertex(n)
+                mb.setVertexUVCoordinates(n, v[0], v[2] * aspect)
+            return mb.build().getTransformed(scale_matrix)
+
         else:
             aspect = 1.0
             scale_matrix = Matrix()
@@ -358,7 +392,7 @@ class BuildVolume(SceneNode):
             return mb.build().getTransformed(scale_matrix)
 
     def _buildMesh(self, min_w: float, max_w: float, min_h: float, max_h: float, min_d: float, max_d:float, z_fight_distance: float) -> MeshData:
-        if self._shape != "elliptic":
+        if self._shape == "rectangular":
             # Outline 'cube' of the build volume
             mb = MeshBuilder()
             mb.addLine(Vector(min_w, min_h, min_d), Vector(max_w, min_h, min_d), color = self._volume_outline_color)
@@ -377,6 +411,67 @@ class BuildVolume(SceneNode):
             mb.addLine(Vector(max_w, max_h, min_d), Vector(max_w, max_h, max_d), color = self._volume_outline_color)
 
             return mb.build()
+
+        elif self._shape == "moveo":
+            # Bottom and top 'ellipse' of the build volume
+            scale_matrix = Matrix()
+            if self._width != 0:
+                # Scale circular meshes by aspect ratio if width != height
+                aspect = 1.0
+                scale_matrix.compose(scale = Vector(1, 1, aspect))
+            mb = MeshBuilder()
+            mb.addArc(440.713, Vector.Unit_Y, center = (0, min_h - z_fight_distance, 0), sections = 320, color = self._volume_outline_color)
+            mb.addArc(175, Vector.Unit_Y, center = (0, min_h - z_fight_distance, 0), sections = 320, color = self._volume_outline_color)
+            
+            a = [-5.84496390332700e-14, 3.56282507993945e-12, 1.96598578522008e-11, -4.08500656982012e-09, 1.32273243218637e-08, 1.84264287266674e-06, -1.04208238003648e-05, -0.000262072884367316, -0.0107090984034695, 0.197575980978460, 46.4820460203409]
+            #for x in range(-85,384):
+            #    z = float(x/10)
+            #    z_before = float((x-1)/10)
+            #    y = float(0)
+            #    y_before = float(0)
+            #    for i in range(10):
+            #        y = float(y + a[i]*(z**(10-i)))
+            #        y_before = float(y_before + a[i]*(z_before**(10-i)))
+            #    y = y + a[10]
+            for x in range(-9,38):
+                z = float(x)
+                y = float(0)
+                for i in range(10):
+                    y = float(y + a[i]*(z**(10-i)))
+                y = y + a[10]
+                mb.addArc(float(y*10),Vector.Unit_Y, center = (0 , x*10 + min_h - z_fight_distance + 90, 0) ,sections = 320, color = self._volume_outline_color)
+                #mb.addLine(Vector(0, float((x-1)/10+85+min_h-z_fight_distance), -float((y_before*10))), Vector(0, float(x/10+85+min_h-z_fight_distance), -float(y*10)), color = self._volume_outline_color)
+                #mb.addLine(Vector(0, float((x-1)/10+85+min_h-z_fight_distance),  float((y_before*10))), Vector(0, float(x/10+85+min_h-z_fight_distance),  float(y*10)), color = self._volume_outline_color)
+                #mb.addLine(Vector(-float((y_before*10)), float((x-1)/10+85+min_h-z_fight_distance), 0), Vector(-float(y*10), float(x/10+85+min_h-z_fight_distance), 0), color = self._volume_outline_color)
+                #mb.addLine(Vector( float((y_before*10)), float((x-1)/10+85+min_h-z_fight_distance), 0), Vector( float(y*10), float(x/10+85+min_h-z_fight_distance), 0), color = self._volume_outline_color)
+            
+            #b = [1.16552254885792e-13, -1.08681160530253e-11, 1.69908039244408e-10, 1.10681405735891e-08, -3.20926518543364e-07, -2.53352441558143e-06, 0.000147470738969883, -0.000760430515979724, -0.0378400168942736, 0.498796758188418, 16.9182384419229]
+            #for x in range(3686,3840):
+            #    z = float(x/100)
+            #    z_before = float((x-1)/100)
+            #    y = float(0)
+            #    y_before = float(0)
+            #    for i in range(10):
+            #        y = float(y + b[i]*(z**(10-i)))
+            #        y_before = float(y_before + b[i]*(z_before**(10-i)))
+            #    y = y + b[10]
+            #    y_before = y_before + b[10]
+                #mb.addLine(Vector(0, float((x-1)/10+85+min_h-z_fight_distance), -float((y_before*10))), Vector(0, float(x/10+85+min_h-z_fight_distance), -float(y*10)), color = self._volume_outline_color)
+                #mb.addLine(Vector(0, float((x-1)/10+85+min_h-z_fight_distance),  float((y_before*10))), Vector(0, float(x/10+85+min_h-z_fight_distance),  float(y*10)), color = self._volume_outline_color)
+                #mb.addLine(Vector(-float((y_before*10)), float((x-1)/10+85+min_h-z_fight_distance), 0), Vector(-float(y*10), float(x/10+85+min_h-z_fight_distance), 0), color = self._volume_outline_color)
+                #mb.addLine(Vector( float((y_before*10)), float((x-1)/10+85+min_h-z_fight_distance), 0), Vector( float(y*10), float(x/10+85+min_h-z_fight_distance), 0), color = self._volume_outline_color)
+            
+            #mb.addLine(Vector(0, min_h-z_fight_distance, -175), Vector(0, 453.7+min_h-z_fight_distance, -175), color = self._volume_outline_color)
+            #mb.addLine(Vector(0, min_h-z_fight_distance,  175), Vector(0, 453.7+min_h-z_fight_distance,  175), color = self._volume_outline_color)
+            #mb.addLine(Vector(-175, min_h-z_fight_distance, 0), Vector(-175, 453.7+min_h-z_fight_distance, 0), color = self._volume_outline_color)
+            #mb.addLine(Vector( 175, min_h-z_fight_distance, 0), Vector( 175, 453.7+min_h-z_fight_distance, 0), color = self._volume_outline_color)
+            
+            #mb.addLine(Vector(0, 469+min_h-z_fight_distance, -228.2), Vector(0, 469+min_h-z_fight_distance, -263.9), color = self._volume_outline_color)
+            #mb.addLine(Vector(0, 469+min_h-z_fight_distance,  228.2), Vector(0, 469+min_h-z_fight_distance,  263.9), color = self._volume_outline_color)
+            #mb.addLine(Vector(-228.2, 469+min_h-z_fight_distance, 0), Vector(-263.9, 469+min_h-z_fight_distance, 0), color = self._volume_outline_color)
+            #mb.addLine(Vector( 228.2, 469+min_h-z_fight_distance, 0), Vector( 263.9, 469+min_h-z_fight_distance, 0), color = self._volume_outline_color)
+            
+            return mb.build().getTransformed(scale_matrix)
 
         else:
             # Bottom and top 'ellipse' of the build volume
@@ -490,12 +585,20 @@ class BuildVolume(SceneNode):
         if not self._volume_outline_color:
             self._updateColors()
 
-        min_w = -self._width / 2
-        max_w = self._width / 2
-        min_h = 0.0
-        max_h = self._height
-        min_d = -self._depth / 2
-        max_d = self._depth / 2
+        if self._shape == "moveo":
+            min_w = -482.0
+            max_w =  482.0
+            min_h =  0.0
+            max_h =  469.0
+            min_d = -482.0
+            max_d =  482.0
+        else:
+            min_w = -self._width / 2
+            max_w = self._width / 2
+            min_h = 0.0
+            max_h = self._height
+            min_d = -self._depth / 2
+            max_d = self._depth / 2
 
         z_fight_distance = 0.2  # Distance between buildplate and disallowed area meshes to prevent z-fighting
 
@@ -728,6 +831,8 @@ class BuildVolume(SceneNode):
         disallowed_border_size = self.getEdgeDisallowedSize()
 
         result_areas = self._computeDisallowedAreasStatic(disallowed_border_size, used_extruders)  # Normal machine disallowed areas can always be added.
+        if self._shape == "moveo":
+            result_areas_for_moveo = self._computeDisallowedAreasStaticFormoveo(disallowed_border_size, used_extruders)  # Normal machine disallowed areas can always be added.
         prime_areas = self._computeDisallowedAreasPrimeBlob(disallowed_border_size, used_extruders)
         result_areas_no_brim = self._computeDisallowedAreasStatic(0, used_extruders)  # Where the priming is not allowed to happen. This is not added to the result, just for collision checking.
 
@@ -736,6 +841,8 @@ class BuildVolume(SceneNode):
             extruder_id = extruder.getId()
 
             result_areas[extruder_id].extend(prime_areas[extruder_id])
+            if self._shape == "moveo":
+                result_areas_for_moveo[extruder_id].extend(prime_areas[extruder_id])
             result_areas_no_brim[extruder_id].extend(prime_areas[extruder_id])
 
             nozzle_disallowed_areas = extruder.getProperty("nozzle_disallowed_areas", "value")
@@ -743,6 +850,8 @@ class BuildVolume(SceneNode):
                 polygon = Polygon(numpy.array(area, numpy.float32))
                 polygon_disallowed_border = polygon.getMinkowskiHull(Polygon.approximatedCircle(disallowed_border_size))
                 result_areas[extruder_id].append(polygon_disallowed_border)  # Don't perform the offset on these.
+                if self._shape == "moveo":
+                    result_areas_for_moveo[extruder_id].append(polygon_disallowed_border)  # Don't perform the offset on these.
                 result_areas_no_brim[extruder_id].append(polygon)  # No brim
 
         # Add prime tower location as disallowed area.
@@ -755,12 +864,19 @@ class BuildVolume(SceneNode):
                         if prime_tower_area.intersectsPolygon(area) is not None:
                             prime_tower_collision = True
                             break
+                    if self._shape == "moveo":                    
+                        for area in result_areas_for_moveo[extruder_id]:
+                            if prime_tower_area.intersectsPolygon(area) is not None:
+                                prime_tower_collision = True
+                                break
                     if prime_tower_collision:  # Already found a collision.
                         break
                     if self._global_container_stack.getProperty("prime_tower_brim_enable", "value") and self._global_container_stack.getProperty("adhesion_type", "value") != "raft":
                         prime_tower_areas[extruder_id][area_index] = prime_tower_area.getMinkowskiHull(Polygon.approximatedCircle(disallowed_border_size))
                 if not prime_tower_collision:
                     result_areas[extruder_id].extend(prime_tower_areas[extruder_id])
+                    if self._shape == "moveo":
+                        result_areas_for_moveo[extruder_id].extend(prime_tower_areas[extruder_id])
                     result_areas_no_brim[extruder_id].extend(prime_tower_areas[extruder_id])
                 else:
                     self._error_areas.extend(prime_tower_areas[extruder_id])
@@ -770,6 +886,10 @@ class BuildVolume(SceneNode):
         self._disallowed_areas = []
         for extruder_id in result_areas:
             self._disallowed_areas.extend(result_areas[extruder_id])
+        self._disallowed_areas_for_moveo = []
+        if self._shape == "moveo":
+            for extruder_id in result_areas_for_moveo:
+                self._disallowed_areas_for_moveo.extend(result_areas_for_moveo[extruder_id]) #moveo_xz & moveo_yz
         self._disallowed_areas_no_brim = []
         for extruder_id in result_areas_no_brim:
             self._disallowed_areas_no_brim.extend(result_areas_no_brim[extruder_id])
@@ -927,7 +1047,7 @@ class BuildVolume(SceneNode):
             half_machine_width = self._global_container_stack.getProperty("machine_width", "value") / 2
             half_machine_depth = self._global_container_stack.getProperty("machine_depth", "value") / 2
 
-            if self._shape != "elliptic":
+            if self._shape == "rectangular":
                 if border_size - left_unreachable_border > 0:
                     result[extruder_id].append(Polygon(numpy.array([
                         [-half_machine_width, -half_machine_depth],
@@ -956,6 +1076,64 @@ class BuildVolume(SceneNode):
                         [-half_machine_width + border_size - left_unreachable_border, -half_machine_depth + border_size - top_unreachable_border],
                         [half_machine_width - border_size - right_unreachable_border, -half_machine_depth + border_size - top_unreachable_border]
                     ], numpy.float32)))
+ 
+            elif self._shape == "moveo":
+                half_machine_width = 482
+                half_machine_depth = 482
+                border_size = 0
+                sections = 320
+                arc_vertex = [0, half_machine_depth - border_size]
+                for i in range(0, sections):
+                    quadrant = math.floor(4 * i / sections)
+                    vertices = []
+                    if quadrant == 0:
+                        vertices.append([-half_machine_width, half_machine_depth])
+                    elif quadrant == 1:
+                        vertices.append([-half_machine_width, -half_machine_depth])
+                    elif quadrant == 2:
+                        vertices.append([half_machine_width, -half_machine_depth])
+                    elif quadrant == 3:
+                        vertices.append([half_machine_width, half_machine_depth])
+                    vertices.append(arc_vertex)
+
+                    angle = 2 * math.pi * (i + 1) / sections
+                    arc_vertex = [-(half_machine_width - border_size) * math.sin(angle), (half_machine_depth - border_size) * math.cos(angle)]
+                    vertices.append(arc_vertex)
+
+                    result[extruder_id].append(Polygon(numpy.array(vertices, numpy.float32)))
+
+                arc_vertex = [0,0]
+                for i in range(0, sections):
+                    vertices = []
+                    vertices.append([0,0])
+                    vertices.append(arc_vertex)
+                    angle = 2 * math.pi * (i + 1) / sections
+                    arc_vertex = [-(175) * math.sin(angle), (175) * math.cos(angle)]
+                    vertices.append(arc_vertex)
+                    result[extruder_id].append(Polygon(numpy.array(vertices, numpy.float32)))
+
+                if border_size > 0: 
+                    result[extruder_id].append(Polygon(numpy.array([
+                        [-half_machine_width, -half_machine_depth],
+                        [-half_machine_width, half_machine_depth],
+                        [-half_machine_width + border_size, 0]
+                    ], numpy.float32)))
+                    result[extruder_id].append(Polygon(numpy.array([
+                        [-half_machine_width, half_machine_depth],
+                        [ half_machine_width, half_machine_depth],
+                        [ 0, half_machine_depth - border_size]
+                    ], numpy.float32)))
+                    result[extruder_id].append(Polygon(numpy.array([
+                        [ half_machine_width, half_machine_depth],
+                        [ half_machine_width, -half_machine_depth],
+                        [ half_machine_width - border_size, 0]
+                    ], numpy.float32)))
+                    result[extruder_id].append(Polygon(numpy.array([
+                        [ half_machine_width, -half_machine_depth],
+                        [-half_machine_width, -half_machine_depth],
+                        [ 0, -half_machine_depth + border_size]
+                    ], numpy.float32)))
+
             else:
                 sections = 32
                 arc_vertex = [0, half_machine_depth - border_size]
@@ -999,6 +1177,81 @@ class BuildVolume(SceneNode):
                         [-half_machine_width, -half_machine_depth],
                         [ 0, -half_machine_depth + border_size]
                     ], numpy.float32)))
+
+        return result
+
+    def _computeDisallowedAreasStaticFormoveo(self, border_size:float, used_extruders: List["ExtruderStack"]) -> Dict[str, List[Polygon]]:
+        # Convert disallowed areas to polygons and dilate them.
+        machine_disallowed_polygons = []
+        if self._global_container_stack is None:
+            return {}
+
+        for area in self._global_container_stack.getProperty("machine_disallowed_areas", "value"):
+            polygon = Polygon(numpy.array(area, numpy.float32))
+            polygon = polygon.getMinkowskiHull(Polygon.approximatedCircle(border_size))
+            machine_disallowed_polygons.append(polygon)
+
+        # For certain machines we don't need to compute disallowed areas for each nozzle.
+        # So we check here and only do the nozzle offsetting if needed.
+
+        result = {}  # type: Dict[str, List[Polygon]]
+        for extruder in used_extruders:
+            extruder_id = extruder.getId()
+            offset_x = extruder.getProperty("machine_nozzle_offset_x", "value")
+            if offset_x is None:
+                offset_x = 0
+            offset_y = extruder.getProperty("machine_nozzle_offset_y", "value")
+            if offset_y is None:
+                offset_y = 0
+            offset_y = -offset_y  # Y direction of g-code is the inverse of Y direction of Cura's scene space.
+            result[extruder_id] = []
+
+            for polygon in machine_disallowed_polygons:
+                result[extruder_id].append(polygon.translate(offset_x, offset_y))  # Compensate for the nozzle offset of this extruder.
+
+            half_machine_width = 482
+            half_machine_depth = 482
+            arc_vertex = [half_machine_width, -half_machine_depth]
+            for x in range(-85,384):
+                a = [-5.84496390332700e-14, 3.56282507993945e-12, 1.96598578522008e-11, -4.08500656982012e-09, 1.32273243218637e-08, 1.84264287266674e-06, -1.04208238003648e-05, -0.000262072884367316, -0.0107090984034695, 0.197575980978460, 46.4820460203409]
+                
+                z = float(x/10)
+                y = float(0)
+                for i in range(10):
+                    y = float(y + a[i]*(z**(10-i)))
+                y = y + a[10]                
+
+                vertices = []
+                if z < 0:
+                    vertices.append([half_machine_width, -half_machine_depth])
+                else:
+                    vertices.append([half_machine_width, half_machine_depth])
+                vertices.append(arc_vertex)
+                arc_vertex = [y*10, z*10+85]
+                vertices.append(arc_vertex)
+
+                result[extruder_id].append(Polygon(numpy.array(vertices, numpy.float32)))
+
+            arc_vertex = [-half_machine_width, -half_machine_depth]
+            for x in range(-85,384):
+                vertices = []
+                vertices.append(arc_vertex)
+                a = [-5.84496390332700e-14, 3.56282507993945e-12, 1.96598578522008e-11, -4.08500656982012e-09, 1.32273243218637e-08, 1.84264287266674e-06, -1.04208238003648e-05, -0.000262072884367316, -0.0107090984034695, 0.197575980978460, 46.4820460203409]
+                
+                z = float(x/10)
+                y = float(0)
+                for i in range(10):
+                    y = float(y + a[i]*(z**(10-i)))
+                y = y + a[10]                
+
+                if z < 0:
+                    vertices.append([-half_machine_width, -half_machine_depth])
+                else:
+                    vertices.append([-half_machine_width, half_machine_depth])
+                arc_vertex = [-y*10, z*10+85]
+                vertices.append(arc_vertex)
+
+                result[extruder_id].append(Polygon(numpy.array(vertices, numpy.float32)))
 
         return result
 

@@ -84,7 +84,8 @@ enum class FillPerimeterGapMode
 enum class BuildPlateShape
 {
     RECTANGULAR,
-    ELLIPTIC
+    ELLIPTIC,
+    MOVEO
 };
 
 enum class CombingMode

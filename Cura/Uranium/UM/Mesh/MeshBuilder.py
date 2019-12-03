@@ -647,6 +647,41 @@ class MeshBuilder:
         self.addIndices(numpy.asarray(indices, dtype = numpy.int32))
         self.addColors(numpy.asarray(colors, dtype = numpy.float32))
 
+    def addMoveoWorkSpace(self, inner_radius, outer_radius, width, center, sections = 320):
+        indices = []
+
+        start = self.getVertexCount() #Starting index.
+
+        for i in range(sections):
+            v1 = start + i * 3 #Indices for each of the vertices we'll add for this section.
+            v2 = v1 + 1
+            v3 = v1 + 2
+            v4 = v1 + 3
+            v5 = v1 + 4
+            v6 = v1 + 5
+
+            if i+1 >= sections: # connect the end to the start
+                v4 = start
+                v5 = start + 1
+                v6 = start + 2
+
+            theta = i * math.pi / (sections / 2) #Angle of this piece around torus perimeter.
+            c = math.cos(theta) #X-coordinate around torus perimeter.
+            s = math.sin(theta) #Y-coordinate around torus perimeter.
+
+            self.addVertex(inner_radius * s+center.x,      0+center.y, inner_radius * c+center.z)
+            self.addVertex(outer_radius * s+center.x,  width+center.y, outer_radius * c+center.z)
+            self.addVertex(outer_radius * s+center.x, -width+center.y, outer_radius * c+center.z)
+            #Connect the vertices to the next segment.
+            indices.append( [v1, v4, v5] )
+            indices.append( [v2, v1, v5] )
+            indices.append( [v2, v5, v6] )
+            indices.append( [v3, v2, v6] )
+            indices.append( [v3, v6, v4] )
+            indices.append( [v1, v3, v4] )
+
+        self.addIndices(numpy.asarray(indices, dtype = numpy.int32))
+
     ##  Adds a pyramid to the mesh of this mesh builder.
     #
     #   \param width The width of the base of the pyramid.
