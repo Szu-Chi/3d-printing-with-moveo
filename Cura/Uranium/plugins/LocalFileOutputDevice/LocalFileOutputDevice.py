@@ -18,6 +18,7 @@ from UM.OutputDevice.OutputDevice import OutputDevice
 from UM.OutputDevice import OutputDeviceError
 
 from UM.i18n import i18nCatalog
+from cura.CuraApplication import CuraApplication
 
 catalog = i18nCatalog("uranium")
 
@@ -188,9 +189,10 @@ class LocalFileOutputDevice(OutputDevice):
             message._folder = os.path.dirname(job.getFileName())
             message.actionTriggered.connect(self._onMessageActionTriggered)
             message.show()
-            if self._save_name is not None:
+            Shape = CuraApplication.getInstance().getShapeFromBuildVolume()
+            if Shape == "moveo":
                 os.system("roslaunch gcode_translation split.launch gcode_in:="+ self._save_name)
-                #os.system("roslaunch gcode_translation inverse_kinematics.launch gcode_out:="+ self._save_name)
+                os.system("roslaunch gcode_translation inverse_kinematics.launch gcode_out:="+ self._save_name)
         else:
             message = Message(catalog.i18nc("@info:status Don't translate the XML tags <filename> or <message>!", "Could not save to <filename>{0}</filename>: <message>{1}</message>").format(job.getFileName(), str(job.getError())), lifetime = 0, title = catalog.i18nc("@info:title", "Warning"))
             message.show()

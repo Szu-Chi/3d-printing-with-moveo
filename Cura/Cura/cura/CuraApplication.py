@@ -283,6 +283,12 @@ class CuraApplication(QtApplication):
 
     # Adds command line options to the command line parser. This should be called after the application is created and
     # before the pre-start.
+    def getShapeFromBuildVolume(self):
+        root = self.getController().getScene().getRoot()
+        build_volume_moveo = BuildVolume.BuildVolume(self, root)
+        Shape = build_volume_moveo.getShape()
+        return Shape
+
     def addCommandLineOptions(self):
         super().addCommandLineOptions()
         self._cli_parser.add_argument("--help", "-h",
