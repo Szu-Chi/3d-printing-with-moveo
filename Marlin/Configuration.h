@@ -896,7 +896,7 @@
  * Example: `M851 Z-5` with a CLEARANCE of 4  =>  9mm from bed to nozzle.
  *     But: `M851 Z+1` with a CLEARANCE of 2  =>  2mm from bed to nozzle.
  */
-#define Z_CLEARANCE_DEPLOY_PROBE   10 // Z Clearance for Deploy/Stow
+#define Z_CLEARANCE_DEPLOY_PROBE   20 // Z Clearance for Deploy/Stow
 #define Z_CLEARANCE_BETWEEN_PROBES 5  // Z Clearance between probe points
 #define Z_CLEARANCE_MULTI_PROBE    5  // Z Clearance between multiple probes
 //#define Z_AFTER_PROBING           5 // Z position after probing is done
@@ -1007,10 +1007,10 @@
 #define Z_MAX_POS 200
 
 #define J_MIN_POS_step -24800
-#define A_MIN_POS_step -43000
-#define B_MIN_POS_step -120250
-#define C_MIN_POS_step -36940
-#define D_MIN_POS_step -19750
+#define A_MIN_POS_step -43500
+#define B_MIN_POS_step -112250
+#define C_MIN_POS_step -40690
+#define D_MIN_POS_step -20250
 
 #define J_MAX_POS_step 24800
 #define A_MAX_POS_step 42000
@@ -1020,10 +1020,10 @@
 
 // joint
 #define Joint1_MIN_POS -24800
-#define Joint2_MIN_POS -43000
-#define Joint3_MIN_POS -120250
-#define Joint4_MIN_POS -36940
-#define Joint5_MIN_POS -19750
+#define Joint2_MIN_POS -43500
+#define Joint3_MIN_POS -112250
+#define Joint4_MIN_POS -40690
+#define Joint5_MIN_POS -20250
 
 // joint
 #define Joint1_MAX_POS 24800
@@ -1311,10 +1311,8 @@
 
 // Homing speeds (mm/m)
 #define HOMING_FEEDRATE_XY    (50 * 60)
-#define HOMING_FEEDRATE_Z     (4 * 60)
-#define HOMING_FEEDRATE_Joint (200 * 60)
-#define HOMING_FEEDRATE_Z     (4 * 60)
-#define HOMING_FEEDRATE_Joint (200 * 60)
+#define HOMING_FEEDRATE_Z     (50 * 60)//(4 * 60)
+#define HOMING_FEEDRATE_Joint (50 * 60)
 
 // @section calibrate
 
