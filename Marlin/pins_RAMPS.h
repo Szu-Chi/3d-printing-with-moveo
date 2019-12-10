@@ -343,7 +343,7 @@
 #endif
 
 //
-// PrÅ¯Å¡a i3 MK2 Multiplexer Support
+// Průša i3 MK2 Multiplexer Support
 //
 
 #ifndef E_MUX0_PIN
