@@ -1,5 +1,5 @@
 ----------------------------------------------------------------------------------------------------------------------------------
-NCDrill File Report For: uStepper.PcbDoc   2019/11/11  ¤U¤È 10:12:34
+NCDrill File Report For: uStepper.PcbDoc   2019/12/8  ¤W¤È 12:01:28
 ----------------------------------------------------------------------------------------------------------------------------------
 
 Layer Pair : Top Layer to Bottom Layer
@@ -7,11 +7,10 @@ ASCII RoundHoles File : uStepper.TXT
 
 Tool       Hole Size               Hole Tolerance               Hole Type       Hole Count   Plated         Tool Travel
 ----------------------------------------------------------------------------------------------------------------------------------
-T1      8mil (0.2mm)                                              Round             9         PTH        0.00inch (0.00mm)
-T2      8mil (0.203mm)                                            Round             1         PTH        0.00inch (0.00mm)
-T3      35mil (0.9mm)                                             Round             36        PTH        0.00inch (0.00mm)
-T4      118mil (3mm)                                              Round             4         PTH        0.00inch (0.00mm)
+T1      12mil (0.3mm)                                             Round             10        PTH        0.00inch (0.00mm)
+T2      35mil (0.9mm)                                             Round             38        PTH        0.00inch (0.00mm)
+T3      118mil (3mm)                                              Round             4         PTH        0.00inch (0.00mm)
 ----------------------------------------------------------------------------------------------------------------------------------
-Totals                                                                              50
+Totals                                                                              52
 
 Total Processing Time (hh:mm:ss) : 00:00:00

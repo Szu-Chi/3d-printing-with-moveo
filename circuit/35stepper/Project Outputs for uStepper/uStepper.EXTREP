@@ -1,5 +1,5 @@
 ------------------------------------------------------------------------------------------
-Gerber File Extension Report For: uStepper.GBR   2019/11/11  ¤U¤È 10:12:04
+Gerber File Extension Report For: uStepper.GBR   2019/12/8  ¤W¤È 12:01:05
 ------------------------------------------------------------------------------------------
 
 
@@ -20,6 +20,6 @@ Layer Extension     Layer Description
 .GKO                Keep-Out Layer                          
 .GPT                Top Pad Master                          
 .GPB                Bottom Pad Master                       
-.1                  Dielectric 1                            
 .GML                Multi-Layer                             
+.1                  Dielectric 1                            
 ------------------------------------------------------------------------------------------

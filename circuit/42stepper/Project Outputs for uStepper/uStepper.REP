@@ -2,82 +2,15 @@
 FileName = uStepper.GBR
 AutoAperture = True
 *************************************************************
-Generating : Bottom Solder
-      File : uStepper.GBS
+Generating : Mechanical 1
+      File : uStepper.GM1
 
-    Adding Layer      : Bottom Solder
-
-    Adding Layer      : Bottom Layer
-
-    Adding Layer      : Multi-Layer
+    Adding Layer      : Mechanical 1
 
 
 Used DCodes :
-    D23
-    D29
-    D30
-    D31
-    D32
-    D33
-    D34
-    D35
-    D49
-*************************************************************
-
-*************************************************************
-Generating : Top Pad Master
-      File : uStepper.GPT
-
-    Adding Layer      : Top Layer
-
-    Adding Layer      : Multi-Layer
-
-
-Used DCodes :
+    D13
     D16
-    D17
-    D18
-    D19
-    D20
-    D21
-    D22
-    D40
-    D41
-    D42
-*************************************************************
-
-*************************************************************
-Generating : Top Paste
-      File : uStepper.GTP
-
-    Adding Layer      : Top Paste
-
-    Adding Layer      : Top Layer
-
-    Adding Layer      : Multi-Layer
-
-
-Used DCodes :
-    D16
-    D17
-    D18
-    D19
-    D20
-    D21
-    D22
-*************************************************************
-
-*************************************************************
-Generating : Mechanical 15
-      File : uStepper.GM15
-
-    Adding Layer      : Mechanical 15
-
-
-Used DCodes :
-    D50
-    D51
-    D52
 *************************************************************
 
 *************************************************************
@@ -88,31 +21,8 @@ Generating : Mechanical 13
 
 
 Used DCodes :
-    D50
-*************************************************************
-
-*************************************************************
-Generating : Mechanical 1
-      File : uStepper.GM1
-
-    Adding Layer      : Mechanical 1
-
-
-Used DCodes :
-    D15
-*************************************************************
-
-*************************************************************
-Generating : Multi-Layer
-      File : uStepper.GML
-
-    Adding Layer      : Multi-Layer
-
-
-Used DCodes :
-    D40
-    D41
-    D42
+    D10
+    D13
 *************************************************************
 
 *************************************************************
@@ -126,13 +36,32 @@ Used DCodes :
 *************************************************************
 
 *************************************************************
-Generating : Dielectric 1
-      File : uStepper.1
+Generating : Bottom Overlay
+      File : uStepper.GBO
 
-    Adding Layer      : Dielectric 1
+    Adding Layer      : Bottom Overlay
 
 
 Used DCodes :
+    D10
+    D11
+    D12
+    D14
+    D15
+    D16
+*************************************************************
+
+*************************************************************
+Generating : Multi-Layer
+      File : uStepper.GML
+
+    Adding Layer      : Multi-Layer
+
+
+Used DCodes :
+    D41
+    D42
+    D43
 *************************************************************
 
 *************************************************************
@@ -147,45 +76,26 @@ Generating : Bottom Paste
 
 
 Used DCodes :
-    D16
-    D22
+    D18
+    D20
     D46
 *************************************************************
 
 *************************************************************
-Generating : Top Layer
-      File : uStepper.GTL
+Generating : Dielectric 1
+      File : uStepper.1
 
-    Adding Layer      : Top Layer
-
-    Adding Layer      : Multi-Layer
+    Adding Layer      : Dielectric 1
 
 
 Used DCodes :
-    D14
-    D15
-    D16
-    D17
-    D18
-    D19
-    D20
-    D21
-    D22
-    D36
-    D37
-    D38
-    D39
-    D40
-    D41
-    D42
-    D43
-    D44
-    D45
 *************************************************************
 
 *************************************************************
-Generating : Bottom Pad Master
-      File : uStepper.GPB
+Generating : Bottom Solder
+      File : uStepper.GBS
+
+    Adding Layer      : Bottom Solder
 
     Adding Layer      : Bottom Layer
 
@@ -193,12 +103,14 @@ Generating : Bottom Pad Master
 
 
 Used DCodes :
-    D16
-    D22
-    D40
-    D41
-    D42
-    D46
+    D26
+    D28
+    D33
+    D34
+    D35
+    D36
+    D37
+    D48
 *************************************************************
 
 *************************************************************
@@ -213,8 +125,6 @@ Generating : Top Solder
 
 
 Used DCodes :
-    D23
-    D24
     D25
     D26
     D27
@@ -226,32 +136,43 @@ Used DCodes :
     D33
     D34
     D35
+    D36
+    D37
 *************************************************************
 
 *************************************************************
-Generating : Bottom Layer
-      File : uStepper.GBL
+Generating : Mechanical 15
+      File : uStepper.GM15
 
-    Adding Layer      : Bottom Layer
+    Adding Layer      : Mechanical 15
+
+
+Used DCodes :
+    D13
+    D49
+    D50
+*************************************************************
+
+*************************************************************
+Generating : Top Paste
+      File : uStepper.GTP
+
+    Adding Layer      : Top Paste
+
+    Adding Layer      : Top Layer
 
     Adding Layer      : Multi-Layer
 
 
 Used DCodes :
-    D15
-    D16
+    D17
+    D18
+    D19
+    D20
+    D21
     D22
-    D36
-    D37
-    D40
-    D41
-    D42
-    D43
-    D44
-    D45
-    D46
-    D47
-    D48
+    D23
+    D24
 *************************************************************
 
 *************************************************************
@@ -268,21 +189,100 @@ Used DCodes :
     D13
     D14
     D15
+    D16
 *************************************************************
 
 *************************************************************
-Generating : Bottom Overlay
-      File : uStepper.GBO
+Generating : Top Pad Master
+      File : uStepper.GPT
 
-    Adding Layer      : Bottom Overlay
+    Adding Layer      : Top Layer
+
+    Adding Layer      : Multi-Layer
 
 
 Used DCodes :
-    D10
-    D11
-    D12
-    D13
-    D14
-    D15
+    D17
+    D18
+    D19
+    D20
+    D21
+    D22
+    D23
+    D24
+    D41
+    D42
+    D43
+*************************************************************
+
+*************************************************************
+Generating : Bottom Pad Master
+      File : uStepper.GPB
+
+    Adding Layer      : Bottom Layer
+
+    Adding Layer      : Multi-Layer
+
+
+Used DCodes :
+    D18
+    D20
+    D41
+    D42
+    D43
+    D46
+*************************************************************
+
+*************************************************************
+Generating : Top Layer
+      File : uStepper.GTL
+
+    Adding Layer      : Top Layer
+
+    Adding Layer      : Multi-Layer
+
+
+Used DCodes :
+    D16
+    D17
+    D18
+    D19
+    D20
+    D21
+    D22
+    D23
+    D24
+    D38
+    D39
+    D40
+    D41
+    D42
+    D43
+    D44
+    D45
+*************************************************************
+
+*************************************************************
+Generating : Bottom Layer
+      File : uStepper.GBL
+
+    Adding Layer      : Bottom Layer
+
+    Adding Layer      : Multi-Layer
+
+
+Used DCodes :
+    D16
+    D18
+    D20
+    D38
+    D39
+    D41
+    D42
+    D43
+    D44
+    D45
+    D46
+    D47
 *************************************************************
 
