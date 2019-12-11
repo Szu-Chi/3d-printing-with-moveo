@@ -79,6 +79,7 @@ class Backend(PluginObject):
         if self._process is None:  # Failed to start engine.
             return
         Logger.log("i", "Started engine process: %s", self.getEngineCommand()[0])
+        print("6666666666666666666666666666666")
         self._backendLog(bytes("Calling engine with: %s\n" % self.getEngineCommand(), "utf-8"))
         t = threading.Thread(target = self._storeOutputToLogThread, args = (self._process.stdout,), name = "EngineOutputThread")
         t.daemon = True
@@ -142,18 +143,23 @@ class Backend(PluginObject):
             if line == b"":
                 self.backendQuit.emit()
                 break
+            #print("888888888888888888888888")
             self._backendLog(line)
 
     def _storeStderrToLogThread(self, handle):
         while True:
+            #print("222222222222222222222222")
             try:
+                #print("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
                 line = handle.readline()
+                #print("ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ")
             except OSError:
                 Logger.logException("w", "Exception handling stderr log from backend.")
                 continue
             if line == b"":
+                print("999999999999999999999999")
                 break
-            self._backendLog(line)
+            #self._backendLog(line)
 
     ##  Private socket state changed handler.
     def _onSocketStateChanged(self, state):

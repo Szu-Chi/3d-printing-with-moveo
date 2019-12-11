@@ -24,6 +24,7 @@ from cura.Settings.GlobalStack import GlobalStack
 
 catalog = i18nCatalog("cura")
 
+import os
 import numpy
 import math
 import copy
@@ -1217,6 +1218,26 @@ class BuildVolume(SceneNode):
             half_machine_width = 482
             half_machine_depth = 482
             arc_vertex = [half_machine_width, -half_machine_depth]
+            #OpenFilePath = os.path.abspath('.')
+            #OpenFilePath = OpenFilePath + "/cura/Outmost/Outmost.txt"
+            #fp = open(OpenFilePath, "r")
+            #line = fp.readline()
+            #x = -85
+            #while line:
+            #    y =  float(line.strip())
+            #    vertices = []
+            #    if x < 0:
+            #        vertices.append([half_machine_width, -half_machine_depth])
+            #    else:
+            #        vertices.append([half_machine_width, half_machine_depth])
+            #    vertices.append(arc_vertex)
+            #    arc_vertex = [y*10, x+85]
+            #    vertices.append(arc_vertex)
+            #    x = x + 1
+            #    line = fp.readline()
+            #    result[extruder_id].append(Polygon(numpy.array(vertices, numpy.float32)))
+            #fp.close()
+
             for x in range(-85,384):
                 a = [-5.84496390332700e-14, 3.56282507993945e-12, 1.96598578522008e-11, -4.08500656982012e-09, 1.32273243218637e-08, 1.84264287266674e-06, -1.04208238003648e-05, -0.000262072884367316, -0.0107090984034695, 0.197575980978460, 46.4820460203409]
                 
@@ -1236,8 +1257,26 @@ class BuildVolume(SceneNode):
                 vertices.append(arc_vertex)
 
                 result[extruder_id].append(Polygon(numpy.array(vertices, numpy.float32)))
-
+                
             arc_vertex = [-half_machine_width, -half_machine_depth]
+            #fp = open(OpenFilePath, "r")
+            #line = fp.readline()
+            #x = -85
+            #while line:
+            #    y =  float(line.strip())
+            #    vertices = []
+            #    if x < 0:
+            #        vertices.append([-half_machine_width, -half_machine_depth])
+            #    else:
+            #        vertices.append([-half_machine_width, half_machine_depth])
+            #    vertices.append(arc_vertex)
+            #    arc_vertex = [-y*10, x+85]
+            #    vertices.append(arc_vertex)
+            #    x = x + 1
+            #    line = fp.readline()
+            #    result[extruder_id].append(Polygon(numpy.array(vertices, numpy.float32)))
+            #fp.close()
+            
             for x in range(-85,384):
                 vertices = []
                 vertices.append(arc_vertex)

@@ -75,7 +75,7 @@ class ConvexHullNode(SceneNode):
         if not ConvexHullNode.shader:
             ConvexHullNode.shader = OpenGL.getInstance().createShaderProgram(Resources.getPath(Resources.Shaders, "transparent_object.shader"))
             ConvexHullNode.shader.setUniformValue("u_diffuseColor", self._color)
-            ConvexHullNode.shader.setUniformValue("u_opacity", 0.6)
+            ConvexHullNode.shader.setUniformValue("u_opacity", 0.6)#shade color volume
 
         if self.getParent():
             if self.getMeshData() and isinstance(self._node, SceneNode) and self._node.callDecoration("getBuildPlateNumber") == Application.getInstance().getMultiBuildPlateModel().activeBuildPlate:

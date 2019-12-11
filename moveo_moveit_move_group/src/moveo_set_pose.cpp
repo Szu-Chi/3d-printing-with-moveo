@@ -25,7 +25,7 @@ std::vector<double> solveJoint(KDL::Frame end_effector_pose){
     ROS_FATAL("Missing chain info in launch file");
     exit(-1);
   }
-  node_handle.param("timeout", timeout, 0.005);
+  node_handle.param("timeout", timeout, 0.1);
   node_handle.param("urdf_param", urdf_param, std::string("/robot_description"));
 
   double eps = 1e-5;
@@ -64,7 +64,7 @@ std::vector<double> solveJoint(KDL::Frame end_effector_pose){
   KDL::JntArray result;
   int rc = tracik_solver.CartToJnt(nominal, end_effector_pose, result, target_bounds);
   ROS_INFO_STREAM("rc :" << rc);
-
+  ROS_INFO_STREAM("Timeout :" << timeout);
   if(rc > 0){
     std::vector<double> target_joints(chain.getNrOfJoints());
     for(int i = 0; i < chain.getNrOfJoints(); i++){

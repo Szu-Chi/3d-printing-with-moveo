@@ -218,6 +218,7 @@ class CuraEngineBackend(QObject, Backend):
     @pyqtSlot()
     def forceSlice(self) -> None:
         self.markSliceAll()
+        print("12312312312312123123123123123123123123123123")
         self.slice()
 
     ##  Perform a slice of the scene.
@@ -240,9 +241,12 @@ class CuraEngineBackend(QObject, Backend):
         # see if we really have to slice
         active_build_plate = self._application.getMultiBuildPlateModel().activeBuildPlate
         build_plate_to_be_sliced = self._build_plates_to_be_sliced.pop(0)
+        print(build_plate_to_be_sliced)
         Logger.log("d", "Going to slice build plate [%s]!" % build_plate_to_be_sliced)
         num_objects = self._numObjectsPerBuildPlate()
-
+        print("#################################")
+        print(num_objects)
+        print("#################################")
         self._stored_layer_data = []
 
 
@@ -276,6 +280,7 @@ class CuraEngineBackend(QObject, Backend):
         self._start_slice_job.setBuildPlate(self._start_slice_job_build_plate)
         self._start_slice_job.start()
         self._start_slice_job.finished.connect(self._onStartSliceCompleted)
+        print("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
 
     ##  Terminate the engine process.
     #   Start the engine process by calling _createSocket()
@@ -398,6 +403,7 @@ class CuraEngineBackend(QObject, Backend):
                 self.backendError.emit(job)
             else:
                 self.setState(BackendState.NotStarted)
+            return
 
         if job.getResult() == StartJobResult.ObjectsWithDisabledExtruder:
             self._error_message = Message(catalog.i18nc("@info:status", "Unable to slice because there are objects associated with disabled Extruder %s.") % job.getMessage(),

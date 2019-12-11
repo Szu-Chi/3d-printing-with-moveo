@@ -58,14 +58,13 @@ bool check_trac_ik_valid(TRAC_IK::TRAC_IK &tracik_solver,KDL::Chain &chain, KDL:
   }
   return true;
 }
-//1028.57143*4*4.523809*0.95/5.18*100
 void motor_setep_convert(Eigen::VectorXd &data){
                                         // steps * micro_steps * belt * error
-  static const double joint_division[6] = {200          * 32  * 10.533   * 1,     //J
-                                           200          * 128 * 5.71428  * 1,     //A 
-                                           19810.111813 * 4   * 4.523809 * 1,     //B
-                                           5370.24793   * 32  * 1        * 1,     //C
-                                           1036.36364   * 16  * 4.666    * 1      //D
+  static const double joint_division[6] = {200          * 32  * 10       * 1,     //J 64000
+                                           200          * 128 * 5.5      * 1,     //A 140800
+                                           19810.111813 * 4   * 4.357143 * 1,     //B 345261.960060921
+                                           5370.24793   * 32  * 1        * 1,     //C 171847.93376
+                                           1036.36364   * 16  * 4.5      * 1      //D 74618.18208
                                            };
   for(int i = 0; i < 5; i++){
     data(i) = data(i)/(M_PI)*180 * joint_division[i]/360;
@@ -180,9 +179,10 @@ int main(int argc, char **argv){
       if(all_line % 1000 == 0 || !input_file){
         for(int i = 0;i < all_line ;i++){
           line = save[i];
-          if(!line.compare(0,8,";LAYER:0")){
+          if(!line.compare(0,7,";LAYER:")){
             check = 1;
           }
+          check = 1;
           if(check == 1){
             if(!line.compare(0,2,"G0") || !line.compare(0,2,"G1")){
               size_t colon_pos_X = line.find('X');
@@ -199,16 +199,31 @@ int main(int argc, char **argv){
               }
               find_end_effector_target_vol.push_back(end_effector_target_vol);
               save_place.push_back(i);
-              if(end_effector_target_vol.data[1]*100 <= 25.2){
-                if(end_effector_target_vol.data[1]*100 <= sqrt(pow(judge_Y[int((end_effector_target_vol.data[2]+0.085)*1000000)],2)-pow(end_effector_target_vol.data[0]*100,2))){
+              if(abs(end_effector_target_vol.data[1]*100) <= 25.2){
+                if(abs(end_effector_target_vol.data[1]*100) <= sqrt(pow(judge_Y[int((end_effector_target_vol.data[2])*1000000)],2)-pow(end_effector_target_vol.data[0]*100,2))){
+                  if(end_effector_target_vol.data[1]*100 < 0){
+                    save_p_or_n.push_back(1);
+                  }
+                  else{
+                    save_p_or_n.push_back(0);
+                  }
+                }
+                else{
+                  if(end_effector_target_vol.data[1]*100 < 0){
+                    save_p_or_n.push_back(0);
+                  }
+                  else{
+                    save_p_or_n.push_back(1);
+                  }
+                }
+              }
+              else{
+                if(end_effector_target_vol.data[1]*100 < 0){
                   save_p_or_n.push_back(0);
                 }
                 else{
                   save_p_or_n.push_back(1);
                 }
-              }
-              else{
-                save_p_or_n.push_back(1);
               }
             }
           }
