@@ -2389,6 +2389,7 @@ void do_blocking_move_to(const float rx, const float ry, const float rz, const f
 
     /*------------------------New------------------------*/
     if (current_position[Z_AXIS] < rz) {
+    endstops.enable_z_probe(false);
     feedrate_mm_s = z_feedrate;
     
     // Set_current_Joint_Slope(current_position_Joint,HOME_position_Slope,Delta_Z_01mm(current_position[Z_AXIS],rz));
@@ -2402,7 +2403,8 @@ void do_blocking_move_to(const float rx, const float ry, const float rz, const f
     buffer_line_to_current_position();
     planner.synchronize();
   }
-  
+  endstops.enable_z_probe(false);
+
   feedrate_mm_s = fr_mm_s ? fr_mm_s : XY_PROBE_FEEDRATE_MM_S;
   current_position[X_AXIS] = rx;
   current_position[Y_AXIS] = ry;
@@ -2420,13 +2422,16 @@ void do_blocking_move_to(const float rx, const float ry, const float rz, const f
   Set_current_Joint_Curve_More(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS]);
   buffer_line_to_current_position();
   planner.synchronize();
-
+  
   if (current_position[Z_AXIS] > rz) {
+      endstops.enable_z_probe(true);
       SERIAL_ECHOLNPGM("//To High//");
       feedrate_mm_s = z_feedrate;
       current_position[Z_AXIS] = rz;
       Set_current_Joint_Curve_More(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS]);
       buffer_line_to_current_position();
+      planner.synchronize();
+      endstops.enable_z_probe(false);
   }
 
   // If Z needs to lower, do it after moving XY
@@ -2478,6 +2483,7 @@ void do_blocking_move_to_Joint(const float rx, const float ry, const float rz, c
 
   // If Z needs to raise, do it before moving XY
   if (current_position[Z_AXIS] < rz) {
+    endstops.enable_z_probe(false);
     endstops.hit_on_purpose();
     feedrate_mm_s = z_feedrate;
     
@@ -2497,6 +2503,7 @@ void do_blocking_move_to_Joint(const float rx, const float ry, const float rz, c
     SERIAL_ECHOLNPAIR("trigger_state(): ", endstops.trigger_state());
   }
   
+  endstops.enable_z_probe(false);
   feedrate_mm_s = fr_mm_s ? fr_mm_s : XY_PROBE_FEEDRATE_MM_S;
   current_position[X_AXIS] = rx;
   current_position[Y_AXIS] = ry;
@@ -2517,12 +2524,15 @@ void do_blocking_move_to_Joint(const float rx, const float ry, const float rz, c
   // If Z needs to lower, do it after moving XY
 
   if (current_position[Z_AXIS] > rz) {
+      endstops.enable_z_probe(true);
       SERIAL_ECHOLNPGM("//To High//");
       feedrate_mm_s = z_feedrate;
 
       current_position[Z_AXIS] = rz;
       Set_current_Joint_Curve_More(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS]);
       buffer_line_to_current_position();
+      planner.synchronize();
+      endstops.enable_z_probe(false);
   }
   /*
   if (current_position[Z_AXIS] > rz) {
@@ -3293,10 +3303,12 @@ void clean_up_after_endstop_or_probe_move() {
     #endif
 
     // Move down until probe triggered
-    while( (current_position[Z_AXIS]>=z) && !(TEST(endstops.trigger_state(),Z_MIN_PROBE) != 0) )
+    float temp_current_Z_pos=current_position[Z_AXIS];
+    while( (temp_current_Z_pos>=z) && !(TEST(endstops.trigger_state(),Z_MIN_PROBE) != 0) )
     {
-      current_position[Z_AXIS]=current_position[Z_AXIS]-0.1;
-      do_blocking_move_to_z(current_position[Z_AXIS], fr_mm_s);
+      temp_current_Z_pos=temp_current_Z_pos-0.1;//0.01;
+      //current_position[Z_AXIS]=current_position[Z_AXIS]-0.1;
+      do_blocking_move_to_z(temp_current_Z_pos, fr_mm_s);
     }
     endstops.enable_z_probe(false);
     SERIAL_ECHOLNPAIR("current_position[Z_AXIS]:",current_position[Z_AXIS]);

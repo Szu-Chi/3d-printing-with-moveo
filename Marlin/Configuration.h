@@ -860,15 +860,15 @@
  *      O-- FRONT --+
  *    (0,0)
  */
-#define X_PROBE_OFFSET_FROM_EXTRUDER 10 // X offset: -left  +right  [of the nozzle]
-#define Y_PROBE_OFFSET_FROM_EXTRUDER 10 // Y offset: -front +behind [the nozzle]
-#define Z_PROBE_OFFSET_FROM_EXTRUDER 0  // Z offset: -below +above  [the nozzle]
+#define X_PROBE_OFFSET_FROM_EXTRUDER -9 // X offset: -left  +right  [of the nozzle]
+#define Y_PROBE_OFFSET_FROM_EXTRUDER 11 // Y offset: -front +behind [the nozzle]
+#define Z_PROBE_OFFSET_FROM_EXTRUDER -26.55  // Z offset: -below +above  [the nozzle]
 
 // Certain types of probes need to stay away from edges
 #define MIN_PROBE_EDGE 10
 
 // X and Y axis travel speed (mm/m) between probes
-#define XY_PROBE_SPEED 8000
+#define XY_PROBE_SPEED 25*60//8000
 
 // Feedrate (mm/m) for the first approach when double-probing (MULTIPLE_PROBING
 // == 2)
@@ -1007,22 +1007,22 @@
 #define Z_MAX_POS 200
 
 #define J_MIN_POS_step -24800
-#define A_MIN_POS_step -44500
-#define B_MIN_POS_step -114250
-#define C_MIN_POS_step -42690
+#define A_MIN_POS_step -41760
+#define B_MIN_POS_step -108400
+#define C_MIN_POS_step -41690
 #define D_MIN_POS_step -20250
 
 #define J_MAX_POS_step 24800
 #define A_MAX_POS_step 42000
-#define B_MAX_POS_step 110000
+#define B_MAX_POS_step 100000
 #define C_MAX_POS_step 111810
 #define D_MAX_POS_step 20500
 
 // joint
 #define Joint1_MIN_POS -24800
-#define Joint2_MIN_POS -44500
-#define Joint3_MIN_POS -114250
-#define Joint4_MIN_POS -42690
+#define Joint2_MIN_POS -41760
+#define Joint3_MIN_POS -108400
+#define Joint4_MIN_POS -41690
 #define Joint5_MIN_POS -20250
 
 // joint
@@ -1310,9 +1310,9 @@
 #endif
 
 // Homing speeds (mm/m)
-#define HOMING_FEEDRATE_XY    (50 * 60)
-#define HOMING_FEEDRATE_Z     (20 * 60)//(4 * 60)
-#define HOMING_FEEDRATE_Joint (50 * 60)
+#define HOMING_FEEDRATE_XY    (10 * 60)
+#define HOMING_FEEDRATE_Z     (10 * 60)//(4 * 60)
+#define HOMING_FEEDRATE_Joint (10 * 60)
 
 // @section calibrate
 
