@@ -1007,9 +1007,9 @@
 #define Z_MAX_POS 200
 
 #define J_MIN_POS_step -24800
-#define A_MIN_POS_step -43500
-#define B_MIN_POS_step -112250
-#define C_MIN_POS_step -40690
+#define A_MIN_POS_step -44500
+#define B_MIN_POS_step -114250
+#define C_MIN_POS_step -42690
 #define D_MIN_POS_step -20250
 
 #define J_MAX_POS_step 24800
@@ -1020,9 +1020,9 @@
 
 // joint
 #define Joint1_MIN_POS -24800
-#define Joint2_MIN_POS -43500
-#define Joint3_MIN_POS -112250
-#define Joint4_MIN_POS -40690
+#define Joint2_MIN_POS -44500
+#define Joint3_MIN_POS -114250
+#define Joint4_MIN_POS -42690
 #define Joint5_MIN_POS -20250
 
 // joint
@@ -1311,7 +1311,7 @@
 
 // Homing speeds (mm/m)
 #define HOMING_FEEDRATE_XY    (50 * 60)
-#define HOMING_FEEDRATE_Z     (50 * 60)//(4 * 60)
+#define HOMING_FEEDRATE_Z     (20 * 60)//(4 * 60)
 #define HOMING_FEEDRATE_Joint (50 * 60)
 
 // @section calibrate

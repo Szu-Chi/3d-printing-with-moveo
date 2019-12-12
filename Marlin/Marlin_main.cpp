@@ -2397,9 +2397,10 @@ void do_blocking_move_to(const float rx, const float ry, const float rz, const f
 
     SERIAL_ECHOLNPGM("//To low//");
     current_position[Z_AXIS] = rz;
-    Set_current_Joint_Curve_More(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS]);    
+    Set_current_Joint_Curve_More(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS]);
 
-    buffer_line_to_current_position();    
+    buffer_line_to_current_position();
+    planner.synchronize();
   }
   
   feedrate_mm_s = fr_mm_s ? fr_mm_s : XY_PROBE_FEEDRATE_MM_S;
@@ -2499,7 +2500,7 @@ void do_blocking_move_to_Joint(const float rx, const float ry, const float rz, c
   feedrate_mm_s = fr_mm_s ? fr_mm_s : XY_PROBE_FEEDRATE_MM_S;
   current_position[X_AXIS] = rx;
   current_position[Y_AXIS] = ry;
-
+  
   //int tempp = X_Y_to_Number((int)rx,(int)ry);
   //int tempp=0;
 
@@ -2512,6 +2513,7 @@ void do_blocking_move_to_Joint(const float rx, const float ry, const float rz, c
 
   Set_current_Joint_Curve_More(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS]);
   buffer_line_to_current_position();
+  planner.synchronize();
   // If Z needs to lower, do it after moving XY
 
   if (current_position[Z_AXIS] > rz) {
@@ -2627,7 +2629,7 @@ void clean_up_after_endstop_or_probe_move() {
       return true;
     }*/
     // if (JJ || AA || BB || CC || DD) {
-    if (JJ){
+    /*if (JJ){
       SERIAL_ECHO_START();
       SERIAL_ECHOPGM(MSG_HOME " ");
       if (JJ) SERIAL_ECHOPGM(MSG_Joint1);
@@ -2641,7 +2643,7 @@ void clean_up_after_endstop_or_probe_move() {
         lcd_status_printf_P(0, PSTR(MSG_HOME " %s%s%s%s%s " MSG_FIRST), JJ ? MSG_Joint1 : "", AA ? MSG_Joint2 : "", BB ? MSG_Joint3 : "", CC ? MSG_Joint4 : "", DD ? MSG_Joint5 : "");
       #endif
       return true;
-    }
+    }*/
     return false;
   }
 
@@ -3427,7 +3429,7 @@ void clean_up_after_endstop_or_probe_move() {
           SERIAL_ECHOLNPAIR(" Discrepancy:", first_probe_z - z2);
         }
       #endif
-      current_position[Z_AXIS]=0;
+      //current_position[Z_AXIS] = 0;
       // Return a weighted average of the fast and slow probes
       const float measured_z = (z2 * 3.0 + first_probe_z * 2.0) * 0.2;
 
@@ -5828,11 +5830,11 @@ inline void gcode_G28(const bool always_home_all) {
     //*/
 
     //*
-    if(home_all || homeJ)homeJoint(Joint1_AXIS);
-    if(home_all || homeA)homeJoint(Joint2_AXIS);
-    if(home_all || homeB)homeJoint(Joint3_AXIS);
-    if(home_all || homeC)homeJoint(Joint4_AXIS);
     if(home_all || homeD)homeJoint(Joint5_AXIS);
+    if(home_all || homeC)homeJoint(Joint4_AXIS);
+    if(home_all || homeB)homeJoint(Joint3_AXIS);
+    if(home_all || homeA)homeJoint(Joint2_AXIS);
+    if(home_all || homeJ)homeJoint(Joint1_AXIS);   
     //*/
     SYNC_PLAN_POSITION_KINEMATIC();
 
@@ -5848,6 +5850,12 @@ inline void gcode_G28(const bool always_home_all) {
   #if ENABLED(RESTORE_LEVELING_AFTER_G28)
     set_bed_leveling_enabled(leveling_was_active);
   #endif
+
+  if(Joint_homed==31)
+  {
+    axis_homed=7;
+    axis_known_position=7;
+  }
   /*
   report_current_position();
   //*/
@@ -6943,7 +6951,7 @@ void home_all_axes() { gcode_G28(true); }
 
               char str_G29[80];            
                 
-              dtostrf(diff, 5, 5, str_G29);
+              dtostrf(eqnBVector[ind], 5, 5, str_G29);
               strcat(str_G29, " ");                           
               card.write_Str(str_G29);              
             } // xx
@@ -6953,6 +6961,14 @@ void home_all_axes() { gcode_G28(true); }
           SERIAL_EOL();
 
           card.closefile();
+          for(int j=0;j<5;j++)
+          {
+            for(int i=0;i<5;i++)
+            {
+              SERIAL_ECHOPAIR(" ", eqnBVector[j*5+i]);
+            }
+            SERIAL_PROTOCOLLNPGM();
+          }
 
           if (verbose_level > 3) {
             SERIAL_PROTOCOLLNPGM("\nCorrected Bed Height vs. Bed Topology:");
