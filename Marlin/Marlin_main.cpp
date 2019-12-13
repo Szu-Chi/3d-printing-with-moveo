@@ -3306,7 +3306,7 @@ void clean_up_after_endstop_or_probe_move() {
     float temp_current_Z_pos=current_position[Z_AXIS];
     while( (temp_current_Z_pos>=z) && !(TEST(endstops.trigger_state(),Z_MIN_PROBE) != 0) )
     {
-      temp_current_Z_pos=temp_current_Z_pos-0.1;//0.01;
+      temp_current_Z_pos=temp_current_Z_pos-(temp_current_Z_pos>=35)?1:(temp_current_Z_pos>=28)?0.1:0.01;//0.01;
       //current_position[Z_AXIS]=current_position[Z_AXIS]-0.1;
       do_blocking_move_to_z(temp_current_Z_pos, fr_mm_s);
     }
