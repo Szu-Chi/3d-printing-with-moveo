@@ -27,6 +27,14 @@ int main(int argc, char **argv)
   const robot_state::JointModelGroup *joint_model_group = start_state->getJointModelGroup(move_group.getName());
   bool check = 0;
 
+                                          // steps * micro_steps * belt * error
+  static const double joint_division[6] = {200          * 32  * 10       * 1,     //J 64000
+                                           200          * 128 * 5.5      * 1,     //A 140800
+                                           19810.111813 * 4   * 4.357143 * 1,     //B 345261.960060921
+                                           5370.24793   * 32  * 1        * 1,     //C 171847.93376
+                                           1036.36364   * 16  * 4.5      * 1      //D 74618.18208
+                                           };
+
   std::string gcode_in;
   node_handle.param("gcode_in", gcode_in, std::string("/gcode_in"));
   std::ifstream input_file(gcode_in);
@@ -38,42 +46,46 @@ int main(int argc, char **argv)
   double Z = 0;
   double pre_Z = 0;
   bool draw = 0;
+  int save = 0;
   while(input_file){
+    save++;
     std::getline(input_file, line);
-    if(!line.compare(0,2,"G0")){
+    if(!line.compare(0,7,";LAYER:")){
       check = 1;
     }
-    if(!line.compare(0,1,";")){
-    }
-    else if(check == 1){
+    if(check == 1){
       if(!line.compare(0,2,"G0") || !line.compare(0,2,"G1")){
         size_t colon_pos_J = line.find('J');
         if(colon_pos_J < 100){
-          target_joints.at(0) = double(stod(line.substr(colon_pos_J+1))*(2*M_PI)/(200*32*10.533*0.95));
+          target_joints.at(0) = double(stod(line.substr(colon_pos_J+1))*(2*M_PI)/joint_division[0]);
         }
         size_t colon_pos_A = line.find('A');
         if(colon_pos_A < 100){
-          target_joints.at(1) = double(stod(line.substr(colon_pos_A+1))*(2*M_PI)/(200*16*5.71428*0.95));
+          target_joints.at(1) = double(stod(line.substr(colon_pos_A+1))*(2*M_PI)/joint_division[1]);
         }
         size_t colon_pos_B = line.find('B');
         if(colon_pos_B < 100){
-          target_joints.at(2) = double(stod(line.substr(colon_pos_B+1))*(2*M_PI)/(1028.57143*16*4.523809*0.95));
+          target_joints.at(2) = double(stod(line.substr(colon_pos_B+1))*(2*M_PI)/joint_division[2]);
         }
         size_t colon_pos_C = line.find('C');
         if(colon_pos_C < 100){
-          target_joints.at(3) = double(stod(line.substr(colon_pos_C+1))*(2*M_PI)/(200*32));
+          target_joints.at(3) = double(stod(line.substr(colon_pos_C+1))*(2*M_PI)/joint_division[3]);
         }
         size_t colon_pos_D = line.find('D');
         if(colon_pos_D < 100){
-          target_joints.at(4) = double(stod(line.substr(colon_pos_D+1))*(2*M_PI)/(200*16*4.666));
+          target_joints.at(4) = double(stod(line.substr(colon_pos_D+1))*(2*M_PI)/joint_division[4]);
         }
         size_t colon_pos_Z = line.find('Z');
         if(colon_pos_Z < 100){
           Z = stod(line.substr(colon_pos_Z+1));
         }
-        if(Z != pre_Z){
+        /*if(Z != pre_Z){
           draw = 1;
           pre_Z = Z;
+        }*/
+        if(save == 1000){
+          draw = 1;
+          save = 0;
         }
         if(draw == 1){
           draw = 0;
@@ -122,7 +134,7 @@ int main(int argc, char **argv)
   }
   end_ = ros::WallTime::now();
   double execution_time = (end_ - start_).toNSec() * 1e-9;
-  ROS_INFO_STREAM("Exectution time (ms): " << execution_time);
+  ROS_INFO_STREAM("Exectution time (s): " << execution_time);
   ros::shutdown();
   return 0;
 }

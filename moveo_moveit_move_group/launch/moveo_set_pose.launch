@@ -12,7 +12,7 @@
   <arg name="end_effector_target_rot_R" default="0.0"/>
   <arg name="end_effector_target_rot_Y" default="0.0"/>
   <arg name="end_effector_target_rot_P" default="0.0"/>
-  
+  <arg name="g_n_judge_Y" default="$(find gcode_translation)/p_n_judge_Y/p_n_judge_Y.txt"/>
 
   <node name="moveo_moveit_move_group" pkg="moveo_moveit_move_group" type="moveo_set_pose" output="screen">
     <param name="chain_start" value="$(arg chain_start)"/>
@@ -26,5 +26,6 @@
     <param name="end_effector_target_rot_R" value = "$(arg end_effector_target_rot_R)"/>
     <param name="end_effector_target_rot_Y" value = "$(arg end_effector_target_rot_Y)"/>
     <param name="end_effector_target_rot_P" value = "$(arg end_effector_target_rot_P)"/>
+    <param name="g_n_judge_Y" value="$(arg g_n_judge_Y)"/>
   </node>
 </launch>

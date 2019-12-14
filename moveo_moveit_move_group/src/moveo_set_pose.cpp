@@ -12,6 +12,7 @@
 
 #include <trac_ik/trac_ik.hpp>
 #include <ros/ros.h>
+std::vector<double> euler_to_quaternion(double r,double p,double y);
 
 std::vector<double> solveJoint(KDL::Frame end_effector_pose){
   ros::NodeHandle node_handle("~");
@@ -57,9 +58,11 @@ std::vector<double> solveJoint(KDL::Frame end_effector_pose){
   ROS_INFO("Using %d joints", chain.getNrOfJoints());
   // Create Nominal chain configuration midway between all joint limits
   KDL::JntArray nominal(chain.getNrOfJoints());
-
+  for (uint j = 0; j < nominal.data.size(); j++){
+    nominal(j) = (ll(j) + ul(j)) / 2.0;
+  }
   //solving IK
-  KDL::Vector target_bounds_rot(0, 0, M_PI*45/180), target_bounds_vel(0,0,0);
+  KDL::Vector target_bounds_rot(0, 0, M_PI*5/180), target_bounds_vel(0,0,0);
   const KDL::Twist target_bounds(target_bounds_vel, target_bounds_rot);
   KDL::JntArray result;
   int rc = tracik_solver.CartToJnt(nominal, end_effector_pose, result, target_bounds);
@@ -86,8 +89,34 @@ void print_current_pose(geometry_msgs::PoseStamped current_pose){
   ROS_INFO_NAMED("moveo", "w orientation: %f", current_pose.pose.orientation.w);
 }
 
+std::vector<double> euler_to_quaternion(double r,double p,double y){
+    double roll = r;
+    double pitch = p;
+    double yaw = y;
+    std::vector<double> q(4);
+    q.at(0) = sin(roll/2) * cos(pitch/2) * cos(yaw/2) - cos(roll/2) * sin(pitch/2) * sin(yaw/2);
+    q.at(1) = cos(roll/2) * sin(pitch/2) * cos(yaw/2) + sin(roll/2) * cos(pitch/2) * sin(yaw/2);
+    q.at(2) = cos(roll/2) * cos(pitch/2) * sin(yaw/2) - sin(roll/2) * sin(pitch/2) * cos(yaw/2);
+    q.at(3) = cos(roll/2) * cos(pitch/2) * cos(yaw/2) + sin(roll/2) * sin(pitch/2) * sin(yaw/2);
+    return q;
+}
+
 void set_target_pose(const geometry_msgs::PoseStamped& chain_end){
   ros::NodeHandle node_handle("~");
+
+  std::string g_n_judge_Y;
+  node_handle.param("g_n_judge_Y", g_n_judge_Y, std::string("/g_n_judge_Y"));
+  std::ifstream input_file_first(g_n_judge_Y);
+  if(!input_file_first.is_open())ROS_ERROR_STREAM("Can't open " <<g_n_judge_Y);
+  std::vector<double> judge_Y;
+  std::string line;
+  int all_line = 0;
+  while(input_file_first){
+    std::getline(input_file_first, line);
+    judge_Y.push_back(stod(line.substr(0)));
+  }
+  input_file_first.close();
+  ROS_INFO_STREAM("Read judge_Y file success");
 
   //----------------------------
   //Setup
@@ -119,7 +148,27 @@ void set_target_pose(const geometry_msgs::PoseStamped& chain_end){
   KDL::Rotation end_effector_target_rot;
   double end_effector_target_R, end_effector_target_P,end_effector_target_Y;
   //end_effector_target_rot  = KDL::Rotation::Quaternion(chain_end.pose.orientation.x, chain_end.pose.orientation.y, chain_end.pose.orientation.z, chain_end.pose.orientation.w);
-  end_effector_target_rot  = KDL::Rotation::Quaternion(chain_end.pose.orientation.x, chain_end.pose.orientation.y, chain_end.pose.orientation.z, chain_end.pose.orientation.w);
+  
+  float angle_neg = asin(end_effector_target_vol.data[0] / sqrt(pow(end_effector_target_vol.data[0],2)+pow(end_effector_target_vol.data[1],2)));
+  if(end_effector_target_vol.data[1] > 0){
+    angle_neg = angle_neg * (-1);
+  }
+  else{
+    angle_neg = angle_neg + M_PI;
+  }
+  if(end_effector_target_vol.data[2] < 0.331){
+    if(sqrt(pow(end_effector_target_vol.data[0]*100,2)+pow(end_effector_target_vol.data[1]*100,2)) <= judge_Y[int((end_effector_target_vol.data[2])*1000000)]){
+      angle_neg = angle_neg + M_PI;
+    }
+  }
+  ROS_INFO_STREAM("angle_neg = " << angle_neg);
+  std::vector<double> b = euler_to_quaternion(0.0,0.0,angle_neg);
+  ROS_INFO_STREAM("quaternionX = " << b.at(0));
+  ROS_INFO_STREAM("quaternionY = " << b.at(1));
+  ROS_INFO_STREAM("quaternionZ = " << b.at(2));
+  ROS_INFO_STREAM("quaternionW = " << b.at(3));
+
+  end_effector_target_rot  = KDL::Rotation::Quaternion(b.at(0), b.at(1), b.at(2), b.at(3));
 
   //node_handle.param("end_effector_target_rot", end_effector_rot,(0, 0.3, 0.4));
   KDL::Frame end_effector_pose(end_effector_target_rot, end_effector_target_vol);
@@ -132,6 +181,7 @@ void set_target_pose(const geometry_msgs::PoseStamped& chain_end){
   target_pose1.position.x    = end_effector_pose.p.x();
   target_pose1.position.y    = end_effector_pose.p.y();
   target_pose1.position.z    = end_effector_pose.p.z();
+  //end_effector_pose.M.GetQuaternion	(b.at(0), b.at(1), b.at(2), b.at(3));
   end_effector_pose.M.GetQuaternion	(target_pose1.orientation.x, target_pose1.orientation.y, target_pose1.orientation.z, target_pose1.orientation.w);
   visual_tools.publishAxisLabeled(target_pose1, "target_pose1");
   visual_tools.trigger();

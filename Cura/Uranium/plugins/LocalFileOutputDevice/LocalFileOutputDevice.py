@@ -200,10 +200,10 @@ class LocalFileOutputDevice(OutputDevice):
             message = Message(catalog.i18nc("@info:status", "Something went wrong saving to <filename>{0}</filename>: <message>{1}</message>").format(job.getFileName(), str(job.getError())), title = catalog.i18nc("@info:title", "Error"))
             message.show()
             self.writeError.emit(self)
-        #Shape = CuraApplication.getInstance().getShapeFromBuildVolume()
-        #if Shape == "moveo":
-        #    os.system("roslaunch gcode_translation split.launch gcode_in:="+ self._save_name)
-            #os.system("roslaunch gcode_translation inverse_kinematics.launch gcode_out:="+ self._save_name)
+        Shape = CuraApplication.getInstance().getShapeFromBuildVolume()
+        if Shape == "moveo":
+            os.system("roslaunch gcode_translation split.launch gcode_in:="+ self._save_name)
+            os.system("roslaunch gcode_translation inverse_kinematics.launch gcode_out:="+ self._save_name)
 
     def _onMessageActionTriggered(self, message, action):
         if action == "open_folder" and hasattr(message, "_folder"):
