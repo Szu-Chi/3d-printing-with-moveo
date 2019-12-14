@@ -85,6 +85,35 @@ void motor_setep_convert(Eigen::VectorXd &data){
   }
 }
 
+void write_file_joint_value(std::ofstream &output_file, KDL::JntArray &result, KDL::Chain &chain){
+  motor_setep_convert(result.data);
+  for(int i = 0;i < chain.getNrOfJoints(); i++){
+    static const char joint_code[6] = {'J', 'A', 'B', 'C', 'D'};
+    output_file << " " << joint_code[i] << int(result.data(i));
+  }
+}
+
+void write_file_origin_line(std::ofstream &output_file, std::string &line){
+    for(int j = 2;j < line.length(); j++){
+    output_file << line[j];
+  }
+}
+
+void write_file_new_point(std::ofstream &output_file, KDL::Vector &output_end_effector_target_vol, double &X_offset, double &Y_offset){
+  double decimal_x = (output_end_effector_target_vol.data[0]-X_offset)*1e3;
+  double decimal_y = (output_end_effector_target_vol.data[1]-Y_offset)*1e3;
+  output_file << std::fixed << std::setprecision(decimal_point(decimal_x)) << " X" << (output_end_effector_target_vol.data[0]-X_offset)*1e3 << std::defaultfloat;
+  output_file << std::fixed << std::setprecision(decimal_point(decimal_y)) << " Y" << (output_end_effector_target_vol.data[1]-Y_offset)*1e3 << std::defaultfloat;
+}
+
+void write_file_trac_IK_error(std::ofstream &output_file, KDL::Vector &find_end_effector_target_vol){
+  output_file << "X:" << find_end_effector_target_vol.data[0];
+  output_file << "Y:" << find_end_effector_target_vol.data[1];
+  output_file << "Z:" << find_end_effector_target_vol.data[2];
+  output_file << std::endl << "END" << std::endl;
+  ROS_ERROR_STREAM("TRACIK_ERROR");
+}
+
 ros::WallTime start_, end_;
 int main(int argc, char **argv){
   start_ = ros::WallTime::now();
@@ -95,7 +124,7 @@ int main(int argc, char **argv){
   //----------------------------
   //Setup
   //----------------------------
-  std::string chain_start, chain_end, urdf_param, urdf_param2;
+  std::string chain_start, chain_end, urdf_param, urdf_param_turn;
   double timeout,timeout_second,eps;
   double X_offset, Y_offset, Z_offset;
   int num_threads;
@@ -108,12 +137,12 @@ int main(int argc, char **argv){
   node_handle.param("timeout", timeout, 0.05);
   node_handle.param("timeout_second", timeout_second, 0.1);
   node_handle.param("urdf_param", urdf_param, std::string("/robot_description"));
-  node_handle.param("urdf_param2", urdf_param2, std::string("/robot_description2"));
+  node_handle.param("urdf_param_turn", urdf_param_turn, std::string("/robot_description2"));
   node_handle.param("eps", eps, 1e-5);
   node_handle.param("num_threads", num_threads, omp_get_num_procs()*2);
   node_handle.param("X_offset", X_offset, 0.0);
-  node_handle.param("Y_offset", Y_offset, 0.3);
-  node_handle.param("Z_offset", Z_offset,-0.085);
+  node_handle.param("Y_offset", Y_offset, 0.0);
+  node_handle.param("Z_offset", Z_offset, 0.0);
 
   KDL::Chain chain;
   KDL::JntArray ll, ul; //lower joint limits, upper joint limits
@@ -130,12 +159,12 @@ int main(int argc, char **argv){
   // Joint4 needs to turn
   TRAC_IK::TRAC_IK** tracik_solver_turn = new TRAC_IK::TRAC_IK*[num_threads];
   for(int i = 0; i < num_threads; i++){
-    tracik_solver_turn[i] = new TRAC_IK::TRAC_IK(chain_start, chain_end, urdf_param2, timeout, eps, TRAC_IK::Speed);
+    tracik_solver_turn[i] = new TRAC_IK::TRAC_IK(chain_start, chain_end, urdf_param_turn, timeout, eps, TRAC_IK::Speed);
     if(!check_trac_ik_valid(*tracik_solver_turn[i], chain, ll, ul)) return -1;
   }
-  TRAC_IK::TRAC_IK tracik_solver_onecore_turn(chain_start, chain_end, urdf_param2, timeout_second, eps, TRAC_IK::Speed);
+  TRAC_IK::TRAC_IK tracik_solver_onecore_turn(chain_start, chain_end, urdf_param_turn, timeout_second, eps, TRAC_IK::Speed);
   if(!check_trac_ik_valid(tracik_solver_onecore_turn, chain, ll, ul)) return -1;
-  TRAC_IK::TRAC_IK tracik_solver_p_n(chain_start, chain_end, urdf_param2, timeout_second, eps, TRAC_IK::Speed);
+  TRAC_IK::TRAC_IK tracik_solver_p_n(chain_start, chain_end, urdf_param_turn, timeout_second, eps, TRAC_IK::Speed);
   if(!check_trac_ik_valid(tracik_solver_p_n, chain, ll, ul)) return -1;
 
   assert(chain.getNrOfJoints() == ll.data.size());
@@ -158,7 +187,7 @@ int main(int argc, char **argv){
   robot_state::RobotState& current_state = planning_scene.getCurrentStateNonConst();
   collision_request.group_name = "arm";
   
-  // Read file, judge where Joint4 need to turn
+  // Judge Joint4 need to turn 
   std::string g_n_judge_Y;
   node_handle.param("g_n_judge_Y", g_n_judge_Y, std::string("/g_n_judge_Y"));
   std::ifstream input_file_first(g_n_judge_Y);
@@ -178,6 +207,7 @@ int main(int argc, char **argv){
   node_handle.param("gcode_in", gcode_in, std::string("/gcode_in"));
   std::ifstream input_file(gcode_in);
   if(!input_file.is_open())ROS_ERROR_STREAM("Can't open " <<gcode_in);
+
   // Write gcode
   node_handle.param("gcode_out", gcode_out, std::string("/gcode_out"));
   std::ofstream output_file(gcode_out);
@@ -203,6 +233,9 @@ int main(int argc, char **argv){
   int previous_save_p_or_n;
   float previous_angle;
   KDL::Vector end_effector_target_vol;
+  KDL::Vector target_bounds_rot(0, 0, M_PI*2);
+  KDL::Vector target_bounds_vel(0,0,0);          
+  const KDL::Twist target_bounds(target_bounds_vel, target_bounds_rot);
   while(ros::ok()){
     while(input_file){
       std::getline(input_file, line);
@@ -262,11 +295,8 @@ int main(int argc, char **argv){
           int rc = -1;
           int thread_num = omp_get_thread_num();
           KDL::JntArray result;
-          KDL::Vector target_bounds_rot(0, 0, M_PI*2);
-          KDL::Vector target_bounds_vel(0,0,0);
           std::vector<double> quaternion = euler_to_quaternion(0.0,0.0,find_angle[j]);
           KDL::Rotation end_effector_target_rot = KDL::Rotation::Quaternion(quaternion.at(0),quaternion.at(1),quaternion.at(2),quaternion.at(3));
-          const KDL::Twist target_bounds(target_bounds_vel, target_bounds_rot);
           KDL::Frame end_effector_pose(end_effector_target_rot, find_end_effector_target_vol[j]);
           if(save_p_or_n[j] == 0){
             rc = tracik_solver_turn[thread_num]->CartToJnt(nominal, end_effector_pose, result, target_bounds); // Need turn
@@ -278,8 +308,8 @@ int main(int argc, char **argv){
             save_use_onecore.at(j) = 1; // Parallel can't calculate
           }
           else{
-            save_result.at(j) = result;
             save_use_onecore.at(j) = 0;
+            save_result.at(j) = result;
           }
         }
         std::vector<int> use_onecore;
@@ -298,9 +328,6 @@ int main(int argc, char **argv){
           KDL::JntArray result;
           std::vector<double> quaternion = euler_to_quaternion(0.0,0.0,find_angle[use_onecore[l]]);
           KDL::Rotation end_effector_target_rot = KDL::Rotation::Quaternion(quaternion.at(0),quaternion.at(1),quaternion.at(2),quaternion.at(3));
-          KDL::Vector target_bounds_rot(0, 0, M_PI*2);
-          KDL::Vector target_bounds_vel(0,0,0);
-          const KDL::Twist target_bounds(target_bounds_vel, target_bounds_rot);
           KDL::Frame end_effector_pose(end_effector_target_rot, find_end_effector_target_vol[use_onecore[l]]);
           if(save_p_or_n[use_onecore[l]] == 0){
             rc = tracik_solver_onecore_turn.CartToJnt(nominal, end_effector_pose, result, target_bounds);
@@ -310,12 +337,7 @@ int main(int argc, char **argv){
           }
           if(rc < 0){
             output_file << std::endl << "ERROR_TRACIK" << std::endl;
-            output_file << "X:" << find_end_effector_target_vol[use_onecore[l]].data[0];
-            output_file << "Y:" << find_end_effector_target_vol[use_onecore[l]].data[1];
-            output_file << "Z:" << find_end_effector_target_vol[use_onecore[l]].data[2];
-            output_file << std::endl << "END" << std::endl;
-            ROS_ERROR_STREAM("TRACIK_ERROR");
-            ROS_ERROR_STREAM("save_p_or_n:" << save_p_or_n[use_onecore[l]]);
+            write_file_trac_IK_error(output_file, find_end_effector_target_vol[use_onecore[l]]);
             error_num++;
           }
           save_result.at(use_onecore[l]) = result;
@@ -339,7 +361,6 @@ int main(int argc, char **argv){
             collision_result.clear();
             planning_scene.checkSelfCollision(collision_request, collision_result);
             if(collision_result.collision == 0){
-              motor_setep_convert(save_result.at(pop_out).data);
               if(pop_out > 0){
                 previous_save_p_or_n = save_p_or_n[pop_out-1];
                 previous_end_effector_target_vol = find_end_effector_target_vol[pop_out-1];
@@ -350,78 +371,47 @@ int main(int argc, char **argv){
                 int rc = -1;
                 KDL::JntArray result;
                 KDL::Rotation end_effector_target_rot;
-                KDL::Vector target_bounds_rot(0, 0, M_PI*2);
-                KDL::Vector target_bounds_vel(0,0,0);
-                const KDL::Twist target_bounds(target_bounds_vel, target_bounds_rot);
                 KDL::Vector output_end_effector_target_vol;
+                std::vector<double> quaternion;
                 // chose one point to let joint4 turn back
                 if(save_p_or_n[pop_out] == 0){
                   output_end_effector_target_vol = previous_end_effector_target_vol;
-                  std::vector<double> quaternion = euler_to_quaternion(0.0,0.0,(previous_angle+M_PI));
-                  end_effector_target_rot = KDL::Rotation::Quaternion(quaternion.at(0),quaternion.at(1),quaternion.at(2),quaternion.at(3));
+                  quaternion = euler_to_quaternion(0.0,0.0,(previous_angle+M_PI));
                 }
                 else{
                   output_end_effector_target_vol = find_end_effector_target_vol[pop_out];
-                  std::vector<double> quaternion = euler_to_quaternion(0.0,0.0,(find_angle[pop_out]+M_PI));
-                  end_effector_target_rot = KDL::Rotation::Quaternion(quaternion.at(0),quaternion.at(1),quaternion.at(2),quaternion.at(3));
+                  quaternion = euler_to_quaternion(0.0,0.0,(find_angle[pop_out]+M_PI));
                 }
+                end_effector_target_rot = KDL::Rotation::Quaternion(quaternion.at(0),quaternion.at(1),quaternion.at(2),quaternion.at(3));
                 KDL::Frame end_effector_pose(end_effector_target_rot, output_end_effector_target_vol);
                 rc = tracik_solver_p_n.CartToJnt(nominal, end_effector_pose, result, target_bounds);
                 if(rc < 0){
-                  output_file << std::endl << "ERROR_TRACIK_NOW" << std::endl;
-                  output_file << "X:" << output_end_effector_target_vol.data[0];
-                  output_file << "Y:" << output_end_effector_target_vol.data[1];
-                  output_file << "Z:" << output_end_effector_target_vol.data[2];
-                  output_file << std::endl << "END" << std::endl;
-                  ROS_ERROR_STREAM("TRACIK_ERROR_NOW");
-                  ROS_ERROR_STREAM("save_p_or_n:" << save_p_or_n[pop_out]);
+                  output_file << std::endl << "ERROR_TRACIK_P_N" << std::endl;
+                  write_file_trac_IK_error(output_file, output_end_effector_target_vol);
                   error_num++;
                 }
                 else{
-                  motor_setep_convert(result.data);
-                  for(int i = 0;i < chain.getNrOfJoints(); i++){
-                    static const char joint_code[6] = {'J', 'A', 'B', 'C', 'D'};
-                    output_file << " " << joint_code[i] << int(result.data(i));
-                  }
+                  write_file_joint_value(output_file, result, chain);
                   if(save_p_or_n[pop_out] == 0){
-                    double decimal_x = (output_end_effector_target_vol.data[0]-X_offset)*1e3;
-                    double decimal_y = (output_end_effector_target_vol.data[1]-Y_offset)*1e3;
-                    output_file << std::fixed << std::setprecision(decimal_point(decimal_x)) << " X" << (output_end_effector_target_vol.data[0]-X_offset)*1e3 << std::defaultfloat;
-                    output_file << std::fixed << std::setprecision(decimal_point(decimal_y)) << " Y" << (output_end_effector_target_vol.data[1]-Y_offset)*1e3 << std::defaultfloat;
+                    write_file_new_point(output_file, output_end_effector_target_vol, X_offset, Y_offset);
+                    output_file << std::endl;
+                    output_file << line[0] << line[1];
+                    write_file_joint_value(output_file, save_result.at(pop_out), chain);
+                    write_file_origin_line(output_file, line);
                   }
                   else{
-                    for(int j = 2;j < line.length(); j++){
-                      output_file << line[j];
-                    }
-                  }
-                  output_file << std::endl;
-                  output_file << line[0] << line[1];
-                  for(int i = 0;i < chain.getNrOfJoints(); i++){
-                    static const char joint_code[6] = {'J', 'A', 'B', 'C', 'D'};
-                    output_file << " " << joint_code[i] << int(save_result.at(pop_out).data(i));
-                  }
-                  if(save_p_or_n[pop_out] == 0){
-                    for(int j = 2;j < line.length(); j++){
-                      output_file << line[j];
-                    }
-                  }
-                  else{
-                    double decimal_x = (output_end_effector_target_vol.data[0]-X_offset)*1e3;
-                    double decimal_y = (output_end_effector_target_vol.data[1]-Y_offset)*1e3;
-                    output_file << std::fixed << std::setprecision(decimal_point(decimal_x)) << " X" << (output_end_effector_target_vol.data[0]-X_offset)*1e3 << std::defaultfloat;
-                    output_file << std::fixed << std::setprecision(decimal_point(decimal_y)) << " Y" << (output_end_effector_target_vol.data[1]-Y_offset)*1e3 << std::defaultfloat;
+                    write_file_origin_line(output_file, line);
+                    output_file << std::endl;
+                    output_file << line[0] << line[1];
+                    write_file_joint_value(output_file, save_result.at(pop_out), chain);
+                    write_file_new_point(output_file, output_end_effector_target_vol, X_offset, Y_offset);
                   }
                   output_file << std::endl;
                 }
               }
               else{
-                for(int i = 0;i < chain.getNrOfJoints(); i++){
-                  static const char joint_code[6] = {'J', 'A', 'B', 'C', 'D'};
-                  output_file << " " << joint_code[i] << int(save_result.at(pop_out).data(i));
-                }
-                for(int j = 2;j < line.length(); j++){
-                  output_file << line[j];
-                }
+                write_file_joint_value(output_file, save_result.at(pop_out), chain);
+                write_file_origin_line(output_file, line);
                 output_file << std::endl;
               }
               pop_out++;
@@ -432,13 +422,8 @@ int main(int argc, char **argv){
               for (it = collision_result.contacts.begin(); it != collision_result.contacts.end(); ++it){
                 ROS_ERROR("Contact between: %s and %s", it->first.first.c_str(), it->first.second.c_str());
               }
-              motor_setep_convert(save_result.at(pop_out).data);
               output_file << std::endl << "ERROR_COLLISION" << std::endl;
-              output_file << "J:" << (save_result.at(pop_out).data(0))<< std::endl;
-              output_file << "A:" << (save_result.at(pop_out).data(1))<< std::endl;
-              output_file << "B:" << (save_result.at(pop_out).data(2))<< std::endl;
-              output_file << "C:" << (save_result.at(pop_out).data(3))<< std::endl;
-              output_file << "D:" << (save_result.at(pop_out).data(4))<< std::endl;
+              write_file_joint_value(output_file, save_result.at(pop_out), chain);
               output_file << std::endl << "END" << std::endl;
               error_num++;
             }
@@ -448,13 +433,13 @@ int main(int argc, char **argv){
           }
         }
         // clear all and save the last point of these 1000 lines
-        previous_save_p_or_n = save_p_or_n[pop_out-1];
         previous_end_effector_target_vol = find_end_effector_target_vol[pop_out-1];
         previous_angle = find_angle[pop_out-1];
+        previous_save_p_or_n = save_p_or_n[pop_out-1];
         find_end_effector_target_vol.clear();
         find_angle.clear();
-        save_p_or_n.clear();
         save.clear();
+        save_p_or_n.clear();
         save_place.clear();
         save_result.clear();
         all_line = 0;
