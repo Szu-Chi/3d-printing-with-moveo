@@ -53,6 +53,7 @@ int main(int argc, char **argv)
     if(!line.compare(0,7,";LAYER:")){
       check = 1;
     }
+    check = 1;
     if(check == 1){
       if(!line.compare(0,2,"G0") || !line.compare(0,2,"G1")){
         size_t colon_pos_J = line.find('J');
@@ -108,13 +109,15 @@ int main(int argc, char **argv)
           moveit::planning_interface::MoveGroupInterface::Plan my_plan;
           move_group.setPlanningTime(0.05);
           move_group.plan(my_plan);
-          size_t colon_pos_E = line.find('E');
-          if(colon_pos_E < 100){
-            if(stod(line.substr(colon_pos_E+1)) > 0){
-              visual_tools.publishTrajectoryLine(my_plan.trajectory_, joint_model_group);
-              visual_tools.trigger();
-            }
-          }
+          //size_t colon_pos_E = line.find('E');
+          //if(colon_pos_E < 100){
+          //  if(stod(line.substr(colon_pos_E+1)) > 0){
+          //    visual_tools.publishTrajectoryLine(my_plan.trajectory_, joint_model_group);
+          //    visual_tools.trigger();
+          //  }
+          //}
+          visual_tools.publishTrajectoryLine(my_plan.trajectory_, joint_model_group);
+          visual_tools.trigger();
           trajectory.joint_trajectory.joint_names = my_plan.trajectory_.joint_trajectory.joint_names;
           joint_model_group = start_state->getJointModelGroup(move_group.getName());
           start_state->setJointGroupPositions(joint_model_group, target_joints);

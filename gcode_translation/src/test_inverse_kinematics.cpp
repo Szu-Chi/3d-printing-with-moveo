@@ -21,28 +21,6 @@
 
 #include <stdio.h>
 #include <unistd.h>
-int decimal_point(double &A){
-  std::string change = std::to_string(A);
-  bool point = 0;
-  for(int i = 0;i<change.size();i++){
-    if(change[i] == '.'){
-      point = 1;
-    }
-    if(point == 1){
-      if(change[i+3] == '0'){
-        if(change[i+2] == '0'){
-          if(change[i+1] == '0'){
-            return 0;
-          }
-          return 1;
-        }
-        return 2;
-      }
-      return 3;
-    }
-  }
-}
-
 std::vector<double> euler_to_quaternion(double r,double p,double y){
   double roll = r;
   double pitch = p;
@@ -97,13 +75,6 @@ void write_file_origin_line(std::ofstream &output_file, std::string &line){
     for(int j = 2;j < line.length(); j++){
     output_file << line[j];
   }
-}
-
-void write_file_new_point(std::ofstream &output_file, KDL::Vector &output_end_effector_target_vol, double &X_offset, double &Y_offset){
-  double decimal_x = (output_end_effector_target_vol.data[0]-X_offset)*1e3;
-  double decimal_y = (output_end_effector_target_vol.data[1]-Y_offset)*1e3;
-  output_file << std::fixed << std::setprecision(decimal_point(decimal_x)) << " X" << (output_end_effector_target_vol.data[0]-X_offset)*1e3 << std::defaultfloat;
-  output_file << std::fixed << std::setprecision(decimal_point(decimal_y)) << " Y" << (output_end_effector_target_vol.data[1]-Y_offset)*1e3 << std::defaultfloat;
 }
 
 void write_file_trac_IK_error(std::ofstream &output_file, KDL::Vector &find_end_effector_target_vol){
@@ -187,21 +158,6 @@ int main(int argc, char **argv){
   robot_state::RobotState& current_state = planning_scene.getCurrentStateNonConst();
   collision_request.group_name = "arm";
   
-  // Judge Joint4 need to turn 
-  std::string g_n_judge_Y;
-  node_handle.param("g_n_judge_Y", g_n_judge_Y, std::string("/g_n_judge_Y"));
-  std::ifstream input_file_first(g_n_judge_Y);
-  if(!input_file_first.is_open())ROS_ERROR_STREAM("Can't open " <<g_n_judge_Y);
-  std::vector<double> judge_Y;
-  std::string line;
-  int all_line = 0;
-  while(input_file_first){
-    std::getline(input_file_first, line);
-    judge_Y.push_back(stod(line.substr(0)));
-  }
-  input_file_first.close();
-  ROS_INFO_STREAM("Read judge_Y file success");
-
   // Read gcode
   std::string gcode_in, gcode_out;
   node_handle.param("gcode_in", gcode_in, std::string("/gcode_in"));
@@ -213,11 +169,10 @@ int main(int argc, char **argv){
   std::ofstream output_file(gcode_out);
   if(!output_file.is_open())ROS_ERROR_STREAM("Can't open " <<gcode_out);
 
-  bool check = 0;
-  bool first_point = 0;
   int error_num = 0;
   int second_execution = 0;
-  all_line = 0;
+  int all_line = 0;
+  std::string line;
 
   std::vector<KDL::Vector> find_end_effector_target_vol;
   find_end_effector_target_vol.reserve(1000);
@@ -229,9 +184,6 @@ int main(int argc, char **argv){
   save.reserve(1000);
   std::vector<int> save_p_or_n;
   save_p_or_n.reserve(1000);
-  KDL::Vector previous_end_effector_target_vol;
-  int previous_save_p_or_n;
-  float previous_angle;
   KDL::Vector end_effector_target_vol;
   KDL::Vector target_bounds_rot(0, 0, M_PI*2);
   KDL::Vector target_bounds_vel(0,0,0);          
@@ -244,47 +196,42 @@ int main(int argc, char **argv){
       if(all_line % 1000 == 0 || !input_file){ // Read 1000 lines or end of file
         for(int i = 0;i < all_line ;i++){
           line = save[i];
-          if(!line.compare(0,7,";LAYER:")){
-            check = 1;
-          }
-          if(check == 1){
-            if(!line.compare(0,2,"G0") || !line.compare(0,2,"G1")){
-              size_t colon_pos_X = line.find('X');
-              if(colon_pos_X < 100){
-                end_effector_target_vol.data[0] = (stod(line.substr(colon_pos_X+1))*1e-3)+X_offset;
-              }
-              size_t colon_pos_Y = line.find('Y');
-              if(colon_pos_Y < 100){
-                end_effector_target_vol.data[1] = (stod(line.substr(colon_pos_Y+1))*1e-3)+Y_offset;
-              }
-              size_t colon_pos_Z = line.find('Z');
-              if(colon_pos_Z < 100){
-                end_effector_target_vol.data[2] = (stod(line.substr(colon_pos_Z+1))*1e-3)+Z_offset;
-              }
-              find_end_effector_target_vol.push_back(end_effector_target_vol);
-              save_place.push_back(i);
-              // Calculate position angle
-              float position_angel = asin(end_effector_target_vol.data[0] / sqrt(pow(end_effector_target_vol.data[0],2)+pow(end_effector_target_vol.data[1],2)));
-              if(end_effector_target_vol.data[1] > 0){
-                position_angel = position_angel * (-1);
-              }
-              else{
+          if(!line.compare(0,2,"G0") || !line.compare(0,2,"G1")){
+            size_t colon_pos_X = line.find('X');
+            if(colon_pos_X < 100){
+              end_effector_target_vol.data[0] = (stod(line.substr(colon_pos_X+1))*1e-3)+X_offset;
+            }
+            size_t colon_pos_Y = line.find('Y');
+            if(colon_pos_Y < 100){
+              end_effector_target_vol.data[1] = (stod(line.substr(colon_pos_Y+1))*1e-3)+Y_offset;
+            }
+            size_t colon_pos_Z = line.find('Z');
+            if(colon_pos_Z < 100){
+              end_effector_target_vol.data[2] = (stod(line.substr(colon_pos_Z+1))*1e-3)+Z_offset;
+            }
+            find_end_effector_target_vol.push_back(end_effector_target_vol);
+            save_place.push_back(i);
+            // Calculate position angle
+            float position_angel = asin(end_effector_target_vol.data[0] / sqrt(pow(end_effector_target_vol.data[0],2)+pow(end_effector_target_vol.data[1],2)));
+            if(end_effector_target_vol.data[1] > 0){
+              position_angel = position_angel * (-1);
+            }
+            else{
+              position_angel = position_angel + M_PI;
+            }
+            if(end_effector_target_vol.data[2] < 0.331){
+              if(sqrt(pow(end_effector_target_vol.data[0]*100,2)+pow(end_effector_target_vol.data[1]*100,2)) <= 20){
                 position_angel = position_angel + M_PI;
-              }
-              if(end_effector_target_vol.data[2] < 0.331){
-                if(sqrt(pow(end_effector_target_vol.data[0]*100,2)+pow(end_effector_target_vol.data[1]*100,2)) <= judge_Y[int((end_effector_target_vol.data[2])*1000000)]){
-                  position_angel = position_angel + M_PI;
-                  save_p_or_n.push_back(0);
-                }
-                else{
-                  save_p_or_n.push_back(1);
-                }
+                save_p_or_n.push_back(0);
               }
               else{
                 save_p_or_n.push_back(1);
               }
-              find_angle.push_back(position_angel);
             }
+            else{
+              save_p_or_n.push_back(1);
+            }
+            find_angle.push_back(position_angel);
           }
         }
         std::vector<KDL::JntArray> save_result(1000);
@@ -361,61 +308,10 @@ int main(int argc, char **argv){
             collision_result.clear();
             planning_scene.checkSelfCollision(collision_request, collision_result);
             if(collision_result.collision == 0){
-              if(pop_out > 0){
-                previous_save_p_or_n = save_p_or_n[pop_out-1];
-                previous_end_effector_target_vol = find_end_effector_target_vol[pop_out-1];
-                previous_angle = find_angle[pop_out-1];
-              }
-              // If joint4 turns back, we need to add a point
-              if(first_point == 1 && (previous_save_p_or_n != save_p_or_n[pop_out])){
-                int rc = -1;
-                KDL::JntArray result;
-                KDL::Rotation end_effector_target_rot;
-                KDL::Vector output_end_effector_target_vol;
-                std::vector<double> quaternion;
-                // chose one point to let joint4 turn back
-                if(save_p_or_n[pop_out] == 0){
-                  output_end_effector_target_vol = previous_end_effector_target_vol;
-                  quaternion = euler_to_quaternion(0.0,0.0,(previous_angle+M_PI));
-                }
-                else{
-                  output_end_effector_target_vol = find_end_effector_target_vol[pop_out];
-                  quaternion = euler_to_quaternion(0.0,0.0,(find_angle[pop_out]+M_PI));
-                }
-                end_effector_target_rot = KDL::Rotation::Quaternion(quaternion.at(0),quaternion.at(1),quaternion.at(2),quaternion.at(3));
-                KDL::Frame end_effector_pose(end_effector_target_rot, output_end_effector_target_vol);
-                rc = tracik_solver_p_n.CartToJnt(nominal, end_effector_pose, result, target_bounds);
-                if(rc < 0){
-                  output_file << std::endl << "ERROR_TRACIK_P_N" << std::endl;
-                  write_file_trac_IK_error(output_file, output_end_effector_target_vol);
-                  error_num++;
-                }
-                else{
-                  write_file_joint_value(output_file, result, chain);
-                  if(save_p_or_n[pop_out] == 0){
-                    write_file_new_point(output_file, output_end_effector_target_vol, X_offset, Y_offset);
-                    output_file << std::endl;
-                    output_file << line[0] << line[1];
-                    write_file_joint_value(output_file, save_result.at(pop_out), chain);
-                    write_file_origin_line(output_file, line);
-                  }
-                  else{
-                    write_file_origin_line(output_file, line);
-                    output_file << std::endl;
-                    output_file << line[0] << line[1];
-                    write_file_joint_value(output_file, save_result.at(pop_out), chain);
-                    write_file_new_point(output_file, output_end_effector_target_vol, X_offset, Y_offset);
-                  }
-                  output_file << std::endl;
-                }
-              }
-              else{
-                write_file_joint_value(output_file, save_result.at(pop_out), chain);
-                write_file_origin_line(output_file, line);
-                output_file << std::endl;
-              }
+              write_file_joint_value(output_file, save_result.at(pop_out), chain);
+              write_file_origin_line(output_file, line);
+              output_file << std::endl;
               pop_out++;
-              first_point = 1;
             }
             else{
               collision_detection::CollisionResult::ContactMap::const_iterator it;
@@ -433,9 +329,6 @@ int main(int argc, char **argv){
           }
         }
         // clear all and save the last point of these 1000 lines
-        previous_end_effector_target_vol = find_end_effector_target_vol[pop_out-1];
-        previous_angle = find_angle[pop_out-1];
-        previous_save_p_or_n = save_p_or_n[pop_out-1];
         find_end_effector_target_vol.clear();
         find_angle.clear();
         save.clear();
