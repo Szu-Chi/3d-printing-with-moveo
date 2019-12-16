@@ -54,6 +54,10 @@ catkin_package(
     interactive_markers
     DEPENDS
     EIGEN3
+  INCLUDE_DIRS
+    include
+  LIBRARIES
+    Mesh
 )
 
 ###########

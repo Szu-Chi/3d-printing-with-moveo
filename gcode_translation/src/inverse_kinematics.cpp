@@ -21,6 +21,10 @@
 
 #include <stdio.h>
 #include <unistd.h>
+extern "C" {
+  #include "../include/Mesh/Mesh.h"
+}
+
 int decimal_point(double &A){
   std::string change = std::to_string(A);
   bool point = 0;
@@ -121,6 +125,8 @@ int main(int argc, char **argv){
   ros::NodeHandle node_handle("~");
   ros::AsyncSpinner spinner(1);
   spinner.start();
+  Load_Mesh();
+  calc_abcd();
   //----------------------------
   //Setup
   //----------------------------
@@ -218,6 +224,7 @@ int main(int argc, char **argv){
   int error_num = 0;
   int second_execution = 0;
   all_line = 0;
+  double z_init = 0;
 
   std::vector<KDL::Vector> find_end_effector_target_vol;
   find_end_effector_target_vol.reserve(1000);
@@ -234,7 +241,7 @@ int main(int argc, char **argv){
   float previous_angle;
   KDL::Vector end_effector_target_vol;
   KDL::Vector target_bounds_rot(0, 0, M_PI*2);
-  KDL::Vector target_bounds_vel(0,0,0);          
+  KDL::Vector target_bounds_vel(0,0,0);
   const KDL::Twist target_bounds(target_bounds_vel, target_bounds_rot);
   while(ros::ok()){
     while(input_file){
@@ -259,8 +266,10 @@ int main(int argc, char **argv){
               }
               size_t colon_pos_Z = line.find('Z');
               if(colon_pos_Z < 100){
-                end_effector_target_vol.data[2] = (stod(line.substr(colon_pos_Z+1))*1e-3)+Z_offset;
+                z_init = (stod(line.substr(colon_pos_Z+1))*1e-3)+Z_offset;
               }
+              double z_pos = calc_z((end_effector_target_vol.data[0]+0.09)*1000, (end_effector_target_vol.data[1]-0.2)*1000)/1000;
+              end_effector_target_vol.data[2] = z_init + z_pos;//-0.002;
               find_end_effector_target_vol.push_back(end_effector_target_vol);
               save_place.push_back(i);
               // Calculate position angle

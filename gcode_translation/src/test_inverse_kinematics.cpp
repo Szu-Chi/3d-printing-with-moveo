@@ -286,6 +286,7 @@ int main(int argc, char **argv){
             output_file << std::endl << "ERROR_TRACIK" << std::endl;
             write_file_trac_IK_error(output_file, find_end_effector_target_vol[use_onecore[l]]);
             error_num++;
+            return -1;
           }
           save_result.at(use_onecore[l]) = result;
         }
@@ -322,6 +323,7 @@ int main(int argc, char **argv){
               write_file_joint_value(output_file, save_result.at(pop_out), chain);
               output_file << std::endl << "END" << std::endl;
               error_num++;
+              return -1;
             }
           }
           else{
