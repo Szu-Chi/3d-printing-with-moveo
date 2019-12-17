@@ -632,8 +632,8 @@
  * 'TMC26X_STANDALONE', 'TMC2660', 'TMC2660_STANDALONE', 'TMC5130',
  * 'TMC5130_STANDALONE']
  */
-//#define X_DRIVER_TYPE  A4988
-//#define Y_DRIVER_TYPE  A4988
+#define X_DRIVER_TYPE  TMC2100
+#define Y_DRIVER_TYPE  TMC2100
 //#define Z_DRIVER_TYPE  A4988
 //#define X2_DRIVER_TYPE A4988
 //#define Y2_DRIVER_TYPE A4988
@@ -692,14 +692,14 @@
  *                                      X, Y, Z, E0 [, E1[, E2[, E3[, E4]]]]
  */
 
-#define DEFAULT_AXIS_STEPS_PER_UNIT {80, 80, 4000, 418.5}
+#define DEFAULT_AXIS_STEPS_PER_UNIT {100.23, 1, 1, 418.5}
 
 /**
  * Default Max Feed Rate (mm/s)
  * Override with M203
  *                                      X, Y, Z, E0 [, E1[, E2[, E3[, E4]]]]
  */
-#define DEFAULT_MAX_FEEDRATE {300, 300, 5, 25}
+#define DEFAULT_MAX_FEEDRATE {300, 300, 300, 25}
 
 /**
  * Default Max Acceleration (change/s) change = mm/s
@@ -707,7 +707,7 @@
  * Override with M201
  *                                      X, Y, Z, E0 [, E1[, E2[, E3[, E4]]]]
  */
-#define DEFAULT_MAX_ACCELERATION {3000, 3000, 100, 10000}
+#define DEFAULT_MAX_ACCELERATION {100, 100, 10, 10000}
 
 /**
  * Default Acceleration (change/s) change = mm/s
@@ -717,9 +717,9 @@
  *   M204 R    Retract Acceleration
  *   M204 T    Travel Acceleration
  */
-#define DEFAULT_ACCELERATION         3000 // X, Y, Z and E acceleration for printing moves
-#define DEFAULT_RETRACT_ACCELERATION 3000 // E acceleration for retracts
-#define DEFAULT_TRAVEL_ACCELERATION  3000 // X, Y, Z acceleration for travel (non printing) moves
+#define DEFAULT_ACCELERATION         25          // X, Y, Z and E acceleration for printing moves
+#define DEFAULT_RETRACT_ACCELERATION 3000        // E acceleration for retracts
+#define DEFAULT_TRAVEL_ACCELERATION  25          // X, Y, Z acceleration for travel (non printing) moves
 
 /**
  * Default Jerk (mm/s)
@@ -729,9 +729,9 @@
  * When changing speed and direction, if the difference is less than the
  * value set here, it may happen instantaneously.
  */
-#define DEFAULT_XJERK 10.0
-#define DEFAULT_YJERK 10.0
-#define DEFAULT_ZJERK 0.3
+#define DEFAULT_XJERK 0.01
+#define DEFAULT_YJERK 0.01
+#define DEFAULT_ZJERK 0.01
 #define DEFAULT_EJERK 5.0
 
 /**
@@ -742,7 +742,7 @@
  *
  * See https://github.com/synthetos/TinyG/wiki/Jerk-Controlled-Motion-Explained
  */
-#define S_CURVE_ACCELERATION
+//#define S_CURVE_ACCELERATION
 
 //===========================================================================
 //============================= Z Probe Options =============================
