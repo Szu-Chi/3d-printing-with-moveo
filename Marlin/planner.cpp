@@ -3311,13 +3311,13 @@ bool Planner::_populate_block_joint_self(block_t * const block, bool split_move,
   #endif
 ) {
 
-  /*const int32_t da = target[A_AXIS] - position[A_AXIS],
+  const int32_t da = target[A_AXIS] - position[A_AXIS],
                 db = target[B_AXIS] - position[B_AXIS],
                 dc = target[C_AXIS] - position[C_AXIS]
                 #if ENABLED(HANGPRINTER)
                   , dd = target[D_AXIS] - position[D_AXIS]
                 #endif
-              ;*/
+              ;
 
   const int32_t d0 = joint[Joint1_AXIS] - position_joint[Joint1_AXIS],
                 d1 = joint[Joint2_AXIS] - position_joint[Joint2_AXIS],
@@ -3601,7 +3601,7 @@ bool Planner::_populate_block_joint_self(block_t * const block, bool split_move,
   delta_mm[E_AXIS] = esteps_float * steps_to_mm[E_AXIS_N];
   
   float delta_joint_mm[Joint_All];
-  delta_joint_mm[Joint1_AXIS] = d0 * steps_to_mm[A_AXIS]; //da * steps_to_mm[A_AXIS]; *joint_division[axis_d])/130
+  delta_joint_mm[Joint1_AXIS] = d0 * steps_to_mm[A_AXIS]; 
   delta_joint_mm[Joint2_AXIS] = d1 * steps_to_mm[A_AXIS];
   delta_joint_mm[Joint3_AXIS] = d2 * steps_to_mm[A_AXIS];
   delta_joint_mm[Joint4_AXIS] = d3 * steps_to_mm[A_AXIS];
