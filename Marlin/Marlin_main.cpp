@@ -2281,7 +2281,7 @@ void do_blocking_move_to(const float rx, const float ry, const float rz, const f
   const float old_feedrate_mm_s = feedrate_mm_s;
 
   #if ENABLED(DEBUG_LEVELING_FEATURE)
-    //if (DEBUGGING(LEVELING)) print_xyz(PSTR(">>> do_blocking_move_to"), NULL, LOGICAL_X_POSITION(rx), LOGICAL_Y_POSITION(ry), LOGICAL_Z_POSITION(rz));
+    if (DEBUGGING(LEVELING)) print_xyz(PSTR(">>> do_blocking_move_to"), NULL, LOGICAL_X_POSITION(rx), LOGICAL_Y_POSITION(ry), LOGICAL_Z_POSITION(rz));
   #endif
 
   const float z_feedrate = fr_mm_s ? fr_mm_s : homing_feedrate_Joint(Joint1_AXIS);
@@ -2476,7 +2476,7 @@ void do_blocking_move_to_Joint(const float rx, const float ry, const float rz, c
   const float old_feedrate_mm_s = feedrate_mm_s;
 
   #if ENABLED(DEBUG_LEVELING_FEATURE)
-    // if (DEBUGGING(LEVELING)) print_xyz(PSTR(">>> do_blocking_move_to_Joint"), NULL, LOGICAL_X_POSITION(rx), LOGICAL_Y_POSITION(ry), LOGICAL_Z_POSITION(rz));
+    if (DEBUGGING(LEVELING)) print_xyz(PSTR(">>> do_blocking_move_to_Joint"), NULL, LOGICAL_X_POSITION(rx), LOGICAL_Y_POSITION(ry), LOGICAL_Z_POSITION(rz));
   #endif
 
   const float z_feedrate = fr_mm_s ? fr_mm_s : homing_feedrate_Joint(Joint1_AXIS);
@@ -2565,7 +2565,7 @@ void do_blocking_move_to_Joint(const float rx, const float ry, const float rz, c
   feedrate_mm_s = old_feedrate_mm_s;
 
   #if ENABLED(DEBUG_LEVELING_FEATURE)
-    // if (DEBUGGING(LEVELING)) SERIAL_ECHOLNPGM("<<< do_blocking_move_to_Joint");
+    if (DEBUGGING(LEVELING)) SERIAL_ECHOLNPGM("<<< do_blocking_move_to_Joint");
   #endif
 }
 
@@ -3386,7 +3386,7 @@ void clean_up_after_endstop_or_probe_move() {
       float first_probe_z = current_position[Z_AXIS];
 
       #if ENABLED(DEBUG_LEVELING_FEATURE)
-        // if (DEBUGGING(LEVELING)) SERIAL_ECHOLNPAIR("1st Probe Z:", first_probe_z);
+        if (DEBUGGING(LEVELING)) SERIAL_ECHOLNPAIR("1st Probe Z:", first_probe_z);
       #endif
       // move up to make clearance for the probe
       endstops.enable_z_probe(false);
