@@ -868,7 +868,7 @@
 #define MIN_PROBE_EDGE 10
 
 // X and Y axis travel speed (mm/m) between probes
-#define XY_PROBE_SPEED 25*60//8000
+#define XY_PROBE_SPEED 15*60//8000
 
 // Feedrate (mm/m) for the first approach when double-probing (MULTIPLE_PROBING
 // == 2)
@@ -1007,10 +1007,10 @@
 #define Z_MAX_POS 200
 
 #define J_MIN_POS_step -24800
-#define A_MIN_POS_step -41760
-#define B_MIN_POS_step -108400
-#define C_MIN_POS_step -41690
-#define D_MIN_POS_step -20250
+#define A_MIN_POS_step -40760
+#define B_MIN_POS_step -96400
+#define C_MIN_POS_step -36690
+#define D_MIN_POS_step -19160
 
 #define J_MAX_POS_step 24800
 #define A_MAX_POS_step 42000
@@ -1020,10 +1020,10 @@
 
 // joint
 #define Joint1_MIN_POS -24800
-#define Joint2_MIN_POS -41760
-#define Joint3_MIN_POS -108400
-#define Joint4_MIN_POS -41690
-#define Joint5_MIN_POS -20250
+#define Joint2_MIN_POS -40760
+#define Joint3_MIN_POS -96400
+#define Joint4_MIN_POS -36690
+#define Joint5_MIN_POS -19160
 
 // joint
 #define Joint1_MAX_POS 24800

@@ -2162,7 +2162,7 @@ void Set_current_Joint_Curve_More(float numberx,float numbery,float numberz){
   //int number = 0;
   // SERIAL_ECHOLNPAIR("number:", number);
   
-  DEBUG_POS_Joint("(Before)Set_current_Joint_Curve_More", current_position_Joint); 
+  //DEBUG_POS_Joint("(Before)Set_current_Joint_Curve_More", current_position_Joint); 
   float point1=numberz*100;
 
   //SERIAL_ECHOLNPAIR("Forward_Curve(2000,0,0)", Forward_Curve(2000,0,0));
@@ -2177,7 +2177,7 @@ void Set_current_Joint_Curve_More(float numberx,float numbery,float numberz){
   //SERIAL_ECHOPAIR(" x:", numberx);
   //SERIAL_ECHOPAIR("-y:", numbery);
 
-  DEBUG_POS_Joint("(After)Set_current_Joint_Curve_More", current_position_Joint);
+  //DEBUG_POS_Joint("(After)Set_current_Joint_Curve_More", current_position_Joint);
 }
 
 inline void Set_current_Joint_Slope(const int32_t (&Set_current_Joint_data)[Joint_All], const float (&Set_current_Joint_slope)[Joint_All], const float point){
@@ -2281,7 +2281,7 @@ void do_blocking_move_to(const float rx, const float ry, const float rz, const f
   const float old_feedrate_mm_s = feedrate_mm_s;
 
   #if ENABLED(DEBUG_LEVELING_FEATURE)
-    if (DEBUGGING(LEVELING)) print_xyz(PSTR(">>> do_blocking_move_to"), NULL, LOGICAL_X_POSITION(rx), LOGICAL_Y_POSITION(ry), LOGICAL_Z_POSITION(rz));
+    //if (DEBUGGING(LEVELING)) print_xyz(PSTR(">>> do_blocking_move_to"), NULL, LOGICAL_X_POSITION(rx), LOGICAL_Y_POSITION(ry), LOGICAL_Z_POSITION(rz));
   #endif
 
   const float z_feedrate = fr_mm_s ? fr_mm_s : homing_feedrate_Joint(Joint1_AXIS);
@@ -2425,7 +2425,7 @@ void do_blocking_move_to(const float rx, const float ry, const float rz, const f
   
   if (current_position[Z_AXIS] > rz) {
       endstops.enable_z_probe(true);
-      SERIAL_ECHOLNPGM("//To High//");
+      //SERIAL_ECHOLNPGM("//To High//");
       feedrate_mm_s = z_feedrate;
       current_position[Z_AXIS] = rz;
       Set_current_Joint_Curve_More(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS]);
@@ -2476,7 +2476,7 @@ void do_blocking_move_to_Joint(const float rx, const float ry, const float rz, c
   const float old_feedrate_mm_s = feedrate_mm_s;
 
   #if ENABLED(DEBUG_LEVELING_FEATURE)
-    if (DEBUGGING(LEVELING)) print_xyz(PSTR(">>> do_blocking_move_to_Joint"), NULL, LOGICAL_X_POSITION(rx), LOGICAL_Y_POSITION(ry), LOGICAL_Z_POSITION(rz));
+    // if (DEBUGGING(LEVELING)) print_xyz(PSTR(">>> do_blocking_move_to_Joint"), NULL, LOGICAL_X_POSITION(rx), LOGICAL_Y_POSITION(ry), LOGICAL_Z_POSITION(rz));
   #endif
 
   const float z_feedrate = fr_mm_s ? fr_mm_s : homing_feedrate_Joint(Joint1_AXIS);
@@ -2489,9 +2489,9 @@ void do_blocking_move_to_Joint(const float rx, const float ry, const float rz, c
     
     // Set_current_Joint_Slope(current_position_Joint,HOME_position_Slope,Delta_Z_01mm(current_position[Z_AXIS],rz));
     // Set_current_Joint_Slope(current_position_Joint,HOME_position_Slope,100);
-    SERIAL_ECHOLNPGM("//To low//");
+    // SERIAL_ECHOLNPGM("//To low//");
 
-    SERIAL_ECHOLNPAIR("trigger_state(): ", endstops.trigger_state());
+    // SERIAL_ECHOLNPAIR("trigger_state(): ", endstops.trigger_state());
    
     current_position[Z_AXIS] = rz;  
     Set_current_Joint_Curve_More(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS]);
@@ -2500,7 +2500,7 @@ void do_blocking_move_to_Joint(const float rx, const float ry, const float rz, c
     buffer_line_to_current_position();
 
     planner.synchronize();
-    SERIAL_ECHOLNPAIR("trigger_state(): ", endstops.trigger_state());
+    // SERIAL_ECHOLNPAIR("trigger_state(): ", endstops.trigger_state());
   }
   
   endstops.enable_z_probe(false);
@@ -2525,7 +2525,7 @@ void do_blocking_move_to_Joint(const float rx, const float ry, const float rz, c
 
   if (current_position[Z_AXIS] > rz) {
       endstops.enable_z_probe(true);
-      SERIAL_ECHOLNPGM("//To High//");
+      // SERIAL_ECHOLNPGM("//To High//");
       feedrate_mm_s = z_feedrate;
 
       current_position[Z_AXIS] = rz;
@@ -2565,7 +2565,7 @@ void do_blocking_move_to_Joint(const float rx, const float ry, const float rz, c
   feedrate_mm_s = old_feedrate_mm_s;
 
   #if ENABLED(DEBUG_LEVELING_FEATURE)
-    if (DEBUGGING(LEVELING)) SERIAL_ECHOLNPGM("<<< do_blocking_move_to_Joint");
+    // if (DEBUGGING(LEVELING)) SERIAL_ECHOLNPGM("<<< do_blocking_move_to_Joint");
   #endif
 }
 
@@ -3306,13 +3306,15 @@ void clean_up_after_endstop_or_probe_move() {
     float temp_current_Z_pos=current_position[Z_AXIS];
     while( (temp_current_Z_pos>=z) && !(TEST(endstops.trigger_state(),Z_MIN_PROBE) != 0) )
     {
-      temp_current_Z_pos=temp_current_Z_pos-(temp_current_Z_pos>=35)?1:(temp_current_Z_pos>=28)?0.1:0.01;//0.01;
+      if(temp_current_Z_pos>5)temp_current_Z_pos=5;//temp_current_Z_pos=temp_current_Z_pos-5;
+      else if(temp_current_Z_pos>=3)temp_current_Z_pos=temp_current_Z_pos-0.1;
+      else temp_current_Z_pos=temp_current_Z_pos-0.01;
       //current_position[Z_AXIS]=current_position[Z_AXIS]-0.1;
       do_blocking_move_to_z(temp_current_Z_pos, fr_mm_s);
     }
     endstops.enable_z_probe(false);
-    SERIAL_ECHOLNPAIR("current_position[Z_AXIS]:",current_position[Z_AXIS]);
-    sync_plan_position();
+    // SERIAL_ECHOLNPAIR("current_position[Z_AXIS]:",current_position[Z_AXIS]);
+    sync_plan_position_noprint();
     // do_blocking_move_to_z(z, fr_mm_s);
 
     // Check to see if the probe was triggered
@@ -3322,7 +3324,7 @@ void clean_up_after_endstop_or_probe_move() {
       #else
         Z_MIN_PROBE
       #endif
-    );    
+    );
 
     /*SERIAL_ECHOPAIR("hit_state:",endstops.trigger_state());
     SERIAL_ECHOLNPAIR("  probe_triggered:",probe_triggered);*/
@@ -3380,11 +3382,11 @@ void clean_up_after_endstop_or_probe_move() {
         #endif
         return NAN;
       }
-      SERIAL_ECHOLNPAIR("3 endstops.trigger_state(): ",endstops.trigger_state());
+      // SERIAL_ECHOLNPAIR("3 endstops.trigger_state(): ",endstops.trigger_state());
       float first_probe_z = current_position[Z_AXIS];
 
       #if ENABLED(DEBUG_LEVELING_FEATURE)
-        if (DEBUGGING(LEVELING)) SERIAL_ECHOLNPAIR("1st Probe Z:", first_probe_z);
+        // if (DEBUGGING(LEVELING)) SERIAL_ECHOLNPAIR("1st Probe Z:", first_probe_z);
       #endif
       // move up to make clearance for the probe
       endstops.enable_z_probe(false);
