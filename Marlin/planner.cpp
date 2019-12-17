@@ -83,7 +83,7 @@
 
 // Delay for delivery of first block to the stepper ISR, if the queue contains 2 or
 // fewer movements. The delay is measured in milliseconds, and must be less than 250ms
-#define BLOCK_DELAY_FOR_1ST_MOVE 100
+#define BLOCK_DELAY_FOR_1ST_MOVE 200
 
 Planner planner;
 
@@ -3328,9 +3328,7 @@ bool Planner::_populate_block_joint_self(block_t * const block, bool split_move,
   int32_t de = target[E_AXIS] - position[E_AXIS];
 
 
-  const int32_t da = MAX5(abs(d0),abs(d1),abs(d2),abs(d3),abs(d4)), 
-                db,
-                dc ;//= target[C_AXIS] - position[C_AXIS];
+
   /* <-- add a slash to enable
     SERIAL_ECHOPAIR("  _populate_block_Joint FR:", fr_mm_s);
     SERIAL_ECHOPAIR(" A:", target[A_AXIS]);
@@ -3595,26 +3593,28 @@ bool Planner::_populate_block_joint_self(block_t * const block, bool split_move,
    * So we need to create other 2 "AXIS", named X_HEAD and Y_HEAD, meaning the real displacement of the Head.
    * Having the real displacement of the head, we can calculate the total movement length and apply the desired speed.
    */
-  
+
   float delta_mm[NUM_AXIS];
-  delta_mm[A_AXIS] = da * steps_to_mm[A_AXIS];
+  delta_mm[A_AXIS] = da * steps_to_mm[A_AXIS]; 
   delta_mm[B_AXIS] = db * steps_to_mm[B_AXIS];
   delta_mm[C_AXIS] = dc * steps_to_mm[C_AXIS];
   delta_mm[E_AXIS] = esteps_float * steps_to_mm[E_AXIS_N];
   
   float delta_joint_mm[Joint_All];
-  delta_joint_mm[Joint1_AXIS] = d0*(1/80);
-  delta_joint_mm[Joint2_AXIS] = d1*(1/80);
-  delta_joint_mm[Joint3_AXIS] = d2*(1/80);
-  delta_joint_mm[Joint4_AXIS] = d3*(1/80);
-  delta_joint_mm[Joint5_AXIS] = d4*(1/80);
+  delta_joint_mm[Joint1_AXIS] = d0 * steps_to_mm[A_AXIS]; //da * steps_to_mm[A_AXIS]; *joint_division[axis_d])/130
+  delta_joint_mm[Joint2_AXIS] = d1 * steps_to_mm[A_AXIS];
+  delta_joint_mm[Joint3_AXIS] = d2 * steps_to_mm[A_AXIS];
+  delta_joint_mm[Joint4_AXIS] = d3 * steps_to_mm[A_AXIS];
+  delta_joint_mm[Joint5_AXIS] = d4 * steps_to_mm[A_AXIS];
 
   if (block->steps[A_AXIS] < MIN_STEPS_PER_SEGMENT && block->steps[B_AXIS] < MIN_STEPS_PER_SEGMENT && block->steps[C_AXIS] < MIN_STEPS_PER_SEGMENT) {
     block->millimeters = ABS(delta_mm[E_AXIS]);
   }
   else if (!millimeters) {
     block->millimeters = SQRT(
-      sq(delta_mm[X_AXIS]) + sq(delta_mm[Y_AXIS]) + sq(delta_mm[Z_AXIS])
+      //sq(delta_mm[X_AXIS]) + sq(delta_mm[Y_AXIS]) + sq(delta_mm[Z_AXIS])
+      sq(delta_joint_mm[Joint1_AXIS])+sq(delta_joint_mm[Joint2_AXIS])+sq(delta_joint_mm[Joint3_AXIS])+sq(delta_joint_mm[Joint4_AXIS])
+      +sq(delta_joint_mm[Joint5_AXIS])
     );
   }
   else {
