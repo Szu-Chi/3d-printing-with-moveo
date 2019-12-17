@@ -1,0 +1,12 @@
+Added Component: Designator=J3(HDR2X4)
+Add component. Clean all parameters for all variants
+Added Pin To Net: NetName=5V Pin=J3-1
+Added Pin To Net: NetName=D49 Pin=J3-2
+Added Pin To Net: NetName=D50 Pin=J3-3
+Added Pin To Net: NetName=D51 Pin=J3-4
+Added Pin To Net: NetName=D52 Pin=J3-5
+Added Pin To Net: NetName=D53 Pin=J3-6
+Added Pin To Net: NetName=GND Pin=J3-7
+Added Member To Class: ClassName=Smart_Robotic_Arm_ControllerBoard Member=Component DIGITAL IO_36
+Added Member To Class: ClassName=Smart_Robotic_Arm_ControllerBoard Member=Component J3 AUX-3
+Added Room: Name=Smart_Robotic_Arm_ControllerBoard

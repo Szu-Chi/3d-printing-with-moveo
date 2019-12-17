@@ -1,0 +1,12 @@
+Output: NC Drill Files
+Type  : NC Drill
+From  : Project [Smart_Robotic_Arm_ControllerBoard.PrjPCB]
+   Generated File[Smart_Robotic_Arm_ControllerBoard.TXT]
+   Generated File[Smart_Robotic_Arm_ControllerBoard.LDP]
+   Generated File[Smart_Robotic_Arm_ControllerBoard.DRR]
+
+
+Files Generated   : 3
+Documents Printed : 0
+
+Finished Output Generation At 23:45:44 On 2019/12/7

@@ -1,0 +1,32 @@
+Change Component Comment : Designator=D1 Old Comment=D1 for Heater New Comment=LED
+Change Component Comment : Designator=D3 Old Comment=D3 for Fan New Comment=LED
+Change Component Comment : Designator=D5 Old Comment=D5 for Heatbed New Comment=LED
+Change Component Comment : Designator=P5 Old Comment= Driver  New Comment=Driver_Fan
+Change Component Comment : Designator=P6 Old Comment= Heatsink  New Comment=NozzleHeatsink_Fan
+Change Component Comment : Designator=P3 Old Comment= Nozzle  New Comment=Nozzle_Fan
+Change Component Comment : Designator=S1 Old Comment= RESET  New Comment=SW
+Added Component: Designator=Q1(TO-263-2)
+Add component. Clean all parameters for all variants
+Added Component: Designator=Q2(TO-263-2)
+Add component. Clean all parameters for all variants
+Added Component: Designator=Q3(TO-263-2)
+Add component. Clean all parameters for all variants
+Added Pin To Net: NetName=GND Pin=Q1-2
+Added Pin To Net: NetName=NetD1_2 Pin=Q1-3
+Added Pin To Net: NetName=GND Pin=Q2-2
+Added Pin To Net: NetName=NetD3_2 Pin=Q2-3
+Added Pin To Net: NetName=GND Pin=Q3-2
+Added Pin To Net: NetName=NetD5_2 Pin=Q3-3
+Added Pin To Net: NetName=NetQ1_1 Pin=Q1-1
+Added Pin To Net: NetName=NetQ1_1 Pin=R2-1
+Added Net: Name=NetQ1_1
+Added Pin To Net: NetName=NetQ2_1 Pin=Q2-1
+Added Pin To Net: NetName=NetQ2_1 Pin=R5-1
+Added Net: Name=NetQ2_1
+Added Pin To Net: NetName=NetQ3_1 Pin=Q3-1
+Added Pin To Net: NetName=NetQ3_1 Pin=R8-1
+Added Net: Name=NetQ3_1
+Added Member To Class: ClassName=Smart_Robotic_Arm_ControllerBoard Member=Component Q1 MCB150N06YB
+Added Member To Class: ClassName=Smart_Robotic_Arm_ControllerBoard Member=Component Q2 MCB150N06YB
+Added Member To Class: ClassName=Smart_Robotic_Arm_ControllerBoard Member=Component Q3 MCB150N06YB
+Added Room: Name=Smart_Robotic_Arm_ControllerBoard

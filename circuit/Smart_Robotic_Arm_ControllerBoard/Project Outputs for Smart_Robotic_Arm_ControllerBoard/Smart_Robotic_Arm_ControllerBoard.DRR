@@ -1,0 +1,17 @@
+----------------------------------------------------------------------------------------------------------------------------------
+NCDrill File Report For: Smart_Robotic_Arm_ControllerBoard.PcbDoc   2019/12/7  23:45:44
+----------------------------------------------------------------------------------------------------------------------------------
+
+Layer Pair : Top Layer to Bottom Layer
+ASCII RoundHoles File : Smart_Robotic_Arm_ControllerBoard.TXT
+
+Tool       Hole Size               Hole Tolerance               Hole Type       Hole Count   Plated         Tool Travel
+----------------------------------------------------------------------------------------------------------------------------------
+T1      12mil (0.3mm)                                             Round             49        PTH        0.00inch (0.00mm)
+T2      20mil (0.508mm)                                           Round             103       PTH        0.00inch (0.00mm)
+T3      39mil (1mm)                                               Round             300       PTH        0.00inch (0.00mm)
+T4      47mil (1.2mm)                                             Round             6         PTH        0.00inch (0.00mm)
+----------------------------------------------------------------------------------------------------------------------------------
+Totals                                                                              458
+
+Total Processing Time (hh:mm:ss) : 00:00:00

@@ -1,0 +1,8 @@
+DRC Rules Export File for PCB: D:\Daniel_Chung\College\Final_Project\Circuit\Smart_Robotic_Arm_ControllerBoard\Smart_Robotic_Arm_ControllerBoard.PcbDoc
+RuleKind=Clearance|RuleName=Clearance_2|Scope=Board|Minimum=10.00
+RuleKind=Clearance|RuleName=Clearance_1|Scope=Board|Minimum=7.00
+RuleKind=Width|RuleName=signal|Scope=Board|Minimum=6.00
+RuleKind=SolderMaskExpansion|RuleName=SolderMaskExpansion|Scope=Board|Minimum=4.00
+RuleKind=Width|RuleName=power|Scope=Board|Minimum=10.00
+RuleKind=Clearance|RuleName=Clearance|Scope=Board|Minimum=6.00
+RuleKind=ShortCircuit|RuleName=ShortCircuit|Scope=Board|Allowed=0
