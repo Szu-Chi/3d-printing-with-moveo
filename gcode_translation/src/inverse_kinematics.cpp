@@ -78,7 +78,7 @@ bool check_trac_ik_valid(TRAC_IK::TRAC_IK &tracik_solver,KDL::Chain &chain, KDL:
 
 void motor_setep_convert(Eigen::VectorXd &data){
                                         // steps * micro_steps * belt * error
-  static const double joint_division[6] = {200          * 32  * 10       * 1,     //J 64000
+  static const double joint_division[5] = {200          * 32  * 10       * 1,     //J 64000
                                            200          * 128 * 5.5      * 1,     //A 140800
                                            19810.111813 * 4   * 4.357143 * 1,     //B 345261.960060921
                                            5370.24793   * 32  * 1        * 1,     //C 171847.93376
@@ -116,6 +116,10 @@ void write_file_trac_IK_error(std::ofstream &output_file, KDL::Vector &find_end_
   output_file << "Z:" << find_end_effector_target_vol.data[2];
   output_file << std::endl << "END" << std::endl;
   ROS_ERROR_STREAM("TRACIK_ERROR");
+}
+void error_to_quit(std::ofstream &check_success_file){
+  check_success_file << "Error";
+  check_success_file.close();
 }
 
 ros::WallTime start_, end_;
@@ -209,7 +213,7 @@ int main(int argc, char **argv){
   ROS_INFO_STREAM("Read judge_Y file success");
 
   // Read gcode
-  std::string gcode_in, gcode_out;
+  std::string gcode_in, gcode_out, check_success;
   node_handle.param("gcode_in", gcode_in, std::string("/gcode_in"));
   std::ifstream input_file(gcode_in);
   if(!input_file.is_open())ROS_ERROR_STREAM("Can't open " <<gcode_in);
@@ -219,9 +223,13 @@ int main(int argc, char **argv){
   std::ofstream output_file(gcode_out);
   if(!output_file.is_open())ROS_ERROR_STREAM("Can't open " <<gcode_out);
 
+  // Write check_success
+  node_handle.param("check_success", check_success, std::string("/check_success"));
+  std::ofstream check_success_file(check_success);
+  if(!check_success_file.is_open())ROS_ERROR_STREAM("Can't open " <<check_success);
+
   bool check = 0;
   bool first_point = 0;
-  int error_num = 0;
   int second_execution = 0;
   all_line = 0;
   double z_init = 0;
@@ -269,7 +277,7 @@ int main(int argc, char **argv){
                 z_init = (stod(line.substr(colon_pos_Z+1))*1e-3)+Z_offset;
               }
               double z_pos = calc_z((end_effector_target_vol.data[0]+0.09)*1000, (end_effector_target_vol.data[1]-0.2)*1000)/1000;
-              end_effector_target_vol.data[2] = z_init + z_pos;//-0.002;
+              end_effector_target_vol.data[2] = z_init + z_pos;
               find_end_effector_target_vol.push_back(end_effector_target_vol);
               save_place.push_back(i);
               // Calculate position angle
@@ -347,7 +355,8 @@ int main(int argc, char **argv){
           if(rc < 0){
             output_file << std::endl << "ERROR_TRACIK" << std::endl;
             write_file_trac_IK_error(output_file, find_end_effector_target_vol[use_onecore[l]]);
-            error_num++;
+            error_to_quit(check_success_file);
+            return -1;
           }
           save_result.at(use_onecore[l]) = result;
         }
@@ -397,7 +406,8 @@ int main(int argc, char **argv){
                 if(rc < 0){
                   output_file << std::endl << "ERROR_TRACIK_P_N" << std::endl;
                   write_file_trac_IK_error(output_file, output_end_effector_target_vol);
-                  error_num++;
+                  error_to_quit(check_success_file);
+                  return -1;
                 }
                 else{
                   write_file_joint_value(output_file, result, chain);
@@ -434,7 +444,8 @@ int main(int argc, char **argv){
               output_file << std::endl << "ERROR_COLLISION" << std::endl;
               write_file_joint_value(output_file, save_result.at(pop_out), chain);
               output_file << std::endl << "END" << std::endl;
-              error_num++;
+              error_to_quit(check_success_file);
+              return -1;
             }
           }
           else{
@@ -462,8 +473,9 @@ int main(int argc, char **argv){
     end_ = ros::WallTime::now();
     double execution_time = (end_ - start_).toNSec() * 1e-9;
     ROS_INFO_STREAM("second_execution: " << second_execution);
-    ROS_INFO_STREAM("can't exectution:" << error_num);
     ROS_INFO_STREAM("Exectution time (s): " << execution_time);
+    check_success_file << "Success";
+    check_success_file.close();
     input_file.close();
     output_file.close();
     ros::shutdown();

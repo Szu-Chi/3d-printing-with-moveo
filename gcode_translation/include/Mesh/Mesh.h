@@ -27,17 +27,17 @@ double XYZ_Position[25][XYZ] = {{0, 0, 0},    {45, 0, 0},   {90, 0, 0},  {135, 0
 
 void Print_Mesh(void)
 {
-  std::printf("+------------------------------------------------------+\n");
-  std::printf("|          |                   X                       |\n");
-  std::printf("+    Z     +-------------------------------------------+\n");
-  std::printf("|          | %+3d       %+3d      %+3d      %+3d     %+3d |\n", 0, 45, 90, 135, 180);
-  std::printf("+---+------+-------------------------------------------+\n");
-  std::printf("|   | %+3d  |  %+.2lf    %+.2lf    %+.2lf    %+.2lf    %+.2lf|\n", 0, XYZ_Position[0][2], XYZ_Position[1][2], XYZ_Position[2][2], XYZ_Position[3][2], XYZ_Position[4][2]);
-  std::printf("|   | %+3d  |  %+.2lf    %+.2lf    %+.2lf    %+.2lf    %+.2lf|\n", 45, XYZ_Position[5][2], XYZ_Position[6][2], XYZ_Position[7][2], XYZ_Position[8][2], XYZ_Position[9][2]);
-  std::printf("| Y | %+3d  |  %+.2lf    %+.2lf    %+.2lf    %+.2lf    %+.2lf|\n", 90, XYZ_Position[10][2], XYZ_Position[11][2], XYZ_Position[12][2], XYZ_Position[13][2], XYZ_Position[14][2]);
-  std::printf("|   | %+3d |  %+.2lf    %+.2lf    %+.2lf    %+.2lf    %+.2lf|\n", 135, XYZ_Position[15][2], XYZ_Position[16][2], XYZ_Position[17][2], XYZ_Position[18][2], XYZ_Position[19][2]);
-  std::printf("|   | %+3d |  %+.2lf    %+.2lf    %+.2lf    %+.2lf    %+.2lf|\n", 180, XYZ_Position[20][2], XYZ_Position[21][2], XYZ_Position[22][2], XYZ_Position[23][2], XYZ_Position[24][2]);
-  std::printf("+---+------+-------------------------------------------+\n");
+  //std::printf("+------------------------------------------------------+\n");
+  //std::printf("|          |                   X                       |\n");
+  //std::printf("+    Z     +-------------------------------------------+\n");
+  //std::printf("|          | %+3d       %+3d      %+3d      %+3d     %+3d |\n", 0, 45, 90, 135, 180);
+  //std::printf("+---+------+-------------------------------------------+\n");
+  //std::printf("|   | %+3d  |  %+.2lf    %+.2lf    %+.2lf    %+.2lf    %+.2lf|\n", 0, XYZ_Position[0][2], XYZ_Position[1][2], XYZ_Position[2][2], XYZ_Position[3][2], XYZ_Position[4][2]);
+  //std::printf("|   | %+3d  |  %+.2lf    %+.2lf    %+.2lf    %+.2lf    %+.2lf|\n", 45, XYZ_Position[5][2], XYZ_Position[6][2], XYZ_Position[7][2], XYZ_Position[8][2], XYZ_Position[9][2]);
+  //std::printf("| Y | %+3d  |  %+.2lf    %+.2lf    %+.2lf    %+.2lf    %+.2lf|\n", 90, XYZ_Position[10][2], XYZ_Position[11][2], XYZ_Position[12][2], XYZ_Position[13][2], XYZ_Position[14][2]);
+  //std::printf("|   | %+3d |  %+.2lf    %+.2lf    %+.2lf    %+.2lf    %+.2lf|\n", 135, XYZ_Position[15][2], XYZ_Position[16][2], XYZ_Position[17][2], XYZ_Position[18][2], XYZ_Position[19][2]);
+  //std::printf("|   | %+3d |  %+.2lf    %+.2lf    %+.2lf    %+.2lf    %+.2lf|\n", 180, XYZ_Position[20][2], XYZ_Position[21][2], XYZ_Position[22][2], XYZ_Position[23][2], XYZ_Position[24][2]);
+  //std::printf("+---+------+-------------------------------------------+\n");
 }
 
 void calc_abcd(void)
@@ -103,11 +103,11 @@ void Print_data(const double Pr_buffer[4][4])
   {
     for (int i = 0; i < 4; i++)
     {
-      std::printf("    %.2lf    ", Pr_buffer[j][i]);
+      //std::printf("    %.2lf    ", Pr_buffer[j][i]);
     }
-    std::printf("\n");
+    //std::printf("\n");
   }
-  std::printf("\n");
+  //std::printf("\n");
 }
 
 double calc_z(double calc_x, double calc_y)
@@ -120,28 +120,28 @@ double calc_z(double calc_x, double calc_y)
     x_div = 0;
   if (y_div < 0)
     y_div = 0;
-  std::printf("x_div=%d y_div=%d\n", x_div, y_div);
-  std::printf("a_1=%+.10lf a_2=%+.10lf\n", a_1[y_div][x_div], a_2[y_div][x_div]);
-  std::printf("b_1=%+.10lf b_2=%+.10lf\n", b_1[y_div][x_div], b_2[y_div][x_div]);
-  std::printf("c_1=%+4.10lf c_2=%+4.10lf\n", c_1[y_div][x_div], c_2[y_div][x_div]);
-  std::printf("d_1=%+.10lf d_2=%+.10lf\n", d_1[y_div][x_div], d_2[y_div][x_div]);
+  //std::printf("x_div=%d y_div=%d\n", x_div, y_div);
+  //std::printf("a_1=%+.10lf a_2=%+.10lf\n", a_1[y_div][x_div], a_2[y_div][x_div]);
+  //std::printf("b_1=%+.10lf b_2=%+.10lf\n", b_1[y_div][x_div], b_2[y_div][x_div]);
+  //std::printf("c_1=%+4.10lf c_2=%+4.10lf\n", c_1[y_div][x_div], c_2[y_div][x_div]);
+  //std::printf("d_1=%+.10lf d_2=%+.10lf\n", d_1[y_div][x_div], d_2[y_div][x_div]);
 
   x_diff = calc_x - x_div * 45;
   y_diff = calc_y - y_div * 45;
 
-  std::printf("x_diff:%.3lf y_diff:%.3lf\n", x_diff, y_diff);
+  //std::printf("x_diff:%.3lf y_diff:%.3lf\n", x_diff, y_diff);
 
   if ((x_diff + y_diff) <= 45)
   {
     z_pos_temp = (-d_1[y_div][x_div] - a_1[y_div][x_div] * calc_x - b_1[y_div][x_div] * calc_y) / c_1[y_div][x_div];
-    std::printf("a_1*x_pos=%.10lf b_1*y_pos=%.10lf \n", a_1[y_div][x_div] * calc_x, b_1[y_div][x_div] * calc_y);
-    std::printf("b_1*x_pos=%.10lf d_1=%.10lf \n", c_1[y_div][x_div] * z_pos_temp, c_1[y_div][x_div]);
+    //std::printf("a_1*x_pos=%.10lf b_1*y_pos=%.10lf \n", a_1[y_div][x_div] * calc_x, b_1[y_div][x_div] * calc_y);
+    //std::printf("b_1*x_pos=%.10lf d_1=%.10lf \n", c_1[y_div][x_div] * z_pos_temp, c_1[y_div][x_div]);
   }
   else
   {
     z_pos_temp = (-d_2[y_div][x_div] - a_2[y_div][x_div] * calc_x - b_2[y_div][x_div] * calc_y) / c_1[y_div][x_div];
-    std::printf("a_2*x_pos=%.10lf b_2*y_pos=%.10lf \n", a_2[y_div][x_div] * calc_x, b_2[y_div][x_div] * calc_y);
-    std::printf("c_2*z_pos=%.10lf d_2=%.10lf \n", c_2[y_div][x_div] * z_pos_temp, d_2[y_div][x_div]);
+    //std::printf("a_2*x_pos=%.10lf b_2*y_pos=%.10lf \n", a_2[y_div][x_div] * calc_x, b_2[y_div][x_div] * calc_y);
+    //std::printf("c_2*z_pos=%.10lf d_2=%.10lf \n", c_2[y_div][x_div] * z_pos_temp, d_2[y_div][x_div]);
   }
   return z_pos_temp;
 }

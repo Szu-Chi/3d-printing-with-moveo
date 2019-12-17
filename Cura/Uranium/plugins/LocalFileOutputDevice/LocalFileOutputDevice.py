@@ -182,28 +182,43 @@ class LocalFileOutputDevice(OutputDevice):
     def _onWriteJobFinished(self, job):
         self._writing = False
         self.writeFinished.emit(self)
-        if job.getResult():
-            self.writeSuccess.emit(self)
-            message = Message(catalog.i18nc("@info:status Don't translate the XML tags <filename>!", "Saved to <filename>{0}</filename>").format(job.getFileName()), title = catalog.i18nc("@info:title", "File Saved"))
-            message.addAction("open_folder", catalog.i18nc("@action:button", "Open Folder"), "open-folder", catalog.i18nc("@info:tooltip", "Open the folder containing the file"))
-            message._folder = os.path.dirname(job.getFileName())
-            message.actionTriggered.connect(self._onMessageActionTriggered)
-            message.show()
-        else:
-            message = Message(catalog.i18nc("@info:status Don't translate the XML tags <filename> or <message>!", "Could not save to <filename>{0}</filename>: <message>{1}</message>").format(job.getFileName(), str(job.getError())), lifetime = 0, title = catalog.i18nc("@info:title", "Warning"))
-            message.show()
-            self.writeError.emit(self)
-
         try:
             job.getStream().close()
         except (OSError, PermissionError): #When you don't have the rights to do the final flush or the disk is full.
             message = Message(catalog.i18nc("@info:status", "Something went wrong saving to <filename>{0}</filename>: <message>{1}</message>").format(job.getFileName(), str(job.getError())), title = catalog.i18nc("@info:title", "Error"))
             message.show()
             self.writeError.emit(self)
+
+        data = "check"
         Shape = CuraApplication.getInstance().getShapeFromBuildVolume()
         if Shape == "moveo":
-            os.system("roslaunch gcode_translation split.launch gcode_in:="+ self._save_name)
-            os.system("roslaunch gcode_translation inverse_kinematics.launch gcode_out:="+ self._save_name)
+            place = ""
+            for i in self._save_name:
+                if(i == " "):
+                    place = place + "\\"
+                place = place + i
+            os.system("roslaunch gcode_translation split.launch gcode_in:="+ place)
+            os.system("roslaunch gcode_translation inverse_kinematics.launch gcode_out:="+ place)
+            success_place = os.getcwd()
+            read_file = open(success_place[:-10]+'/gcode_translation/check_success/check_success.txt','r')
+            data = read_file.read().strip()
+        if(data == "Error"):
+            os.system("rm -f "+ place)
+            message = Message(catalog.i18nc("@info:status", "gcode_translation went wrong saving to <filename>{0}</filename>: <message>{1}</message>").format(job.getFileName(), str(job.getError())), title = catalog.i18nc("@info:title", "Error"))
+            message.show()
+            self.writeError.emit(self)
+        else:
+            if job.getResult():
+                self.writeSuccess.emit(self)
+                message = Message(catalog.i18nc("@info:status Don't translate the XML tags <filename>!", "Saved to <filename>{0}</filename>").format(job.getFileName()), title = catalog.i18nc("@info:title", "File Saved"))
+                message.addAction("open_folder", catalog.i18nc("@action:button", "Open Folder"), "open-folder", catalog.i18nc("@info:tooltip", "Open the folder containing the file"))
+                message._folder = os.path.dirname(job.getFileName())
+                message.actionTriggered.connect(self._onMessageActionTriggered)
+                message.show()
+            else:
+                message = Message(catalog.i18nc("@info:status Don't translate the XML tags <filename> or <message>!", "Could not save to <filename>{0}</filename>: <message>{1}</message>").format(job.getFileName(), str(job.getError())), lifetime = 0, title = catalog.i18nc("@info:title", "Warning"))
+                message.show()
+                self.writeError.emit(self)
 
     def _onMessageActionTriggered(self, message, action):
         if action == "open_folder" and hasattr(message, "_folder"):
