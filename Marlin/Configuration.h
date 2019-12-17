@@ -862,7 +862,7 @@
  */
 #define X_PROBE_OFFSET_FROM_EXTRUDER -9 // X offset: -left  +right  [of the nozzle]
 #define Y_PROBE_OFFSET_FROM_EXTRUDER 11 // Y offset: -front +behind [the nozzle]
-#define Z_PROBE_OFFSET_FROM_EXTRUDER -26.55  // Z offset: -below +above  [the nozzle]
+#define Z_PROBE_OFFSET_FROM_EXTRUDER 13.5  //26.55  // Z offset: -below +above  [the nozzle]
 
 // Certain types of probes need to stay away from edges
 #define MIN_PROBE_EDGE 10
@@ -896,7 +896,7 @@
  * Example: `M851 Z-5` with a CLEARANCE of 4  =>  9mm from bed to nozzle.
  *     But: `M851 Z+1` with a CLEARANCE of 2  =>  2mm from bed to nozzle.
  */
-#define Z_CLEARANCE_DEPLOY_PROBE   50 // Z Clearance for Deploy/Stow
+#define Z_CLEARANCE_DEPLOY_PROBE   20 // Z Clearance for Deploy/Stow
 #define Z_CLEARANCE_BETWEEN_PROBES 5  // Z Clearance between probe points
 #define Z_CLEARANCE_MULTI_PROBE    5  // Z Clearance between multiple probes
 //#define Z_AFTER_PROBING           5 // Z position after probing is done
@@ -1007,9 +1007,9 @@
 #define Z_MAX_POS 200
 
 #define J_MIN_POS_step -24800
-#define A_MIN_POS_step -40760
+#define A_MIN_POS_step -43560
 #define B_MIN_POS_step -96400
-#define C_MIN_POS_step -36690
+#define C_MIN_POS_step -37990
 #define D_MIN_POS_step -19160
 
 #define J_MAX_POS_step 24800
@@ -1020,9 +1020,9 @@
 
 // joint
 #define Joint1_MIN_POS -24800
-#define Joint2_MIN_POS -40760
+#define Joint2_MIN_POS -43560
 #define Joint3_MIN_POS -96400
-#define Joint4_MIN_POS -36690
+#define Joint4_MIN_POS -37990
 #define Joint5_MIN_POS -19160
 
 // joint

@@ -3306,8 +3306,8 @@ void clean_up_after_endstop_or_probe_move() {
     float temp_current_Z_pos=current_position[Z_AXIS];
     while( (temp_current_Z_pos>=z) && !(TEST(endstops.trigger_state(),Z_MIN_PROBE) != 0) )
     {
-      if(temp_current_Z_pos>5)temp_current_Z_pos=5;//temp_current_Z_pos=temp_current_Z_pos-5;
-      else if(temp_current_Z_pos>=3)temp_current_Z_pos=temp_current_Z_pos-0.1;
+      //if(temp_current_Z_pos>5.0)temp_current_Z_pos=temp_current_Z_pos-5;
+      if(temp_current_Z_pos>=18.0)temp_current_Z_pos=temp_current_Z_pos-0.1;
       else temp_current_Z_pos=temp_current_Z_pos-0.01;
       //current_position[Z_AXIS]=current_position[Z_AXIS]-0.1;
       do_blocking_move_to_z(temp_current_Z_pos, fr_mm_s);
@@ -6965,7 +6965,7 @@ void home_all_axes() { gcode_G28(true); }
 
               char str_G29[80];            
                 
-              dtostrf(eqnBVector[ind], 5, 5, str_G29);
+              dtostrf(eqnBVector[ind]-Z_PROBE_OFFSET_FROM_EXTRUDER, 5, 5, str_G29);
               strcat(str_G29, " ");                           
               card.write_Str(str_G29);              
             } // xx

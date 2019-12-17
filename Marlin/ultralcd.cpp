@@ -2729,6 +2729,12 @@ void lcd_quick_feedback(const bool clear_buttons) {
       MENU_ITEM(gcode, MSG_AUTO_HOME_Z, PSTR("G28 Z"));
     #endif
     */
+
+   //
+   // G29 P5 T
+   //
+    MENU_ITEM(gcode, MSG_AUTO_G29, PSTR("G29 P5 T"));
+
     //
     // TMC Z Calibration
     //
