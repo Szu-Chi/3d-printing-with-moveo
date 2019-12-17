@@ -21,9 +21,7 @@
 
 #include <stdio.h>
 #include <unistd.h>
-extern "C" {
-  #include "../include/Mesh/Mesh.h"
-}
+#include "../include/Mesh/Mesh.h"
 
 int decimal_point(double &A){
   std::string change = std::to_string(A);
@@ -156,7 +154,7 @@ int main(int argc, char **argv){
 
   KDL::Chain chain;
   KDL::JntArray ll, ul; //lower joint limits, upper joint limits
-  
+
   // Joint4 doesn't need to turn
   TRAC_IK::TRAC_IK** tracik_solver = new TRAC_IK::TRAC_IK*[num_threads];
   for(int i = 0; i < num_threads; i++){
@@ -228,7 +226,6 @@ int main(int argc, char **argv){
   std::ofstream check_success_file(check_success);
   if(!check_success_file.is_open())ROS_ERROR_STREAM("Can't open " <<check_success);
 
-  bool check = 0;
   bool first_point = 0;
   int second_execution = 0;
   all_line = 0;
@@ -259,49 +256,44 @@ int main(int argc, char **argv){
       if(all_line % 1000 == 0 || !input_file){ // Read 1000 lines or end of file
         for(int i = 0;i < all_line ;i++){
           line = save[i];
-          if(!line.compare(0,7,";LAYER:")){
-            check = 1;
-          }
-          if(check == 1){
-            if(!line.compare(0,2,"G0") || !line.compare(0,2,"G1")){
-              size_t colon_pos_X = line.find('X');
-              if(colon_pos_X < 100){
-                end_effector_target_vol.data[0] = (stod(line.substr(colon_pos_X+1))*1e-3)+X_offset;
-              }
-              size_t colon_pos_Y = line.find('Y');
-              if(colon_pos_Y < 100){
-                end_effector_target_vol.data[1] = (stod(line.substr(colon_pos_Y+1))*1e-3)+Y_offset;
-              }
-              size_t colon_pos_Z = line.find('Z');
-              if(colon_pos_Z < 100){
-                z_init = (stod(line.substr(colon_pos_Z+1))*1e-3)+Z_offset;
-              }
-              double z_pos = calc_z((end_effector_target_vol.data[0]+0.09)*1000, (end_effector_target_vol.data[1]-0.2)*1000)/1000;
-              end_effector_target_vol.data[2] = z_init + z_pos;
-              find_end_effector_target_vol.push_back(end_effector_target_vol);
-              save_place.push_back(i);
-              // Calculate position angle
-              float position_angel = asin(end_effector_target_vol.data[0] / sqrt(pow(end_effector_target_vol.data[0],2)+pow(end_effector_target_vol.data[1],2)));
-              if(end_effector_target_vol.data[1] > 0){
-                position_angel = position_angel * (-1);
-              }
-              else{
+          if(!line.compare(0,2,"G0") || !line.compare(0,2,"G1")){
+            size_t colon_pos_X = line.find('X');
+            if(colon_pos_X < 100){
+              end_effector_target_vol.data[0] = (stod(line.substr(colon_pos_X+1))*1e-3)+X_offset;
+            }
+            size_t colon_pos_Y = line.find('Y');
+            if(colon_pos_Y < 100){
+              end_effector_target_vol.data[1] = (stod(line.substr(colon_pos_Y+1))*1e-3)+Y_offset;
+            }
+            size_t colon_pos_Z = line.find('Z');
+            if(colon_pos_Z < 100){
+              z_init = (stod(line.substr(colon_pos_Z+1))*1e-3)+Z_offset;
+            }
+            double z_pos = calc_z((end_effector_target_vol.data[0]+0.09)*1000, (end_effector_target_vol.data[1]-0.2)*1000)/1000;
+            end_effector_target_vol.data[2] = z_init + z_pos;
+            find_end_effector_target_vol.push_back(end_effector_target_vol);
+            save_place.push_back(i);
+            // Calculate position angle
+            float position_angel = asin(end_effector_target_vol.data[0] / sqrt(pow(end_effector_target_vol.data[0],2)+pow(end_effector_target_vol.data[1],2)));
+            if(end_effector_target_vol.data[1] > 0){
+              position_angel = position_angel * (-1);
+            }
+            else{
+              position_angel = position_angel + M_PI;
+            }
+            if(end_effector_target_vol.data[2] < 0.331){
+              if(sqrt(pow(end_effector_target_vol.data[0]*100,2)+pow(end_effector_target_vol.data[1]*100,2)) <= judge_Y[int((end_effector_target_vol.data[2])*1000000)]){
                 position_angel = position_angel + M_PI;
-              }
-              if(end_effector_target_vol.data[2] < 0.331){
-                if(sqrt(pow(end_effector_target_vol.data[0]*100,2)+pow(end_effector_target_vol.data[1]*100,2)) <= judge_Y[int((end_effector_target_vol.data[2])*1000000)]){
-                  position_angel = position_angel + M_PI;
-                  save_p_or_n.push_back(0);
-                }
-                else{
-                  save_p_or_n.push_back(1);
-                }
+                save_p_or_n.push_back(0);
               }
               else{
                 save_p_or_n.push_back(1);
               }
-              find_angle.push_back(position_angel);
             }
+            else{
+              save_p_or_n.push_back(1);
+            }
+            find_angle.push_back(position_angel);
           }
         }
         std::vector<KDL::JntArray> save_result(1000);

@@ -270,6 +270,8 @@ std::string GCodeExport::getFileHeader(const std::vector<bool>& extruder_is_used
         prefix << ";MAXX:" << INT2MM(total_bounding_box.max.x) << new_line;
         prefix << ";MAXY:" << INT2MM(total_bounding_box.max.y) << new_line;
         prefix << ";MAXZ:" << INT2MM(total_bounding_box.max.z) << new_line;
+        prefix << "G28 ;Home" << new_line;
+        prefix << "G1 X0 Y300 Z15 F2000" << new_line;
     }
 
     return prefix.str();

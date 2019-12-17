@@ -218,7 +218,6 @@ class CuraEngineBackend(QObject, Backend):
     @pyqtSlot()
     def forceSlice(self) -> None:
         self.markSliceAll()
-        print("12312312312312123123123123123123123123123123")
         self.slice()
 
     ##  Perform a slice of the scene.
@@ -244,9 +243,7 @@ class CuraEngineBackend(QObject, Backend):
         print(build_plate_to_be_sliced)
         Logger.log("d", "Going to slice build plate [%s]!" % build_plate_to_be_sliced)
         num_objects = self._numObjectsPerBuildPlate()
-        print("#################################")
         print(num_objects)
-        print("#################################")
         self._stored_layer_data = []
 
 
@@ -280,7 +277,6 @@ class CuraEngineBackend(QObject, Backend):
         self._start_slice_job.setBuildPlate(self._start_slice_job_build_plate)
         self._start_slice_job.start()
         self._start_slice_job.finished.connect(self._onStartSliceCompleted)
-        print("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
 
     ##  Terminate the engine process.
     #   Start the engine process by calling _createSocket()

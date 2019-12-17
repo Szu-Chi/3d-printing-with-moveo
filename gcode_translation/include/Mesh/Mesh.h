@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <ros/package.h>
 
 #define XYZ 3
 
@@ -149,7 +150,9 @@ double calc_z(double calc_x, double calc_y)
 void Load_Mesh(void)
 {
   FILE *ReadFILE;
-  ReadFILE = fopen("/home/tiao/git_ws/moveo_moveit_ws/src/gcode_translation/include/Mesh/Mesh.txt", "r");
+  std::string path = ros::package::getPath("gcode_translation");
+  path += "/include/Mesh/Mesh.txt";
+  ReadFILE = fopen(path.c_str(), "r");
 
   for (int i = 0; i < 5; i++)
     fscanf(ReadFILE, "%lf %lf %lf %lf %lf\n", &XYZ_Position[5 * i + 0][2], &XYZ_Position[5 * i + 1][2], &XYZ_Position[5 * i + 2][2], &XYZ_Position[5 * i + 3][2], &XYZ_Position[5 * i + 4][2]);
