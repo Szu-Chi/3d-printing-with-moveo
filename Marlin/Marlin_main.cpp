@@ -443,83 +443,83 @@ float   c[5]={-609, 3739, 16214, 0, -2972};
 // float b_m[25][5];
 // float c_m[25][5];
 
-const PROGMEM float a_m1[125] ={0.0000000000, 0.0000026250, -0.0000547500, 0.0000000000, -0.0000108750,
-            0.0000000000, 0.0000015000, -0.0000553750, 0.0000000000, -0.0000116250,
-            -0.0000001250, 0.0000008750, -0.0000553750, 0.0000000000, -0.0000120000,
-            0.0000000000, 0.0000015000, -0.0000557500, -0.0000001250, -0.0000117500,
-            0.0000000000, 0.0000028750, -0.0000547500, 0.0000000000, -0.0000108750,
-            0.0000000000, 0.0000056250, -0.0000552500, 0.0000000000, -0.0000096250,
-            0.0000000000, 0.0000047500, -0.0000543750, 0.0000000000, -0.0000096250,
-            -0.0000001250, 0.0000045000, -0.0000540000, 0.0000000000, -0.0000098750,
-            0.0000000000, 0.0000048750, -0.0000547500, 0.0000000000, -0.0000097500,
-            0.0000000000, 0.0000055000, -0.0000547500, 0.0000000000, -0.0000092500,
-            0.0000000000, 0.0000033750, -0.0000546250, 0.0000000000, 0.0000106250,
-            0.0000002500, 0.0000023750, -0.0000547500, 0.0000000000, 0.0000110000,
-            -0.0000002500, 0.0000021250, -0.0000553750, 0.0000000000, 0.0000113750,
-            0.0000001250, 0.0000025000, -0.0000547500, 0.0000001250, 0.0000111250,
-            0.0000000000, 0.0000035000, -0.0000550000, 0.0000000000, 0.0000103750,
-            -0.0000001250, 0.0000061250, -0.0000553750, 0.0000000000, 0.0000092500,
-            0.0000000000, 0.0000055000, -0.0000548750, 0.0000000000, 0.0000093750,
-            0.0000000000, 0.0000055000, -0.0000547500, 0.0000000000, 0.0000095000,
-            0.0000000000, 0.0000055000, -0.0000548750, 0.0000000000, 0.0000093750,
-            0.0000000000, 0.0000060000, -0.0000550000, 0.0000000000, 0.0000091250,
-            0.0000000000, 0.0000087500, -0.0000607500, 0.0000000000, 0.0000087500,
-            0.0000000000, 0.0000083750, -0.0000595000, 0.0000000000, 0.0000087500,
-            0.0000000000, 0.0000080000, -0.0000583750, 0.0000000000, 0.0000087500,
-            0.0000000000, 0.0000082500, -0.0000587500, 0.0000000000, 0.0000086250,
-            0.0000000000, 0.0000090000, -0.0000608750, 0.0000000000, 0.0000088750};
+const PROGMEM float a_m1[125] ={0.0000000000, 0.0000026250, -0.0000550000, 0.0000000000, -0.0000106250,
+            0.0000000000, 0.0000015000, -0.0000561250, -0.0000001250, -0.0000113750,
+            0.0000000000, 0.0000010000, -0.0000567500, 0.0000000000, -0.0000118750,
+            0.0000000000, 0.0000015000, -0.0000565000, 0.0000000000, -0.0000113750,
+            0.0000000000, 0.0000027500, -0.0000558750, 0.0000000000, -0.0000107500,
+            0.0000001250, 0.0000055000, -0.0000555000, -0.0000001250, -0.0000090000,
+            0.0000000000, 0.0000047500, -0.0000551250, 0.0000000000, -0.0000093750,
+            0.0000000000, 0.0000043750, -0.0000550000, 0.0000000000, -0.0000095000,
+            0.0000000000, 0.0000050000, -0.0000556250, 0.0000000000, -0.0000093750,
+            0.0000001250, 0.0000053750, -0.0000552500, 0.0000000000, -0.0000090000,
+            0.0000000000, 0.0000033750, -0.0000553750, 0.0000000000, 0.0000103750,
+            0.0000000000, 0.0000023750, -0.0000555000, 0.0000000000, 0.0000106250,
+            0.0000000000, 0.0000022500, -0.0000558750, 0.0000000000, 0.0000108750,
+            0.0000000000, 0.0000025000, -0.0000555000, 0.0000001250, 0.0000106250,
+            -0.0000001250, 0.0000035000, -0.0000556250, 0.0000000000, 0.0000101250,
+            0.0000000000, 0.0000061250, -0.0000562500, 0.0000000000, 0.0000088750,
+            0.0000000000, 0.0000055000, -0.0000557500, 0.0000000000, 0.0000090000,
+            0.0000000000, 0.0000053750, -0.0000551250, 0.0000000000, 0.0000090000,
+            0.0000000000, 0.0000053750, -0.0000557500, 0.0000000000, 0.0000090000,
+            0.0000000000, 0.0000060000, -0.0000560000, 0.0000000000, 0.0000088750,
+            0.0000000000, 0.0000090000, -0.0000613750, 0.0000000000, 0.0000086250,
+            0.0000000000, 0.0000085000, -0.0000601250, 0.0000000000, 0.0000086250,
+            0.0000000000, 0.0000081250, -0.0000591250, 0.0000000000, 0.0000085000,
+            -0.0000001250, 0.0000082500, -0.0000596250, 0.0000000000, 0.0000085000,
+            0.0000000000, 0.0000088750, -0.0000622500, 0.0000000000, 0.0000086250};
 
-const PROGMEM float b_m1[125] ={0.0000000000, -0.9702500105, 0.9125000238, 0.0000000000, -0.3327499926,
-            0.0000000000, -1.0119999647, 0.9342499971, 0.0000000000, -0.3512499928,
-            -0.0002500000, -1.0277500153, 0.9427499771, 0.0000000000, -0.3580000103,
-            0.0000000000, -1.0119999647, 0.9344999790, -0.0002500000, -0.3510000110,
-            0.0000000000, -0.9702500105, 0.9125000238, 0.0000000000, -0.3327499926,
-            0.0000000000, -0.8702499866, 0.8820000291, 0.0000000000, -0.2842499912,
-            0.0000000000, -0.8955000043, 0.8857499957, 0.0000000000, -0.2972500026,
-            -0.0002500000, -0.9049999714, 0.8874999881, 0.0000000000, -0.3022499979,
-            0.0000000000, -0.8957499862, 0.8855000138, 0.0000000000, -0.2975000143,
-            0.0000000000, -0.8700000048, 0.8820000291, 0.0000000000, -0.2840000093,
-            0.0000000000, -0.9502500296, 0.9037500024, 0.0000000000, 0.3237499893,
-            0.0000000000, -0.9782500267, 0.9160000086, 0.0000000000, 0.3364999890,
-            0.0000000000, -0.9882500172, 0.9217500091, 0.0000000000, 0.3407500088,
-            -0.0002500000, -0.9779999852, 0.9164999723, 0.0002500000, 0.3362500072,
-            0.0000000000, -0.9505000114, 0.9039999843, 0.0000000000, 0.3237499893,
-            0.0002500000, -0.8532500267, 0.8822500110, 0.0000000000, 0.2745000124,
-            0.0000000000, -0.8705000281, 0.8817499876, 0.0000000000, 0.2842499912,
-            0.0000000000, -0.8765000105, 0.8824999928, 0.0000000000, 0.2874999940,
-            0.0000000000, -0.8705000281, 0.8822500110, 0.0000000000, 0.2842499912,
-            0.0000000000, -0.8529999852, 0.8820000291, 0.0000000000, 0.2747499943,
-            0.0000000000, -0.7885000110, 0.9315000176, 0.0000000000, 0.2275000066,
-            0.0000000000, -0.7977499962, 0.9154999852, 0.0000000000, 0.2360000014,
-            0.0000000000, -0.8009999990, 0.9112499952, 0.0000000000, 0.2389999926,
-            0.0000000000, -0.7975000143, 0.9160000086, 0.0000000000, 0.2357500046,
-            0.0000000000, -0.7885000110, 0.9322500229, 0.0000000000, 0.2272499949};
+const PROGMEM float b_m1[125] ={0.0000000000, -0.9827499986, 0.9254999757, 0.0000000000, -0.3207499981,
+            0.0000000000, -1.0255000591, 0.9477499723, 0.0002500000, -0.3387500048,
+            0.0000000000, -1.0414999723, 0.9564999938, 0.0000000000, -0.3452500105,
+            0.0000000000, -1.0255000591, 0.9474999905, 0.0000000000, -0.3387500048,
+            0.0000000000, -0.9829999804, 0.9252499938, 0.0000000000, -0.3210000098,
+            -0.0002500000, -0.8815000057, 0.8939999938, 0.0002500000, -0.2739999890,
+            0.0000000000, -0.9075000286, 0.8977500200, 0.0000000000, -0.2867499888,
+            0.0000000000, -0.9167500138, 0.8999999762, 0.0000000000, -0.2915000021,
+            0.0000000000, -0.9075000286, 0.8977500200, 0.0000000000, -0.2867499888,
+            0.0002500000, -0.8817499876, 0.8939999938, 0.0000000000, -0.2739999890,
+            0.0000000000, -0.9627500176, 0.9162499905, 0.0000000000, 0.3122499883,
+            0.0000000000, -0.9912499785, 0.9290000200, 0.0000000000, 0.3247500062,
+            0.0000000000, -1.0015000105, 0.9342499971, 0.0000000000, 0.3287500143,
+            0.0000000000, -0.9909999967, 0.9294999838, 0.0002500000, 0.3242500126,
+            -0.0002500000, -0.9629999995, 0.9162499905, 0.0000000000, 0.3122499883,
+            0.0000000000, -0.8642500043, 0.8945000172, 0.0000000000, 0.2647500038,
+            0.0000000000, -0.8820000291, 0.8939999938, 0.0000000000, 0.2739999890,
+            0.0000000000, -0.8877500296, 0.8942499757, 0.0000000000, 0.2775000036,
+            0.0000000000, -0.8817499876, 0.8945000172, 0.0000000000, 0.2739999890,
+            0.0000000000, -0.8644999862, 0.8945000172, 0.0000000000, 0.2647500038,
+            0.0000000000, -0.7990000248, 0.9452499747, 0.0000000000, 0.2192499936,
+            0.0000000000, -0.8080000281, 0.9277499914, 0.0000000000, 0.2277500033,
+            0.0000000000, -0.8112499714, 0.9232500196, 0.0000000000, 0.2304999977,
+            -0.0002500000, -0.8080000281, 0.9287499785, 0.0000000000, 0.2275000066,
+            0.0000000000, -0.7987499833, 0.9440000057, 0.0000000000, 0.2192499936};
 
-const PROGMEM float c_m1[125]  = {4506.0000000000, 20989.0000000000, 99876.0000000000, 85898.0000000000, -4454.0000000000,
-            2490.0000000000, 20502.0000000000, 104013.0000000000, 85898.0000000000, -3785.0000000000,
-            250.0000000000, 20348.0000000000, 105426.0000000000, 85898.0000000000, -3550.0000000000,
-            -2020.0000000000, 20502.0000000000, 104014.0000000000, 85898.0000000000, -3785.0000000000,
-            -4113.0000000000, 20988.0000000000, 99876.0000000000, 85898.0000000000, -4454.0000000000,
-            -3480.0000000000, 22770.0000000000, 86934.0000000000, 85898.0000000000, -6402.0000000000,
-            -1721.0000000000, 22206.0000000000, 90785.0000000000, 85898.0000000000, -5842.0000000000,
-            138.0000000000, 22022.0000000000, 92078.0000000000, 85898.0000000000, -5650.0000000000,
-            1981.0000000000, 22205.0000000000, 90786.0000000000, 85898.0000000000, -5842.0000000000,
-            3696.0000000000, 22770.0000000000, 86933.0000000000, 85898.0000000000, -6403.0000000000,
-            2377.0000000000, 21261.0000000000, 97716.0000000000, -23.0000000000, 4665.0000000000,
-            867.0000000000, 20886.0000000000, 100718.0000000000, -23.0000000000, 4192.0000000000,
-            -704.0000000000, 20765.0000000000, 101727.0000000000, -23.0000000000, 4030.0000000000,
-            -2270.0000000000, 20886.0000000000, 100718.0000000000, -23.0000000000, 4192.0000000000,
-            -3756.0000000000, 21260.0000000000, 97716.0000000000, -23.0000000000, 4666.0000000000,
-            -3322.0000000000, 23217.0000000000, 83991.0000000000, -23.0000000000, 6694.0000000000,
-            -2016.0000000000, 22767.0000000000, 86954.0000000000, -23.0000000000, 6272.0000000000,
-            -658.0000000000, 22620.0000000000, 87939.0000000000, -23.0000000000, 6130.0000000000,
-            705.0000000000, 22767.0000000000, 86954.0000000000, -23.0000000000, 6272.0000000000,
-            2027.0000000000, 23217.0000000000, 83990.0000000000, -23.0000000000, 6695.0000000000,
-            1754.0000000000, 25861.0000000000, 67847.0000000000, -23.0000000000, 8891.0000000000,
-            580.0000000000, 25324.0000000000, 70992.0000000000, -23.0000000000, 8475.0000000000,
-            -622.0000000000, 25150.0000000000, 72026.0000000000, -23.0000000000, 8337.0000000000,
-            -1822.0000000000, 25324.0000000000, 70992.0000000000, -23.0000000000, 8475.0000000000,
-            -2985.0000000000, 25860.0000000000, 67849.0000000000, -23.0000000000, 8890.0000000000};
+const PROGMEM float c_m1[125]  ={4503.0000000000, 21265.0000000000, 101258.0000000000, 85898.0000000000, -4295.0000000000,
+            2489.0000000000, 20772.0000000000, 105454.0000000000, 85898.0000000000, -3650.0000000000,
+            249.0000000000, 20616.0000000000, 106887.0000000000, 85898.0000000000, -3423.0000000000,
+            -2019.0000000000, 20772.0000000000, 105455.0000000000, 85898.0000000000, -3650.0000000000,
+            -4110.0000000000, 21265.0000000000, 101261.0000000000, 85898.0000000000, -4295.0000000000,
+            -3478.0000000000, 23070.0000000000, 88137.0000000000, 85898.0000000000, -6175.0000000000,
+            -1720.0000000000, 22498.0000000000, 92042.0000000000, 85898.0000000000, -5634.0000000000,
+            138.0000000000, 22312.0000000000, 93355.0000000000, 85898.0000000000, -5449.0000000000,
+            1980.0000000000, 22497.0000000000, 92044.0000000000, 85898.0000000000, -5634.0000000000,
+            3693.0000000000, 23070.0000000000, 88136.0000000000, 85898.0000000000, -6175.0000000000,
+            2376.0000000000, 21541.0000000000, 99069.0000000000, -23.0000000000, 4499.0000000000,
+            867.0000000000, 21161.0000000000, 102113.0000000000, -23.0000000000, 4043.0000000000,
+            -704.0000000000, 21038.0000000000, 103135.0000000000, -23.0000000000, 3887.0000000000,
+            -2268.0000000000, 21161.0000000000, 102113.0000000000, -23.0000000000, 4043.0000000000,
+            -3753.0000000000, 21540.0000000000, 99070.0000000000, -23.0000000000, 4500.0000000000,
+            -3320.0000000000, 23523.0000000000, 85155.0000000000, -23.0000000000, 6456.0000000000,
+            -2015.0000000000, 23067.0000000000, 88158.0000000000, -23.0000000000, 6049.0000000000,
+            -657.0000000000, 22918.0000000000, 89157.0000000000, -23.0000000000, 5912.0000000000,
+            704.0000000000, 23067.0000000000, 88159.0000000000, -23.0000000000, 6049.0000000000,
+            2025.0000000000, 23523.0000000000, 85154.0000000000, -23.0000000000, 6456.0000000000,
+            1753.0000000000, 26201.0000000000, 68787.0000000000, -23.0000000000, 8574.0000000000,
+            580.0000000000, 25657.0000000000, 71976.0000000000, -23.0000000000, 8173.0000000000,
+            -622.0000000000, 25481.0000000000, 73024.0000000000, -23.0000000000, 8040.0000000000,
+            -1820.0000000000, 25658.0000000000, 71975.0000000000, -23.0000000000, 8173.0000000000,
+            -2983.0000000000, 26201.0000000000, 68789.0000000000, -23.0000000000, 8574.0000000000};
 
 /**
  * Cartesian Destination
@@ -601,7 +601,7 @@ static const float homing_feedrate_mm_s_Joint[] PROGMEM = {
   MMM_TO_MMS(HOMING_FEEDRATE_Joint) 
 };
 FORCE_INLINE float homing_feedrate(const AxisEnum a) { return pgm_read_float(&homing_feedrate_mm_s[a]); }
-FORCE_INLINE float homing_feedrate_Joint(const JointEnum a) { return pgm_read_float(&homing_feedrate_mm_s_Joint[a])/10; }
+FORCE_INLINE float homing_feedrate_Joint(const JointEnum a) { return pgm_read_float(&homing_feedrate_mm_s_Joint[a]); }
 
 float feedrate_mm_s = MMM_TO_MMS(1500.0f);
 const float manual_feedrate_mm_m_joint[] = MANUAL2_FEEDRATE;
@@ -2162,7 +2162,7 @@ void Set_current_Joint_Curve_More(float numberx,float numbery,float numberz){
   //int number = 0;
   // SERIAL_ECHOLNPAIR("number:", number);
   
-  DEBUG_POS_Joint("(Before)Set_current_Joint_Curve_More", current_position_Joint); 
+  //DEBUG_POS_Joint("(Before)Set_current_Joint_Curve_More", current_position_Joint); 
   float point1=numberz*100;
 
   //SERIAL_ECHOLNPAIR("Forward_Curve(2000,0,0)", Forward_Curve(2000,0,0));
@@ -2177,7 +2177,7 @@ void Set_current_Joint_Curve_More(float numberx,float numbery,float numberz){
   //SERIAL_ECHOPAIR(" x:", numberx);
   //SERIAL_ECHOPAIR("-y:", numbery);
 
-  DEBUG_POS_Joint("(After)Set_current_Joint_Curve_More", current_position_Joint);   
+  //DEBUG_POS_Joint("(After)Set_current_Joint_Curve_More", current_position_Joint);
 }
 
 inline void Set_current_Joint_Slope(const int32_t (&Set_current_Joint_data)[Joint_All], const float (&Set_current_Joint_slope)[Joint_All], const float point){
@@ -2389,6 +2389,7 @@ void do_blocking_move_to(const float rx, const float ry, const float rz, const f
 
     /*------------------------New------------------------*/
     if (current_position[Z_AXIS] < rz) {
+    endstops.enable_z_probe(false);
     feedrate_mm_s = z_feedrate;
     
     // Set_current_Joint_Slope(current_position_Joint,HOME_position_Slope,Delta_Z_01mm(current_position[Z_AXIS],rz));
@@ -2396,13 +2397,14 @@ void do_blocking_move_to(const float rx, const float ry, const float rz, const f
     //Set_current_Joint(HOME_position_Z10_Joint);
 
     SERIAL_ECHOLNPGM("//To low//");
-
     current_position[Z_AXIS] = rz;
-    Set_current_Joint_Curve_More(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS]);    
+    Set_current_Joint_Curve_More(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS]);
 
-    buffer_line_to_current_position();    
+    buffer_line_to_current_position();
+    planner.synchronize();
   }
-  
+  endstops.enable_z_probe(false);
+
   feedrate_mm_s = fr_mm_s ? fr_mm_s : XY_PROBE_FEEDRATE_MM_S;
   current_position[X_AXIS] = rx;
   current_position[Y_AXIS] = ry;
@@ -2410,20 +2412,26 @@ void do_blocking_move_to(const float rx, const float ry, const float rz, const f
   //int tempp = X_Y_to_Number((int)rx,(int)ry);
   //int tempp=0;
 
+  /*
   SERIAL_ECHOPGM("//Move XY to ");
   SERIAL_ECHOPAIR("X:",rx);
   SERIAL_ECHOPAIR(" Y:",ry);
   SERIAL_ECHOLNPGM("//");  
-  
+  //*/
+
   Set_current_Joint_Curve_More(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS]);
   buffer_line_to_current_position();
-
+  planner.synchronize();
+  
   if (current_position[Z_AXIS] > rz) {
-      SERIAL_ECHOLNPGM("//To High//");
+      endstops.enable_z_probe(true);
+      //SERIAL_ECHOLNPGM("//To High//");
       feedrate_mm_s = z_feedrate;
       current_position[Z_AXIS] = rz;
       Set_current_Joint_Curve_More(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS]);
       buffer_line_to_current_position();
+      planner.synchronize();
+      endstops.enable_z_probe(false);
   }
 
   // If Z needs to lower, do it after moving XY
@@ -2475,41 +2483,56 @@ void do_blocking_move_to_Joint(const float rx, const float ry, const float rz, c
 
   // If Z needs to raise, do it before moving XY
   if (current_position[Z_AXIS] < rz) {
+    endstops.enable_z_probe(false);
+    endstops.hit_on_purpose();
     feedrate_mm_s = z_feedrate;
     
     // Set_current_Joint_Slope(current_position_Joint,HOME_position_Slope,Delta_Z_01mm(current_position[Z_AXIS],rz));
     // Set_current_Joint_Slope(current_position_Joint,HOME_position_Slope,100);
-    SERIAL_ECHOLNPGM("//To low//");
-    current_position[Z_AXIS] = rz;   
+    // SERIAL_ECHOLNPGM("//To low//");
+
+    // SERIAL_ECHOLNPAIR("trigger_state(): ", endstops.trigger_state());
+   
+    current_position[Z_AXIS] = rz;  
     Set_current_Joint_Curve_More(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS]);
     //Set_current_Joint(HOME_position_Z10_Joint);
 
-    buffer_line_to_current_position();    
+    buffer_line_to_current_position();
+
+    planner.synchronize();
+    // SERIAL_ECHOLNPAIR("trigger_state(): ", endstops.trigger_state());
   }
   
+  endstops.enable_z_probe(false);
   feedrate_mm_s = fr_mm_s ? fr_mm_s : XY_PROBE_FEEDRATE_MM_S;
   current_position[X_AXIS] = rx;
   current_position[Y_AXIS] = ry;
-
+  
   //int tempp = X_Y_to_Number((int)rx,(int)ry);
   //int tempp=0;
 
+  /*
   SERIAL_ECHOPGM("//Move XY to ");
   SERIAL_ECHOPAIR("X:",rx);
   SERIAL_ECHOPAIR(" Y:",ry);
   SERIAL_ECHOLNPGM("//");  
-  
+  //*/
+
   Set_current_Joint_Curve_More(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS]);
   buffer_line_to_current_position();
+  planner.synchronize();
   // If Z needs to lower, do it after moving XY
 
   if (current_position[Z_AXIS] > rz) {
-      SERIAL_ECHOLNPGM("//To High//");
+      endstops.enable_z_probe(true);
+      // SERIAL_ECHOLNPGM("//To High//");
       feedrate_mm_s = z_feedrate;
 
       current_position[Z_AXIS] = rz;
       Set_current_Joint_Curve_More(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS]);
       buffer_line_to_current_position();
+      planner.synchronize();
+      endstops.enable_z_probe(false);
   }
   /*
   if (current_position[Z_AXIS] > rz) {
@@ -2521,8 +2544,7 @@ void do_blocking_move_to_Joint(const float rx, const float ry, const float rz, c
 
     
     // current_position[Z_AXIS] = rz;
-    // buffer_line_to_current_position();
-    
+    // buffer_line_to_current_position();    
     
     bool probe_triggered1=0;    
     do
@@ -2617,7 +2639,7 @@ void clean_up_after_endstop_or_probe_move() {
       return true;
     }*/
     // if (JJ || AA || BB || CC || DD) {
-    if (JJ){
+    /*if (JJ){
       SERIAL_ECHO_START();
       SERIAL_ECHOPGM(MSG_HOME " ");
       if (JJ) SERIAL_ECHOPGM(MSG_Joint1);
@@ -2631,7 +2653,7 @@ void clean_up_after_endstop_or_probe_move() {
         lcd_status_printf_P(0, PSTR(MSG_HOME " %s%s%s%s%s " MSG_FIRST), JJ ? MSG_Joint1 : "", AA ? MSG_Joint2 : "", BB ? MSG_Joint3 : "", CC ? MSG_Joint4 : "", DD ? MSG_Joint5 : "");
       #endif
       return true;
-    }
+    }*/
     return false;
   }
 
@@ -3281,14 +3303,18 @@ void clean_up_after_endstop_or_probe_move() {
     #endif
 
     // Move down until probe triggered
-    while( (current_position[Z_AXIS]>=z) && !(TEST(endstops.trigger_state(),Z_MIN_PROBE) != 0) )
+    float temp_current_Z_pos=current_position[Z_AXIS];
+    while( (temp_current_Z_pos>=z) && !(TEST(endstops.trigger_state(),Z_MIN_PROBE) != 0) )
     {
-      current_position[Z_AXIS]=current_position[Z_AXIS]-0.01;
-      do_blocking_move_to_z(current_position[Z_AXIS], fr_mm_s);
+      //if(temp_current_Z_pos>5.0)temp_current_Z_pos=temp_current_Z_pos-5;
+      if(temp_current_Z_pos>=18.0)temp_current_Z_pos=temp_current_Z_pos-0.1;
+      else temp_current_Z_pos=temp_current_Z_pos-0.01;
+      //current_position[Z_AXIS]=current_position[Z_AXIS]-0.1;
+      do_blocking_move_to_z(temp_current_Z_pos, fr_mm_s);
     }
-
-    SERIAL_ECHOLNPAIR("current_position[Z_AXIS]:",current_position[Z_AXIS]);
-    sync_plan_position();
+    endstops.enable_z_probe(false);
+    // SERIAL_ECHOLNPAIR("current_position[Z_AXIS]:",current_position[Z_AXIS]);
+    sync_plan_position_noprint();
     // do_blocking_move_to_z(z, fr_mm_s);
 
     // Check to see if the probe was triggered
@@ -3299,7 +3325,6 @@ void clean_up_after_endstop_or_probe_move() {
         Z_MIN_PROBE
       #endif
     );
-    
 
     /*SERIAL_ECHOPAIR("hit_state:",endstops.trigger_state());
     SERIAL_ECHOLNPAIR("  probe_triggered:",probe_triggered);*/
@@ -3311,20 +3336,21 @@ void clean_up_after_endstop_or_probe_move() {
     // Retract BLTouch immediately after a probe if it was triggered
     #if ENABLED(BLTOUCH)
       if (probe_triggered && set_bltouch_deployed(false)) return true;
-    #endif
+    #endif    
 
-    endstops.hit_on_purpose();
+    endstops.hit_on_purpose();    
 
     // Get Z where the steppers were interrupted
-    set_current_from_steppers_for_axis(Z_AXIS);
+    set_current_from_steppers_for_axis(Z_AXIS);    
 
     // Tell the planner where we actually are
-    SYNC_PLAN_POSITION_KINEMATIC();
+    SYNC_PLAN_POSITION_KINEMATIC();    
 
     #if ENABLED(DEBUG_LEVELING_FEATURE)
       if (DEBUGGING(LEVELING)) DEBUG_POS("<<< do_probe_move", current_position);
     #endif
 
+    endstops.enable_z_probe(true);
     return !probe_triggered;
   }
 
@@ -3335,7 +3361,6 @@ void clean_up_after_endstop_or_probe_move() {
    * @return The raw Z position where the probe was triggered
    */
   static float run_z_probe() {
-
     #if ENABLED(DEBUG_LEVELING_FEATURE)
       if (DEBUGGING(LEVELING)) DEBUG_POS(">>> run_z_probe", current_position);
     #endif
@@ -3357,16 +3382,16 @@ void clean_up_after_endstop_or_probe_move() {
         #endif
         return NAN;
       }
-
+      // SERIAL_ECHOLNPAIR("3 endstops.trigger_state(): ",endstops.trigger_state());
       float first_probe_z = current_position[Z_AXIS];
 
       #if ENABLED(DEBUG_LEVELING_FEATURE)
         if (DEBUGGING(LEVELING)) SERIAL_ECHOLNPAIR("1st Probe Z:", first_probe_z);
       #endif
-
       // move up to make clearance for the probe
+      endstops.enable_z_probe(false);
       do_blocking_move_to_z(current_position[Z_AXIS] + Z_CLEARANCE_MULTI_PROBE, MMM_TO_MMS(Z_PROBE_SPEED_FAST));
-
+      endstops.enable_z_probe(true);
     #else
 
       // If the nozzle is well over the travel height then
@@ -3418,7 +3443,7 @@ void clean_up_after_endstop_or_probe_move() {
           SERIAL_ECHOLNPAIR(" Discrepancy:", first_probe_z - z2);
         }
       #endif
-
+      //current_position[Z_AXIS] = 0;
       // Return a weighted average of the fast and slow probes
       const float measured_z = (z2 * 3.0 + first_probe_z * 2.0) * 0.2;
 
@@ -5819,11 +5844,11 @@ inline void gcode_G28(const bool always_home_all) {
     //*/
 
     //*
-    if(home_all || homeJ)homeJoint(Joint1_AXIS);
-    if(home_all || homeA)homeJoint(Joint2_AXIS);
-    if(home_all || homeB)homeJoint(Joint3_AXIS);
-    if(home_all || homeC)homeJoint(Joint4_AXIS);
     if(home_all || homeD)homeJoint(Joint5_AXIS);
+    if(home_all || homeC)homeJoint(Joint4_AXIS);
+    if(home_all || homeB)homeJoint(Joint3_AXIS);
+    if(home_all || homeA)homeJoint(Joint2_AXIS);
+    if(home_all || homeJ)homeJoint(Joint1_AXIS);   
     //*/
     SYNC_PLAN_POSITION_KINEMATIC();
 
@@ -5839,6 +5864,12 @@ inline void gcode_G28(const bool always_home_all) {
   #if ENABLED(RESTORE_LEVELING_AFTER_G28)
     set_bed_leveling_enabled(leveling_was_active);
   #endif
+
+  if(Joint_homed==31)
+  {
+    axis_homed=7;
+    axis_known_position=7;
+  }
   /*
   report_current_position();
   //*/
@@ -6934,7 +6965,7 @@ void home_all_axes() { gcode_G28(true); }
 
               char str_G29[80];            
                 
-              dtostrf(diff, 5, 5, str_G29);
+              dtostrf(eqnBVector[ind]-Z_PROBE_OFFSET_FROM_EXTRUDER, 5, 5, str_G29);
               strcat(str_G29, " ");                           
               card.write_Str(str_G29);              
             } // xx
@@ -6944,6 +6975,14 @@ void home_all_axes() { gcode_G28(true); }
           SERIAL_EOL();
 
           card.closefile();
+          for(int j=0;j<5;j++)
+          {
+            for(int i=0;i<5;i++)
+            {
+              SERIAL_ECHOPAIR(" ", eqnBVector[j*5+i]);
+            }
+            SERIAL_PROTOCOLLNPGM();
+          }
 
           if (verbose_level > 3) {
             SERIAL_PROTOCOLLNPGM("\nCorrected Bed Height vs. Bed Topology:");
@@ -16517,16 +16556,16 @@ void stop() {
  *  - Print startup messages and diagnostics
  *  - Get EEPROM or default settings
  *  - Initialize managers for:
- *    • temperature
- *    • planner
- *    • watchdog
- *    • stepper
- *    • photo pin
- *    • servos
- *    • LCD controller
- *    • Digipot I2C
- *    • Z probe sled
- *    • status LEDs
+ *     • temperature
+ *     • planner
+ *     • watchdog
+ *     • stepper
+ *     • photo pin
+ *     • servos
+ *     • LCD controller
+ *     • Digipot I2C
+ *     • Z probe sled
+ *     • status LEDs
  */
 void setup() {
   #if ENABLED(MAX7219_DEBUG)

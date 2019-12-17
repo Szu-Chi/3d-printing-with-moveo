@@ -4460,12 +4460,6 @@ void Planner::_set_position_mm_Joint(const uint32_t &j1, const uint32_t &j2, con
   position_joint[Joint4_AXIS]=j4;
   position_joint[Joint5_AXIS]=j5;
 
-  if (has_blocks_queued()) {
-    //previous_nominal_speed_sqr = 0.0; // Reset planner junction speeds. Assume start from rest.
-    //ZERO(previous_speed);
-    buffer_sync_block();
-  }
-
  stepper.set_position(position[A_AXIS], position[B_AXIS], position[C_AXIS],
          position_joint[0],position_joint[1],position_joint[2],position_joint[3],position_joint[4], position[E_AXIS]
   );
