@@ -689,7 +689,7 @@ void Planner::init() {
 
 #endif // S_CURVE_ACCELERATION
 
-#define MINIMAL_STEP_RATE 120
+#define MINIMAL_STEP_RATE 1
 
 /**
  * Calculate trapezoid parameters, multiplying the entry- and exit-speeds
@@ -3305,26 +3305,36 @@ bool Planner::_populate_block_joint_self(block_t * const block, bool split_move,
   #if HAS_POSITION_FLOAT
     , const float (&target_float)[NUM_AXIS]
   #endif
-  , float fr_mm_s, const uint8_t extruder, const float &millimeters/*=0.0*/
+  , float fr_mm_s, const uint8_t extruder, const float &millimeters=0.0
   #if ENABLED(UNREGISTERED_MOVE_SUPPORT)
     , const bool count_it/*=true*/
   #endif
 ) {
-
-  const int32_t da = target[A_AXIS] - position[A_AXIS],
+  /*const int32_t da = target[A_AXIS] - position[A_AXIS],
                 db = target[B_AXIS] - position[B_AXIS],
-                dc = target[C_AXIS] - position[C_AXIS]
-                #if ENABLED(HANGPRINTER)
-                  , dd = target[D_AXIS] - position[D_AXIS]
-                #endif
-              ;
-
+                dc = target[C_AXIS] - position[C_AXIS];
+  */
   const int32_t d0 = joint[Joint1_AXIS] - position_joint[Joint1_AXIS],
                 d1 = joint[Joint2_AXIS] - position_joint[Joint2_AXIS],
                 d2 = joint[Joint3_AXIS] - position_joint[Joint3_AXIS],
                 d3 = joint[Joint4_AXIS] - position_joint[Joint4_AXIS],
                 d4 = joint[Joint5_AXIS] - position_joint[Joint5_AXIS];
+
+  const int32_t joint_d[] = {d0,d1,d2,d3,d4};
+  int32_t dj = 0;
+
+  for(int i=Joint1_AXIS;i<=Joint5_AXIS;i++){
+    if(MAX5(abs(d0),abs(d1),abs(d2),abs(d3),abs(d4))==abs(joint_d[i])){
+      dj = joint_d[i];
+    }
+  }
+
+
+  const int32_t da = dj,//target[A_AXIS] - position[A_AXIS],
+                db = 0,//target[B_AXIS] - position[B_AXIS],
+                dc = 0;//target[C_AXIS] - position[C_AXIS]
   
+
   int32_t de = target[E_AXIS] - position[E_AXIS];
 
 
@@ -3601,11 +3611,11 @@ bool Planner::_populate_block_joint_self(block_t * const block, bool split_move,
   delta_mm[E_AXIS] = esteps_float * steps_to_mm[E_AXIS_N];
   
   float delta_joint_mm[Joint_All];
-  delta_joint_mm[Joint1_AXIS] = d0 * steps_to_mm[A_AXIS]; 
-  delta_joint_mm[Joint2_AXIS] = d1 * steps_to_mm[A_AXIS];
-  delta_joint_mm[Joint3_AXIS] = d2 * steps_to_mm[A_AXIS];
-  delta_joint_mm[Joint4_AXIS] = d3 * steps_to_mm[A_AXIS];
-  delta_joint_mm[Joint5_AXIS] = d4 * steps_to_mm[A_AXIS];
+  delta_joint_mm[Joint1_AXIS] = d0 / 30420.65; 
+  delta_joint_mm[Joint2_AXIS] = d1 / 20712.062;
+  delta_joint_mm[Joint3_AXIS] = d2 / 51518.1;
+  delta_joint_mm[Joint4_AXIS] = d3 / 67955.7;
+  delta_joint_mm[Joint5_AXIS] = d4 / 10601.915;
 
   if (block->steps[A_AXIS] < MIN_STEPS_PER_SEGMENT && block->steps[B_AXIS] < MIN_STEPS_PER_SEGMENT && block->steps[C_AXIS] < MIN_STEPS_PER_SEGMENT) {
     block->millimeters = ABS(delta_mm[E_AXIS]);
