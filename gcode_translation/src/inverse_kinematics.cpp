@@ -117,9 +117,9 @@ void write_file_trac_IK_error(std::ofstream &output_file, KDL::Vector &find_end_
   output_file << std::endl << "END" << std::endl;
   ROS_ERROR_STREAM("TRACIK_ERROR");
 }
-void error_to_quit(std::ofstream &check_success_file){
-  check_success_file << "Error";
-  check_success_file.close();
+
+void shutdown(const std_msgs::Float64MultiArray& check){
+  ros::shutdown();
 }
 
 ros::WallTime start_, end_;
@@ -130,6 +130,8 @@ int main(int argc, char **argv){
   spinner.start();
   
   ros::Publisher translation_pub = node_handle.advertise<std_msgs::Float64MultiArray>("progress", 1000);
+  ros::Subscriber shutdown_sub = node_handle.subscribe("/progress/shutdown", 100000, shutdown);
+
   std_msgs::Float64MultiArray push_data;
   push_data.data.resize(3);
   push_data.data[0] = 0;
@@ -204,63 +206,66 @@ int main(int argc, char **argv){
   robot_state::RobotState& current_state = planning_scene.getCurrentStateNonConst();
   collision_request.group_name = "arm";
   
+  std::string line;// getline used
+
   // Judge Joint4 need to turn 
   std::string g_n_judge_Y;
   node_handle.param("g_n_judge_Y", g_n_judge_Y, std::string("/g_n_judge_Y"));
-  std::ifstream input_file_first(g_n_judge_Y);
-  if(!input_file_first.is_open())ROS_ERROR_STREAM("Can't open " <<g_n_judge_Y);
+  std::ifstream input_file(g_n_judge_Y);
+  if(!input_file.is_open())ROS_ERROR_STREAM("Can't open " <<g_n_judge_Y);
   std::vector<double> judge_Y;
-  std::string line;
-  while(input_file_first){
-    std::getline(input_file_first, line);
+  while(input_file){
+    std::getline(input_file, line);
     judge_Y.push_back(stod(line.substr(0)));
   }
-  input_file_first.close();
+  input_file.close();
   ROS_INFO_STREAM("Read judge_Y file success");
 
   // Read all lines of gcode
-  std::string get_all_gcode;
-  node_handle.param("gcode_in", get_all_gcode, std::string("/gcode_in"));
-  std::ifstream input_file_get_all_lines(get_all_gcode);
-  if(!input_file_get_all_lines.is_open())ROS_ERROR_STREAM("Can't open " <<get_all_gcode);
+  std::string gcode_in;
+  node_handle.param("gcode_in", gcode_in, std::string("/gcode_in"));
+  input_file.open(gcode_in);
+  if(!input_file.is_open())ROS_ERROR_STREAM("Can't open " << gcode_in);
   int save_all_line = 0;
-  while(input_file_get_all_lines){
-    std::getline(input_file_get_all_lines, line);
+  while(input_file){
+    std::getline(input_file, line);
     save_all_line++;
   }
-  input_file_get_all_lines.close();
+  input_file.close();
   ROS_INFO_STREAM("Read all lines success");
 
+  // Write check_success
+  std::string check_success;
+  node_handle.param("check_success", check_success, std::string("/check_success"));
+  std::ofstream output_file(check_success);
+  if(!output_file.is_open())ROS_ERROR_STREAM("Can't open " << check_success);
+  output_file << "Error";
+  output_file.close();
+  ROS_INFO_STREAM("Write check success");
+
   // Read gcode
-  std::string gcode_in, gcode_out, check_success;
-  node_handle.param("gcode_in", gcode_in, std::string("/gcode_in"));
-  std::ifstream input_file(gcode_in);
-  if(!input_file.is_open())ROS_ERROR_STREAM("Can't open " <<gcode_in);
+  input_file.open(gcode_in);
 
   // Write gcode
+  std::string gcode_out;
   node_handle.param("gcode_out", gcode_out, std::string("/gcode_out"));
-  std::ofstream output_file(gcode_out);
-  if(!output_file.is_open())ROS_ERROR_STREAM("Can't open " <<gcode_out);
+  output_file.open(gcode_out);
+  if(!output_file.is_open())ROS_ERROR_STREAM("Can't open " << gcode_out);
 
-  // Write check_success
-  node_handle.param("check_success", check_success, std::string("/check_success"));
-  std::ofstream check_success_file(check_success);
-  if(!check_success_file.is_open())ROS_ERROR_STREAM("Can't open " <<check_success);
-
-  std::vector<KDL::Vector> find_end_effector_target_vol;
+  std::vector<KDL::Vector> find_end_effector_target_vol;  // Filtrate not G1 or G0
   find_end_effector_target_vol.reserve(1000);
-  std::vector<float> find_angle;
+  std::vector<float> find_angle;                          // Each point angle
   find_angle.reserve(1000);
-  std::vector<int> save_place;
+  std::vector<int> save_place;                            // Find position of G1 and G0 
   save_place.reserve(1000);
-  std::vector<std::string> save;
+  std::vector<std::string> save;                          // Save original gcode lines
   save.reserve(1000);
-  std::vector<int> save_p_or_n;
+  std::vector<int> save_p_or_n;                           // Save joint4 needs to turn or not 
   save_p_or_n.reserve(1000);
   KDL::Vector previous_end_effector_target_vol;
   int previous_save_p_or_n;
   float previous_angle;
-  KDL::Vector end_effector_target_vol;
+  KDL::Vector end_effector_target_vol;                    // Read gcode xyz
   KDL::Vector target_bounds_rot(0, 0, M_PI*2);
   KDL::Vector target_bounds_vel(0,0,0);
   const KDL::Twist target_bounds(target_bounds_vel, target_bounds_rot);
@@ -272,8 +277,9 @@ int main(int argc, char **argv){
   int second_execution = 0;
   double z_init = 0;
 
-  while(ros::ok()){
-    while(input_file){
+  
+  while(input_file){
+    if(ros::ok()){
       std::getline(input_file, line);
       save.push_back(line);
       read_line_count++;
@@ -370,9 +376,8 @@ int main(int argc, char **argv){
             rc = tracik_solver_onecore.CartToJnt(nominal, end_effector_pose, result, target_bounds);
           }
           if(rc < 0){
-            output_file << std::endl << "ERROR_TRACIK" << std::endl;
+            //output_file << std::endl << "ERROR_TRACIK" << std::endl;
             write_file_trac_IK_error(output_file, find_end_effector_target_vol[use_onecore[l]]);
-            error_to_quit(check_success_file);
             return -1;
           }
           save_result.at(use_onecore[l]) = result;
@@ -421,9 +426,8 @@ int main(int argc, char **argv){
                 KDL::Frame end_effector_pose(end_effector_target_rot, output_end_effector_target_vol);
                 rc = tracik_solver_p_n.CartToJnt(nominal, end_effector_pose, result, target_bounds);
                 if(rc < 0){
-                  output_file << std::endl << "ERROR_TRACIK_P_N" << std::endl;
+                  //output_file << std::endl << "ERROR_TRACIK_P_N" << std::endl;
                   write_file_trac_IK_error(output_file, output_end_effector_target_vol);
-                  error_to_quit(check_success_file);
                   return -1;
                 }
                 else{
@@ -458,10 +462,9 @@ int main(int argc, char **argv){
               for (it = collision_result.contacts.begin(); it != collision_result.contacts.end(); ++it){
                 ROS_ERROR("Contact between: %s and %s", it->first.first.c_str(), it->first.second.c_str());
               }
-              output_file << std::endl << "ERROR_COLLISION" << std::endl;
-              write_file_joint_value(output_file, save_result.at(pop_out), chain);
-              output_file << std::endl << "END" << std::endl;
-              error_to_quit(check_success_file);
+              //output_file << std::endl << "ERROR_COLLISION" << std::endl;
+              //write_file_joint_value(output_file, save_result.at(pop_out), chain);
+              //output_file << std::endl << "END" << std::endl;
               return -1;
             }
           }
@@ -473,9 +476,9 @@ int main(int argc, char **argv){
         save_count++;
         double execution_time = (end_ - start_).toNSec() * 1e-6;
         save_all_need_times = save_all_need_times + execution_time;
-        push_data.data[0] = save_all_line;
-        push_data.data[1] = push_data.data[1] + read_line_count;
-        push_data.data[2] = save_all_need_times/save_count;
+        push_data.data[0] = save_all_line;                          // gcode all lines
+        push_data.data[1] = push_data.data[1] + read_line_count;    // now we write how many lines
+        push_data.data[2] = save_all_need_times/save_count;         // each writes 1000 line need times (average)
         translation_pub.publish(push_data); 
         // clear all and save the last point of these 1000 lines
         previous_end_effector_target_vol = find_end_effector_target_vol[pop_out-1];
@@ -490,17 +493,21 @@ int main(int argc, char **argv){
         read_line_count = 0;
       }
     }
-    // Translation finish
-    for(int i = 0; i < num_threads; i++){
-      delete tracik_solver[i];
+    else{
+      return -1;
     }
-    delete tracik_solver;
-    ROS_INFO_STREAM("second_execution: " << second_execution);
-    check_success_file << "Success";
-    check_success_file.close();
-    input_file.close();
-    output_file.close();
-    ros::shutdown();
   }
+  // Translation finish
+  for(int i = 0; i < num_threads; i++){
+    delete tracik_solver[i];
+  }
+  delete tracik_solver;
+  ROS_INFO_STREAM("second_execution: " << second_execution);
+  input_file.close();
+  output_file.close();
+  output_file.open(check_success);
+  output_file << "Success";
+  output_file.close();
+  ros::shutdown();
   return 0;
 }

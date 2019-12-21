@@ -26,6 +26,7 @@ int main(int argc, char **argv)
   ros::NodeHandle node_handle("~");
   ros::AsyncSpinner spinner(2);
   spinner.start();
+  ros::Publisher shutdown_pub = node_handle.advertise<std_msgs::Float64MultiArray>("shutdown", 1000);
   ros::Subscriber gcode_translation_sub = node_handle.subscribe("/inverse_kinematics/progress", 100000, receive);
   QApplication app(argc, argv);
   QProgressDialog dialog("Progress", "Cancel", 0, 10000);
@@ -37,7 +38,14 @@ int main(int argc, char **argv)
     dialog.setValue(now_value);
     dialog.setLabelText(a);
     QCoreApplication::processEvents();
-    if(dialog.wasCanceled() || now_value == 10000){
+    if(dialog.wasCanceled()){
+      std_msgs::Float64MultiArray push;
+      push.data.resize(1);
+      push.data[0] = 1;
+      shutdown_pub.publish(push);
+      break;
+    }
+    if(now_value == 10000){
       break;
     }
   }

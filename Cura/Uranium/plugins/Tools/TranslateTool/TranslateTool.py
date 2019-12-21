@@ -96,7 +96,6 @@ class TranslateTool(Tool):
     def setX(self, x: str) -> None:
         parsed_x = self._parseFloat(x)
         bounding_box = Selection.getBoundingBox()
-        print("7777777777777777777777")
         if not Float.fuzzyCompare(parsed_x, float(bounding_box.center.x), DIMENSION_TOLERANCE):
             selected_nodes = self._getSelectedObjectsWithoutSelectedAncestors()
             if len(selected_nodes) > 1:
@@ -122,7 +121,6 @@ class TranslateTool(Tool):
         parsed_y = self._parseFloat(y)
         bounding_box = Selection.getBoundingBox()
 
-        print("8888888888888888888888888888")
         if not Float.fuzzyCompare(parsed_y, float(bounding_box.center.z), DIMENSION_TOLERANCE):
             selected_nodes = self._getSelectedObjectsWithoutSelectedAncestors()
             if len(selected_nodes) > 1:
@@ -150,7 +148,6 @@ class TranslateTool(Tool):
         parsed_z = self._parseFloat(z)
         bounding_box = Selection.getBoundingBox()
 
-        print("9999999999999999999999999")
         if not Float.fuzzyCompare(parsed_z, float(bounding_box.bottom), DIMENSION_TOLERANCE):
             selected_nodes = self._getSelectedObjectsWithoutSelectedAncestors()
             if len(selected_nodes) > 1:

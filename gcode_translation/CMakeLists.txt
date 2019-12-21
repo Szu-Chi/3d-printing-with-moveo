@@ -30,6 +30,8 @@ if (OPENMP_FOUND)
     set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
 endif()
 
+find_package(Qt5  REQUIRED COMPONENTS  Widgets  )
+
 find_package(Boost REQUIRED system filesystem date_time thread)
 
 
@@ -46,6 +48,10 @@ generate_messages(
   sensor_msgs
   std_msgs
 )
+
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTOUIC ON)
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 catkin_package(
   CATKIN_DEPENDS
@@ -77,6 +83,7 @@ add_executable(test_inverse_kinematics src/test_inverse_kinematics.cpp)
 target_link_libraries(gcode_point_split
   ${catkin_LIBRARIES}
 )
+target_link_libraries(gcode_point_split  Qt5::Widgets )
 ## Specify libraries to link a library or executable target against
 target_link_libraries(inverse_kinematics
   ${catkin_LIBRARIES}

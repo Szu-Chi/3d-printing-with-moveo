@@ -3,6 +3,10 @@
 #include <fstream>
 #include <time.h>
 #include <math.h>
+#include <qprogressdialog.h>
+#include <QApplication>
+#include <QString>
+
 int decimal_point(double &A){
   std::string change = std::to_string(A);
   bool point = 0;
@@ -39,13 +43,37 @@ int main(int argc, char **argv){
   node_handle.param("gcode_in", gcode_in, std::string("/gcode_in"));
   node_handle.param("gcode_out", gcode_out, std::string("/gcode_out"));
 
+  int all_lines = 0;
+  std::string line;
   std::ifstream input_file(gcode_in);
   if(!input_file.is_open())ROS_ERROR_STREAM("Can't open " <<gcode_in);
+  while(input_file){
+    std::getline(input_file, line);
+    all_lines++;
+  }
+  input_file.close();
+  input_file.open(gcode_in);
 
-  std::ofstream output_file(gcode_out);
+  // Write check_success
+  std::string check_success;
+  node_handle.param("check_success", check_success, std::string("/check_success"));
+  std::ofstream output_file(check_success);
+  if(!output_file.is_open())ROS_ERROR_STREAM("Can't open " << check_success);
+  output_file << "Error";
+  output_file.close();
+
+  ROS_INFO_STREAM("Write check success");
+  output_file.open(gcode_out);
   if(!output_file.is_open())ROS_ERROR_STREAM("Can't open " <<gcode_out);
   
-  std::string line;
+  QApplication app(argc, argv);
+  QProgressDialog dialog("Connecting", "Cancel", 0, all_lines);
+  dialog.setWindowTitle("Connecting");
+  dialog.setWindowModality(Qt::WindowModal);
+  dialog.show();
+  dialog.setLabelText("Connecting to Gcode Translation");
+
+  int now_line = 0;
   bool check_distance = 0;
   double x = 0;
   double y = 0;
@@ -57,6 +85,7 @@ int main(int argc, char **argv){
   double pre_E = 0;
   while(input_file){
     std::getline(input_file, line);
+    now_line++;
     if((!line.compare(0,2,"G0") || !line.compare(0,2,"G1"))){
       size_t colon_pos_X = line.find('X');
       if(colon_pos_X < 100){
@@ -139,11 +168,19 @@ int main(int argc, char **argv){
     else{
       output_file << line << std::endl;
     }
+    dialog.setValue(now_line);
+    QCoreApplication::processEvents();
+    if(dialog.wasCanceled()){
+      return -1;
+    }
   }
   end_ = ros::WallTime::now();
   double execution_time = (end_ - start_).toNSec() * 1e-9;
   ROS_INFO_STREAM("Exectution time (s): " << execution_time);
   input_file.close();
+  output_file.close();
+  output_file.open(check_success);
+  output_file << "Success";
   output_file.close();
   ros::shutdown();
   return 0;

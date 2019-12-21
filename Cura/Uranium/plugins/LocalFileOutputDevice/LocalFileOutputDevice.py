@@ -55,6 +55,7 @@ class LocalFileOutputDevice(OutputDevice):
         dialog.setWindowTitle(catalog.i18nc("@title:window", "Save to File"))
         dialog.setFileMode(QFileDialog.AnyFile)
         dialog.setAcceptMode(QFileDialog.AcceptSave)
+        dialog.setOptions(QFileDialog.DontUseNativeDialog)
 
         # Ensure platform never ask for overwrite confirmation since we do this ourselves
         dialog.setOption(QFileDialog.DontConfirmOverwrite)
@@ -198,10 +199,13 @@ class LocalFileOutputDevice(OutputDevice):
                     place = place + "\\"
                 place = place + i
             os.system("roslaunch gcode_translation split.launch gcode_in:="+ place)
-            os.system("roslaunch gcode_translation inverse_kinematics.launch gcode_out:="+ place)
             success_place = os.getcwd()
-            read_file = open(success_place[:-10]+'/gcode_translation/check_success/check_success.txt','r')
+            read_file = open(success_place[:-10]+'/gcode_translation/check_success/check_success_split.txt','r')
             data = read_file.read().strip()
+            if(data != "Error"):
+                os.system("roslaunch gcode_translation inverse_kinematics.launch gcode_out:="+ place)
+                read_file = open(success_place[:-10]+'/gcode_translation/check_success/check_success_IK.txt','r')
+                data = read_file.read().strip()
         if(data == "Error"):
             os.system("rm -f "+ place)
             message = Message(catalog.i18nc("@info:status", "gcode_translation went wrong saving to <filename>{0}</filename>: <message>{1}</message>").format(job.getFileName(), str(job.getError())), title = catalog.i18nc("@info:title", "Error"))
