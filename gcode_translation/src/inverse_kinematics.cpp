@@ -21,6 +21,8 @@
 
 #include <stdio.h>
 #include <unistd.h>
+
+#include "std_msgs/Float64MultiArray.h"
 #include "../include/Mesh/Mesh.h"
 
 int decimal_point(double &A){
@@ -122,11 +124,18 @@ void error_to_quit(std::ofstream &check_success_file){
 
 ros::WallTime start_, end_;
 int main(int argc, char **argv){
-  start_ = ros::WallTime::now();
   ros::init(argc, argv, "gcode_translation");
   ros::NodeHandle node_handle("~");
   ros::AsyncSpinner spinner(1);
   spinner.start();
+  
+  ros::Publisher translation_pub = node_handle.advertise<std_msgs::Float64MultiArray>("progress", 1000);
+  std_msgs::Float64MultiArray push_data;
+  push_data.data.resize(3);
+  push_data.data[0] = 0;
+  push_data.data[1] = 0;
+  push_data.data[2] = 0;
+
   Load_Mesh();
   calc_abcd();
   //----------------------------
@@ -202,13 +211,25 @@ int main(int argc, char **argv){
   if(!input_file_first.is_open())ROS_ERROR_STREAM("Can't open " <<g_n_judge_Y);
   std::vector<double> judge_Y;
   std::string line;
-  int all_line = 0;
   while(input_file_first){
     std::getline(input_file_first, line);
     judge_Y.push_back(stod(line.substr(0)));
   }
   input_file_first.close();
   ROS_INFO_STREAM("Read judge_Y file success");
+
+  // Read all lines of gcode
+  std::string get_all_gcode;
+  node_handle.param("gcode_in", get_all_gcode, std::string("/gcode_in"));
+  std::ifstream input_file_get_all_lines(get_all_gcode);
+  if(!input_file_get_all_lines.is_open())ROS_ERROR_STREAM("Can't open " <<get_all_gcode);
+  int save_all_line = 0;
+  while(input_file_get_all_lines){
+    std::getline(input_file_get_all_lines, line);
+    save_all_line++;
+  }
+  input_file_get_all_lines.close();
+  ROS_INFO_STREAM("Read all lines success");
 
   // Read gcode
   std::string gcode_in, gcode_out, check_success;
@@ -225,11 +246,6 @@ int main(int argc, char **argv){
   node_handle.param("check_success", check_success, std::string("/check_success"));
   std::ofstream check_success_file(check_success);
   if(!check_success_file.is_open())ROS_ERROR_STREAM("Can't open " <<check_success);
-
-  bool first_point = 0;
-  int second_execution = 0;
-  all_line = 0;
-  double z_init = 0;
 
   std::vector<KDL::Vector> find_end_effector_target_vol;
   find_end_effector_target_vol.reserve(1000);
@@ -248,13 +264,22 @@ int main(int argc, char **argv){
   KDL::Vector target_bounds_rot(0, 0, M_PI*2);
   KDL::Vector target_bounds_vel(0,0,0);
   const KDL::Twist target_bounds(target_bounds_vel, target_bounds_rot);
+  
+  double save_all_need_times = 0;
+  int read_line_count = 0;
+  int save_count = 0;
+  bool first_point = 0;
+  int second_execution = 0;
+  double z_init = 0;
+
   while(ros::ok()){
     while(input_file){
       std::getline(input_file, line);
       save.push_back(line);
-      all_line++;
-      if(all_line % 1000 == 0 || !input_file){ // Read 1000 lines or end of file
-        for(int i = 0;i < all_line ;i++){
+      read_line_count++;
+      if(read_line_count % 1000 == 0 || !input_file){ // Read 1000 lines or end of file
+        start_ = ros::WallTime::now();
+        for(int i = 0;i < read_line_count ;i++){
           line = save[i];
           if(!line.compare(0,2,"G0") || !line.compare(0,2,"G1")){
             size_t colon_pos_X = line.find('X');
@@ -355,7 +380,7 @@ int main(int argc, char **argv){
         use_onecore.clear();
         int pop_out = 0;
         // Write gcode
-        for(int m = 0;m < all_line ;m++){
+        for(int m = 0;m < read_line_count ;m++){
           line = save[m];
           if((save_place[pop_out] == m) && (pop_out < save_place.size())){
             output_file << line[0] << line[1];
@@ -444,6 +469,14 @@ int main(int argc, char **argv){
             output_file << line << std::endl;
           }
         }
+        end_ = ros::WallTime::now();
+        save_count++;
+        double execution_time = (end_ - start_).toNSec() * 1e-6;
+        save_all_need_times = save_all_need_times + execution_time;
+        push_data.data[0] = save_all_line;
+        push_data.data[1] = push_data.data[1] + read_line_count;
+        push_data.data[2] = save_all_need_times/save_count;
+        translation_pub.publish(push_data); 
         // clear all and save the last point of these 1000 lines
         previous_end_effector_target_vol = find_end_effector_target_vol[pop_out-1];
         previous_angle = find_angle[pop_out-1];
@@ -454,7 +487,7 @@ int main(int argc, char **argv){
         save_p_or_n.clear();
         save_place.clear();
         save_result.clear();
-        all_line = 0;
+        read_line_count = 0;
       }
     }
     // Translation finish
@@ -462,10 +495,7 @@ int main(int argc, char **argv){
       delete tracik_solver[i];
     }
     delete tracik_solver;
-    end_ = ros::WallTime::now();
-    double execution_time = (end_ - start_).toNSec() * 1e-9;
     ROS_INFO_STREAM("second_execution: " << second_execution);
-    ROS_INFO_STREAM("Exectution time (s): " << execution_time);
     check_success_file << "Success";
     check_success_file.close();
     input_file.close();

@@ -50,4 +50,5 @@
     <param name="gcode_out" value="$(arg gcode_out)"/>
     <param name="check_success" value="$(arg check_success)"/>
   </node>
+  <include file="$(find progressbar)/launch/progressbar.launch" />
 </launch>

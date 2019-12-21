@@ -46,7 +46,6 @@ int main(int argc, char **argv){
   if(!output_file.is_open())ROS_ERROR_STREAM("Can't open " <<gcode_out);
   
   std::string line;
-  bool check = 0;
   bool check_distance = 0;
   double x = 0;
   double y = 0;
@@ -58,10 +57,7 @@ int main(int argc, char **argv){
   double pre_E = 0;
   while(input_file){
     std::getline(input_file, line);
-    if(!line.compare(0,7,";LAYER:")){
-      check = 1;
-    }
-    if(check == 1 && (!line.compare(0,2,"G0") || !line.compare(0,2,"G1"))){
+    if((!line.compare(0,2,"G0") || !line.compare(0,2,"G1"))){
       size_t colon_pos_X = line.find('X');
       if(colon_pos_X < 100){
         x = stod(line.substr(colon_pos_X+1));
