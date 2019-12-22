@@ -104,9 +104,15 @@ uint32_t Planner::max_acceleration_mm_per_s2[NUM_AXIS_N],    // (mm/s^2) M201 XY
          Planner::max_acceleration_steps_per_s2[NUM_AXIS_N], // (steps/s^2) Derived from mm_per_s2
          Planner::min_segment_time_us;                       // (µs) M205 Q
 
+uint32_t Planner::max_acceleration_mm_per_s2_joint[NUM_JOINT],    // (mm/s^2) M201 joint
+         Planner::max_acceleration_steps_per_s2_joint[NUM_JOINT]; // (steps/s^2) Derived from mm_per_s2
+
 float Planner::max_feedrate_mm_s[NUM_AXIS_N], // (mm/s) M203 XYZE - Max speeds
+      Planner::max_feedrate_mm_s_joint[NUM_JOINT],
       Planner::axis_steps_per_mm[NUM_AXIS_N], // (steps) M92 XYZE - Steps per millimeter
       Planner::steps_to_mm[NUM_AXIS_N],       // (mm) Millimeters per step
+      Planner::axis_steps_per_mm_joint[NUM_JOINT], // (steps) M92 joint - Steps per millimeter
+      Planner::steps_to_mm_joint[NUM_JOINT],       // (mm) Millimeters per step (joint)
       Planner::min_feedrate_mm_s,             // (mm/s) M205 S - Minimum linear feedrate
       Planner::acceleration,                  // (mm/s^2) M204 S - Normal acceleration. DEFAULT ACCELERATION for all printing moves.
       Planner::retract_acceleration,          // (mm/s^2) M204 R - Retract acceleration. Filament pull-back and push-forward while standing still in the other axes
@@ -124,6 +130,7 @@ float Planner::max_feedrate_mm_s[NUM_AXIS_N], // (mm/s) M203 XYZE - Max speeds
   #endif
 #else
   float Planner::max_jerk[NUM_AXIS];          // (mm/s^2) M205 XYZE - The largest speed change requiring no acceleration.
+  float Planner::max_jerk_joint[NUM_JOINT];
 #endif
 
 #if ENABLED(LINE_BUILDUP_COMPENSATION_FEATURE)
@@ -191,11 +198,12 @@ float Planner::e_factor[EXTRUDERS] = ARRAY_BY_EXTRUDERS1(1.0f); // The flow perc
 // private:
 
 int32_t Planner::position[NUM_AXIS] = { 0 };
-int32_t Planner::position_joint[5] = { 0 };
+int32_t Planner::position_joint[NUM_JOINT] = { 0 };
 
 uint32_t Planner::cutoff_long;
 
 float Planner::previous_speed[NUM_AXIS],
+      Planner::previous_speed_joint[NUM_JOINT],
       Planner::previous_nominal_speed_sqr;
 
 #if ENABLED(DISABLE_INACTIVE_EXTRUDER)
@@ -229,10 +237,12 @@ Planner::Planner() { init(); }
 
 void Planner::init() {
   ZERO(position);
+  ZERO(position_joint);
   #if HAS_POSITION_FLOAT
     ZERO(position_float);
   #endif
   ZERO(previous_speed);
+  ZERO(previous_speed_joint);
   previous_nominal_speed_sqr = 0;
   #if ABL_PLANAR
     bed_level_matrix.set_to_identity();
@@ -3310,10 +3320,11 @@ bool Planner::_populate_block_joint_self(block_t * const block, bool split_move,
     , const bool count_it/*=true*/
   #endif
 ) {
-  /*const int32_t da = target[A_AXIS] - position[A_AXIS],
+  ///*
+  const int32_t da = target[A_AXIS] - position[A_AXIS],
                 db = target[B_AXIS] - position[B_AXIS],
                 dc = target[C_AXIS] - position[C_AXIS];
-  */
+  //*/
   const int32_t d0 = joint[Joint1_AXIS] - position_joint[Joint1_AXIS],
                 d1 = joint[Joint2_AXIS] - position_joint[Joint2_AXIS],
                 d2 = joint[Joint3_AXIS] - position_joint[Joint3_AXIS],
@@ -3323,17 +3334,17 @@ bool Planner::_populate_block_joint_self(block_t * const block, bool split_move,
   const int32_t joint_d[] = {d0,d1,d2,d3,d4};
   int32_t dj = 0;
 
-  for(int i=Joint1_AXIS;i<=Joint5_AXIS;i++){
+  LOOP_NUM_JOINT(i){
     if(MAX5(abs(d0),abs(d1),abs(d2),abs(d3),abs(d4))==abs(joint_d[i])){
       dj = joint_d[i];
     }
   }
 
 
-  const int32_t da = dj,//target[A_AXIS] - position[A_AXIS],
+  /*const int32_t da = dj,//target[A_AXIS] - position[A_AXIS],
                 db = 0,//target[B_AXIS] - position[B_AXIS],
                 dc = 0;//target[C_AXIS] - position[C_AXIS]
-  
+  //*/
 
   int32_t de = target[E_AXIS] - position[E_AXIS];
 
@@ -3611,11 +3622,11 @@ bool Planner::_populate_block_joint_self(block_t * const block, bool split_move,
   delta_mm[E_AXIS] = esteps_float * steps_to_mm[E_AXIS_N];
   
   float delta_joint_mm[Joint_All];
-  delta_joint_mm[Joint1_AXIS] = d0 / 30420.65; 
-  delta_joint_mm[Joint2_AXIS] = d1 / 20712.062;
-  delta_joint_mm[Joint3_AXIS] = d2 / 51518.1;
-  delta_joint_mm[Joint4_AXIS] = d3 / 67955.7;
-  delta_joint_mm[Joint5_AXIS] = d4 / 10601.915;
+  delta_joint_mm[Joint1_AXIS] = d0 * steps_to_mm_joint[Joint1_AXIS];/// 30420.65; 
+  delta_joint_mm[Joint2_AXIS] = d1 * steps_to_mm_joint[Joint2_AXIS];/// 20712.062;
+  delta_joint_mm[Joint3_AXIS] = d2 * steps_to_mm_joint[Joint3_AXIS];/// 51518.1;
+  delta_joint_mm[Joint4_AXIS] = d3 * steps_to_mm_joint[Joint4_AXIS];/// 67955.7;
+  delta_joint_mm[Joint5_AXIS] = d4 * steps_to_mm_joint[Joint5_AXIS];/// 10601.915;
 
   if (block->steps[A_AXIS] < MIN_STEPS_PER_SEGMENT && block->steps[B_AXIS] < MIN_STEPS_PER_SEGMENT && block->steps[C_AXIS] < MIN_STEPS_PER_SEGMENT) {
     block->millimeters = ABS(delta_mm[E_AXIS]);
@@ -3674,7 +3685,7 @@ bool Planner::_populate_block_joint_self(block_t * const block, bool split_move,
   block->nominal_rate = CEIL(block->step_event_count * inverse_secs); // (step/sec) Always > 0
 
   
-
+  /*
   // Calculate and limit speed in mm/sec for each axis
   float current_speed[NUM_AXIS], speed_factor = 1.0f; // factor <1 decreases speed
   LOOP_NUM_AXIS(i) {
@@ -3684,11 +3695,30 @@ bool Planner::_populate_block_joint_self(block_t * const block, bool split_move,
     #endif
     if (cs > max_feedrate_mm_s[i]) NOMORE(speed_factor, max_feedrate_mm_s[i] / cs);
   }
+  //*/
 
+
+  // Calculate and limit speed in mm/sec for each axis
   
+  float current_joint_speed[Joint_All], speed_factor = 1.0f; // factor <1 decreases speed
+  LOOP_NUM_JOINT(i) {
+    const float cs = ABS((current_joint_speed[i] = delta_joint_mm[i] * inverse_secs));
+    #if ENABLED(DISTINCT_E_FACTORS)
+      if (i == E_AXIS) i += extruder;
+    #endif
+    if (cs > max_feedrate_mm_s_joint[i]) NOMORE(speed_factor, max_feedrate_mm_s_joint[i] / cs);
+  }
+
+  /*
   // Correct the speed
   if (speed_factor < 1.0f) {
     LOOP_NUM_AXIS(i) current_speed[i] *= speed_factor;
+    block->nominal_rate *= speed_factor;
+    block->nominal_speed_sqr = block->nominal_speed_sqr * sq(speed_factor);
+  }
+  //*/
+  if (speed_factor < 1.0f) {
+    LOOP_NUM_JOINT(i) current_joint_speed[i] *= speed_factor;
     block->nominal_rate *= speed_factor;
     block->nominal_speed_sqr = block->nominal_speed_sqr * sq(speed_factor);
   }
@@ -3696,7 +3726,9 @@ bool Planner::_populate_block_joint_self(block_t * const block, bool split_move,
   // Compute and limit the acceleration rate for the trapezoid generator.
   const float steps_per_mm = block->step_event_count * inverse_millimeters;
   uint32_t accel;
-  if (!block->steps[A_AXIS] && !block->steps[B_AXIS] && !block->steps[C_AXIS]) {
+  //if (!block->steps[A_AXIS] && !block->steps[B_AXIS] && !block->steps[C_AXIS]) {
+  if (!block->step_Joint[Joint1_AXIS] && !block->step_Joint[Joint2_AXIS] && !block->step_Joint[Joint3_AXIS]
+        && !block->step_Joint[Joint4_AXIS] && !block->step_Joint[Joint5_AXIS]) {
     // convert to: acceleration steps/sec^2
     accel = CEIL(retract_acceleration * steps_per_mm);
     #if ENABLED(LIN_ADVANCE)
@@ -3704,7 +3736,7 @@ bool Planner::_populate_block_joint_self(block_t * const block, bool split_move,
     #endif
   }
   else {
-    #define LIMIT_ACCEL_LONG(AXIS,INDX) do{ \
+    /*#define LIMIT_ACCEL_LONG(AXIS,INDX) do{ \
       if (block->steps[AXIS] && max_acceleration_steps_per_s2[AXIS+INDX] < accel) { \
         const uint32_t comp = max_acceleration_steps_per_s2[AXIS+INDX] * block->step_event_count; \
         if (accel * block->steps[AXIS] > comp) accel = comp / block->steps[AXIS]; \
@@ -3715,6 +3747,21 @@ bool Planner::_populate_block_joint_self(block_t * const block, bool split_move,
       if (block->steps[AXIS] && max_acceleration_steps_per_s2[AXIS+INDX] < accel) { \
         const float comp = (float)max_acceleration_steps_per_s2[AXIS+INDX] * (float)block->step_event_count; \
         if ((float)accel * (float)block->steps[AXIS] > comp) accel = comp / (float)block->steps[AXIS]; \
+      } \
+    }while(0)
+    //*/
+
+    #define LIMIT_ACCEL_LONG(AXIS,INDX) do{ \
+      if (block->step_Joint[AXIS] && max_acceleration_steps_per_s2_joint[AXIS+INDX] < accel) { \
+        const uint32_t comp = max_acceleration_steps_per_s2_joint[AXIS+INDX] * block->step_event_count; \
+        if (accel * block->step_Joint[AXIS] > comp) accel = comp / block->step_Joint[AXIS]; \
+      } \
+    }while(0)
+
+    #define LIMIT_ACCEL_FLOAT(AXIS,INDX) do{ \
+      if (block->step_Joint[AXIS] && max_acceleration_steps_per_s2_joint[AXIS+INDX] < accel) { \
+        const float comp = (float)max_acceleration_steps_per_s2_joint[AXIS+INDX] * (float)block->step_event_count; \
+        if ((float)accel * (float)block->steps[AXIS] > comp) accel = comp / (float)block->step_Joint[AXIS]; \
       } \
     }while(0)
 
@@ -3780,18 +3827,28 @@ bool Planner::_populate_block_joint_self(block_t * const block, bool split_move,
 
     // Limit acceleration per axis
     if (block->step_event_count <= cutoff_long) {
-      LIMIT_ACCEL_LONG(A_AXIS, 0);
-      LIMIT_ACCEL_LONG(B_AXIS, 0);
-      LIMIT_ACCEL_LONG(C_AXIS, 0);
+      //LIMIT_ACCEL_LONG(A_AXIS, 0);
+      //LIMIT_ACCEL_LONG(B_AXIS, 0);
+      //LIMIT_ACCEL_LONG(C_AXIS, 0);
+      LIMIT_ACCEL_LONG(Joint1_AXIS, 0);
+      LIMIT_ACCEL_LONG(Joint2_AXIS, 0);
+      LIMIT_ACCEL_LONG(Joint3_AXIS, 0);
+      LIMIT_ACCEL_LONG(Joint4_AXIS, 0);
+      LIMIT_ACCEL_LONG(Joint5_AXIS, 0);
       #if ENABLED(HANGPRINTER)
         LIMIT_ACCEL_LONG(D_AXIS, 0);
       #endif
       LIMIT_ACCEL_LONG(E_AXIS, ACCEL_IDX);
     }
     else {
-      LIMIT_ACCEL_FLOAT(A_AXIS, 0);
-      LIMIT_ACCEL_FLOAT(B_AXIS, 0);
-      LIMIT_ACCEL_FLOAT(C_AXIS, 0);
+      //LIMIT_ACCEL_FLOAT(A_AXIS, 0);
+      //LIMIT_ACCEL_FLOAT(B_AXIS, 0);
+      //LIMIT_ACCEL_FLOAT(C_AXIS, 0);
+      LIMIT_ACCEL_FLOAT(Joint1_AXIS, 0);
+      LIMIT_ACCEL_FLOAT(Joint2_AXIS, 0);
+      LIMIT_ACCEL_FLOAT(Joint3_AXIS, 0);
+      LIMIT_ACCEL_FLOAT(Joint4_AXIS, 0);
+      LIMIT_ACCEL_FLOAT(Joint5_AXIS, 0);
       #if ENABLED(HANGPRINTER)
         LIMIT_ACCEL_FLOAT(D_AXIS, 0);
       #endif
@@ -3930,6 +3987,7 @@ bool Planner::_populate_block_joint_self(block_t * const block, bool split_move,
     float safe_speed = nominal_speed;
 
     uint8_t limited = 0;
+    /*
     LOOP_NUM_AXIS(i) {
       const float jerk = ABS(current_speed[i]),   // cs : Starting from zero, change in speed for this axis
                   maxj = max_jerk[i];             // mj : The max jerk setting for this axis
@@ -3944,7 +4002,21 @@ bool Planner::_populate_block_joint_self(block_t * const block, bool split_move,
         }
       }
     }
-
+    //*/
+    LOOP_NUM_JOINT(i) {
+      const float jerk = ABS(current_joint_speed[i]),   // cs : Starting from zero, change in speed for this axis
+                  maxj = max_jerk_joint[i];             // mj : The max jerk setting for this axis
+      if (jerk > maxj) {                          // cs > mj : New current speed too fast?
+        if (limited) {                            // limited already?
+          const float mjerk = nominal_speed * maxj; // ns*mj
+          if (jerk * safe_speed > mjerk) safe_speed = mjerk / jerk; // ns*mj/cs
+        }
+        else {
+          safe_speed *= maxj / jerk;              // Initial limit: ns*mj/cs
+          ++limited;                              // Initially limited
+        }
+      }
+    }
     float vmax_junction;
     if (moves_queued && !UNEAR_ZERO(previous_nominal_speed_sqr)) {
       // Estimate a maximum velocity allowed at a joint of two successive segments.
@@ -3962,6 +4034,7 @@ bool Planner::_populate_block_joint_self(block_t * const block, bool split_move,
 
       // Now limit the jerk in all axes.
       const float smaller_speed_factor = vmax_junction / previous_nominal_speed;
+      /*
       LOOP_NUM_AXIS(axis) {
         // Limit an axis. We have to differentiate: coasting, reversal of an axis, full stop.
         float v_exit = previous_speed[axis] * smaller_speed_factor,
@@ -3983,6 +4056,29 @@ bool Planner::_populate_block_joint_self(block_t * const block, bool split_move,
           ++limited;
         }
       }
+      //*/
+      LOOP_NUM_JOINT(axis) {
+        // Limit an axis. We have to differentiate: coasting, reversal of an axis, full stop.
+        float v_exit = previous_speed_joint[axis] * smaller_speed_factor,
+              v_entry = current_joint_speed[axis];
+        if (limited) {
+          v_exit *= v_factor;
+          v_entry *= v_factor;
+        }
+
+        // Calculate jerk depending on whether the axis is coasting in the same direction or reversing.
+        const float jerk = (v_exit > v_entry)
+            ? //                                  coasting             axis reversal
+              ( (v_entry > 0 || v_exit < 0) ? (v_exit - v_entry) : MAX(v_exit, -v_entry) )
+            : // v_exit <= v_entry                coasting             axis reversal
+              ( (v_entry < 0 || v_exit > 0) ? (v_entry - v_exit) : MAX(-v_exit, v_entry) );
+
+        if (jerk > max_jerk_joint[axis]) {
+          v_factor *= max_jerk_joint[axis] / jerk;
+          ++limited;
+        }
+      }
+
       if (limited) vmax_junction *= v_factor;
       // Now the transition velocity is known, which maximizes the shared exit / entry velocity while
       // respecting the jerk factors, it may be possible, that applying separate safe exit / entry velocities will achieve faster prints.
@@ -4032,7 +4128,8 @@ bool Planner::_populate_block_joint_self(block_t * const block, bool split_move,
   //SERIAL_ECHOLNPAIR("step_Joint : ", block->step_Joint);
   //SERIAL_ECHOLNPAIR("direction_bits_joint : ", block->direction_bits_joint);
   // Update previous path unit_vector and nominal speed
-  COPY(previous_speed, current_speed);
+  //COPY(previous_speed, current_speed);
+  COPY(previous_speed_joint, current_joint_speed);
   previous_nominal_speed_sqr = block->nominal_speed_sqr;
 
   // Update the position (only when a move was queued)
@@ -4546,6 +4643,10 @@ void Planner::reset_acceleration_rates() {
     max_acceleration_steps_per_s2[i] = max_acceleration_mm_per_s2[i] * axis_steps_per_mm[i];
     if (AXIS_CONDITION) NOLESS(highest_rate, max_acceleration_steps_per_s2[i]);
   }
+  LOOP_NUM_JOINT(i) {
+    max_acceleration_steps_per_s2_joint[i] = max_acceleration_mm_per_s2_joint[i] * axis_steps_per_mm_joint[i];
+    if (AXIS_CONDITION) NOLESS(highest_rate, max_acceleration_steps_per_s2_joint[i]);
+  }
   cutoff_long = 4294967295UL / highest_rate; // 0xFFFFFFFFUL
   #if ENABLED(JUNCTION_DEVIATION) && ENABLED(LIN_ADVANCE)
     recalculate_max_e_jerk();
@@ -4555,7 +4656,8 @@ void Planner::reset_acceleration_rates() {
 // Recalculate position, steps_to_mm if axis_steps_per_mm changes!
 void Planner::refresh_positioning() {
   LOOP_NUM_AXIS_N(i) steps_to_mm[i] = 1.0f / axis_steps_per_mm[i];
-  set_position_mm_kinematic(current_position);
+  LOOP_NUM_JOINT(i) steps_to_mm_joint[i] = 1.0f / axis_steps_per_mm_joint[i];
+  //set_position_mm_kinematic(current_position);
   reset_acceleration_rates();
 }
 

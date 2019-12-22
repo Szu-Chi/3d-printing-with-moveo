@@ -693,6 +693,8 @@
  */
 
 #define DEFAULT_AXIS_STEPS_PER_UNIT {100.23, 99.86, 7999.52, 418.5}
+#define DEFAULT_JOINT_STEPS_PER_UNIT {30420.65, 20712.062, 51518.1, 67955.7, 10601.915}
+
 
 /**
  * Default Max Feed Rate (mm/s)
@@ -700,6 +702,7 @@
  *                                      X, Y, Z, E0 [, E1[, E2[, E3[, E4]]]]
  */
 #define DEFAULT_MAX_FEEDRATE {300, 300, 3, 25}
+#define DEFAULT_MAX_FEEDRATE_JOINT {300, 300, 300, 300, 300}
 
 /**
  * Default Max Acceleration (change/s) change = mm/s
@@ -732,6 +735,13 @@
 #define DEFAULT_XJERK 0.01
 #define DEFAULT_YJERK 0.01
 #define DEFAULT_ZJERK 0.01
+
+#define DEFAULT_JJERK 0.01
+#define DEFAULT_AJERK 0.01
+#define DEFAULT_BJERK 0.01
+#define DEFAULT_CJERK 0.01
+#define DEFAULT_DJERK 0.01
+
 #define DEFAULT_EJERK 5.0
 
 /**
