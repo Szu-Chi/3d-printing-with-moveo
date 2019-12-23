@@ -33,8 +33,11 @@ class LocalFileOutputDevice(OutputDevice):
         self.setDescription(catalog.i18nc("@info:tooltip", "Save to File"))
         self.setIconName("save")
 
-        self._writing = False
-        self._save_name = None
+        self._writing = False # type: bool
+        self._split = False # type: bool
+        self._inverse_kinematics = True # type: bool
+        self._save_name = "" # type: str
+        self._type_of_file = "" # type: str
 
     ##  Request the specified nodes to be written to a file.
     #
@@ -129,6 +132,14 @@ class LocalFileOutputDevice(OutputDevice):
 
         # Get file name from file dialog
         file_name = dialog.selectedFiles()[0]
+
+        self._checkType(selected_type["mime_type"])
+
+        if not file_name.endswith(self._type_of_file): # If there isn't type in file_name  
+            file_name = file_name + self._type_of_file
+
+        self._save_name = file_name.replace(' ','\\ ') # Our gcode translation need
+
         Logger.log("d", "Writing to [%s]..." % file_name)
         
         if os.path.exists(file_name):
@@ -161,7 +172,6 @@ class LocalFileOutputDevice(OutputDevice):
             job.setAddToRecentFiles(True)  # The file will be added into the "recent files" list upon success
             job.progress.connect(self._onJobProgress)
             job.finished.connect(self._onWriteJobFinished)
-            self._save_name = file_name
 
             message = Message(catalog.i18nc("@info:progress Don't translate the XML tags <filename>!", "Saving to <filename>{0}</filename>").format(file_name),
                               0, False, -1 , catalog.i18nc("@info:title", "Saving"))
@@ -192,22 +202,12 @@ class LocalFileOutputDevice(OutputDevice):
 
         data = "check"
         Shape = CuraApplication.getInstance().getShapeFromBuildVolume()
-        if Shape == "moveo":
-            place = ""
-            for i in self._save_name:
-                if(i == " "):
-                    place = place + "\\"
-                place = place + i
-            os.system("roslaunch gcode_translation split.launch gcode_in:="+ place)
-            success_place = os.getcwd()
-            read_file = open(success_place[:-10]+'/gcode_translation/check_success/check_success_split.txt','r')
-            data = read_file.read().strip()
-            if(data != "Error"):
-                os.system("roslaunch gcode_translation inverse_kinematics.launch gcode_out:="+ place)
-                read_file = open(success_place[:-10]+'/gcode_translation/check_success/check_success_IK.txt','r')
-                data = read_file.read().strip()
-        if(data == "Error"):
-            os.system("rm -f "+ place)
+        if Shape == "moveo" and self._type_of_file == ".gcode":
+            data = self._runGocdeTranslation(self._split)
+            if data != "Error":
+                data = self._runGocdeTranslation(self._inverse_kinematics)
+        if data == "Error":
+            os.system("rm -f "+ self._save_name) # Remove error file
             message = Message(catalog.i18nc("@info:status", "gcode_translation went wrong saving to <filename>{0}</filename>: <message>{1}</message>").format(job.getFileName(), str(job.getError())), title = catalog.i18nc("@info:title", "Error"))
             message.show()
             self.writeError.emit(self)
@@ -227,3 +227,26 @@ class LocalFileOutputDevice(OutputDevice):
     def _onMessageActionTriggered(self, message, action):
         if action == "open_folder" and hasattr(message, "_folder"):
             QDesktopServices.openUrl(QUrl.fromLocalFile(message._folder))
+
+    # Check your output type
+    def _checkType(self, input_file_type):
+        if input_file_type == "application/vnd.ms-package.3dmanufacturing-3dmodel+xml":
+            self._type_of_file = ".3mf"
+        elif input_file_type == "text/x-gcode":
+            self._type_of_file = ".gcode"
+        elif input_file_type == "model/x.stl-ascii":
+            self._type_of_file = ".stl"
+        elif input_file_type == "model/x.stl-binary":
+            self._type_of_file = ".stl"
+        elif input_file_type == "application/x-ufp":
+            self._type_of_file = ".ufp"
+        elif input_file_type == "application/x-wavefront-obj":
+            self._type_of_file = ".obj"
+
+    # Run gcode translation
+    def _runGocdeTranslation(self, stages):
+        now_place = os.getcwd()
+        in_or_out = " inverse_kinematics.launch gcode_out:=" if stages else " split.launch gcode_in:="
+        os.system("roslaunch gcode_translation"+ in_or_out + self._save_name)
+        read_file = open(now_place[:-10]+'/gcode_translation/check_success/check_success.txt','r')
+        return read_file.read().strip()
