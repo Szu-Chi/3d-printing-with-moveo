@@ -1,3 +1,8 @@
-gcode_translation/gcode/*.gcode
 moveo_moveit_move_group/area/*.csv
+Cura/protobuf/build-dir
+Cura/libArcus/build
+Cura/libSavitar/build
+Cura/libCharon/build
+Cura/CuraEngine/build
+Cura/Cura/resources/materials
 .vscode
