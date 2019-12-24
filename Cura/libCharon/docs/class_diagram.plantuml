@@ -1,0 +1,83 @@
+@startuml
+
+package Service {
+    class FileService << DBusService >> {
+        +startRequest(file: String, paths: List[str]): int
+        +cancelRequest(requestId: int)
+        ---
+        +signal requestData(requestId: int, data: Dict[str, Any])
+        +signal requestFinished(requestId: int)
+        +signal requestError(requestId: int, error: str)
+    }
+
+    class Queue {
+        +enqueue(job: Job)
+        +dequeue(job: Job)
+        +takeNext() : Job
+    }
+
+    class Worker << Thread >> {
+        +run()
+    }
+
+    class Job {
+        +execute()
+        +requestId: int
+    }
+
+    FileService *-- Queue
+
+    Queue o-- Job
+
+    Worker --> Queue : Take
+    Worker --> Job : Execute
+}
+
+package Library {
+
+    interface FileInterface {
+        +open(path : str, mode : OpenMode = ReadOnly)
+        +openStream(stream: BufferedIOBase, mimetype: String)
+        +close()
+        +flush()
+        +getData(virtual_path: String) : Dict[str, Any]
+        +setData(data: Dict[str, Any])
+        +getStream(virtual_path : String) : BufferedIOBase
+        +listPaths() : List[str]
+        +toByteArray(offset: int = 0, count: int = -1) : Bytes
+    }
+
+    class VirtualFile << ContextManager >> {
+        -implementation : FileImplementation
+    }
+
+    abstract class FileImplementation {
+    }
+
+    FileInterface <|-- VirtualFile
+    FileInterface <|-- FileImplementation
+
+    VirtualFile *-- FileImplementation
+    note on link
+        VirtualFile creates a FileImplementation
+        based on the mimetype of the file it should
+        open.
+    end note
+
+    FileImplementation <|-- GCodeFile
+    FileImplementation <|-- ContainerFile
+}
+
+class FileRequest {
+    +state: RequestState
+    +file_path: str
+    +virtual_paths: List[str]
+    +result: Dict[str, Any]
+    +start()
+    +waitUntilFinished()
+    ---
+    signal dataReceived(request: FileRequest, data: Dict[str, any])
+    signal finished(request: FileRequest)
+}
+
+@enduml
