@@ -1087,7 +1087,7 @@ void MarlinSettings::postprocess() {
         planner.axis_steps_per_mm[i]          = i < MOV_AXIS + esteppers ? tmp2[i] : def2[i < COUNT(def2) ? i : COUNT(def2) - 1];
         planner.max_feedrate_mm_s[i]          = i < MOV_AXIS + esteppers ? tmp3[i] : def3[i < COUNT(def3) ? i : COUNT(def3) - 1];
       }
-
+      
       EEPROM_READ(planner.acceleration);
       EEPROM_READ(planner.retract_acceleration);
       EEPROM_READ(planner.travel_acceleration);

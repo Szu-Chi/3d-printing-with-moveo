@@ -693,7 +693,7 @@
  */
 
 #define DEFAULT_AXIS_STEPS_PER_UNIT {100.23, 99.86, 7999.52, 418.5}
-#define DEFAULT_JOINT_STEPS_PER_UNIT {30420.65, 20712.062, 51518.1, 67955.7, 10601.915}
+#define DEFAULT_JOINT_STEPS_PER_UNIT {60, 60, 60, 60, 40}
 
 
 /**
@@ -702,7 +702,7 @@
  *                                      X, Y, Z, E0 [, E1[, E2[, E3[, E4]]]]
  */
 #define DEFAULT_MAX_FEEDRATE {300, 300, 3, 25}
-#define DEFAULT_MAX_FEEDRATE_JOINT {300, 300, 300, 300, 300}
+#define DEFAULT_MAX_FEEDRATE_JOINT {60, 60, 50, 50, 50}
 
 /**
  * Default Max Acceleration (change/s) change = mm/s
@@ -710,8 +710,8 @@
  * Override with M201
  *                                      X, Y, Z, E0 [, E1[, E2[, E3[, E4]]]]
  */
-#define DEFAULT_MAX_ACCELERATION {500, 500, 30, 10000}
-
+#define DEFAULT_MAX_ACCELERATION {100, 100, 30, 10000}
+#define DEFAULT_MAX_ACCELERATION_joint {50, 50, 15, 50, 50}
 /**
  * Default Acceleration (change/s) change = mm/s
  * Override with M204
@@ -720,9 +720,9 @@
  *   M204 R    Retract Acceleration
  *   M204 T    Travel Acceleration
  */
-#define DEFAULT_ACCELERATION         50           // X, Y, Z and E acceleration for printing moves
+#define DEFAULT_ACCELERATION         25           // X, Y, Z and E acceleration for printing moves
 #define DEFAULT_RETRACT_ACCELERATION 3000         // E acceleration for retracts
-#define DEFAULT_TRAVEL_ACCELERATION  50           // X, Y, Z acceleration for travel (non printing) moves
+#define DEFAULT_TRAVEL_ACCELERATION  25           // X, Y, Z acceleration for travel (non printing) moves
 
 /**
  * Default Jerk (mm/s)
