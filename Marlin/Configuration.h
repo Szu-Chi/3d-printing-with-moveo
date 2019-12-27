@@ -693,7 +693,7 @@
  */
 
 #define DEFAULT_AXIS_STEPS_PER_UNIT {100.23, 99.86, 7999.52, 418.5}
-#define DEFAULT_JOINT_STEPS_PER_UNIT {60, 60, 60, 60, 40}
+#define DEFAULT_JOINT_STEPS_PER_UNIT {100, 60, 60, 60, 40}
 
 
 /**
@@ -702,7 +702,7 @@
  *                                      X, Y, Z, E0 [, E1[, E2[, E3[, E4]]]]
  */
 #define DEFAULT_MAX_FEEDRATE {300, 300, 3, 25}
-#define DEFAULT_MAX_FEEDRATE_JOINT {100, 60, 50, 50, 50}
+#define DEFAULT_MAX_FEEDRATE_JOINT {50, 50, 50, 50, 50}
 
 /**
  * Default Max Acceleration (change/s) change = mm/s
@@ -711,7 +711,7 @@
  *                                      X, Y, Z, E0 [, E1[, E2[, E3[, E4]]]]
  */
 #define DEFAULT_MAX_ACCELERATION {100, 100, 30, 10000}
-#define DEFAULT_MAX_ACCELERATION_joint {200, 50, 15, 50, 50}
+#define DEFAULT_MAX_ACCELERATION_joint {25, 50, 15, 50, 50}
 /**
  * Default Acceleration (change/s) change = mm/s
  * Override with M204
@@ -736,7 +736,7 @@
 #define DEFAULT_YJERK 0.01
 #define DEFAULT_ZJERK 0.01
 
-#define DEFAULT_JJERK 20
+#define DEFAULT_JJERK 0.01
 #define DEFAULT_AJERK 0.01
 #define DEFAULT_BJERK 0.01
 #define DEFAULT_CJERK 0.01
@@ -1016,27 +1016,27 @@
 #define Y_MAX_POS Y_BED_SIZE
 #define Z_MAX_POS 200
 
-#define J_MIN_POS_step -24800
+#define J_MIN_POS_step -12400
 #define A_MIN_POS_step -43560
 #define B_MIN_POS_step -96400
 #define C_MIN_POS_step -37990
 #define D_MIN_POS_step -19160
 
-#define J_MAX_POS_step 24800
+#define J_MAX_POS_step 12400
 #define A_MAX_POS_step 42000
 #define B_MAX_POS_step 100000
 #define C_MAX_POS_step 111810
 #define D_MAX_POS_step 20500
 
 // joint
-#define Joint1_MIN_POS -24800
+#define Joint1_MIN_POS -12400
 #define Joint2_MIN_POS -43560
 #define Joint3_MIN_POS -96400
 #define Joint4_MIN_POS -37990
 #define Joint5_MIN_POS -19160
 
 // joint
-#define Joint1_MAX_POS 24800
+#define Joint1_MAX_POS 12400
 #define Joint2_MAX_POS 42000
 #define Joint3_MAX_POS 110000
 #define Joint4_MAX_POS 118110

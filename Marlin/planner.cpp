@@ -3635,7 +3635,7 @@ bool Planner::_populate_block_joint_self(block_t * const block, bool split_move,
   delta_joint_mm[Joint5_AXIS] = (float) d4  * steps_to_mm_joint[Joint5_AXIS];   //  / 100.23;
 
   //if (block->steps[A_AXIS] < MIN_STEPS_PER_SEGMENT && block->steps[B_AXIS] < MIN_STEPS_PER_SEGMENT && block->steps[C_AXIS] < MIN_STEPS_PER_SEGMENT) {
-  if (block->step_Joint[Joint1_AXIS] < 50 && (block->step_Joint[Joint2_AXIS] < 1 && block->step_Joint[Joint3_AXIS] < 1
+  if (abs(block->step_Joint[Joint1_AXIS]) < 40 && (block->step_Joint[Joint2_AXIS] < 1 && block->step_Joint[Joint3_AXIS] < 1
       && block->step_Joint[Joint4_AXIS] < 1 && block->step_Joint[Joint5_AXIS] < 1)) {//*/
     block->millimeters = ABS(delta_mm[E_AXIS]);
   }
@@ -3716,7 +3716,7 @@ bool Planner::_populate_block_joint_self(block_t * const block, bool split_move,
     #endif
     if (cs > max_feedrate_mm_s_joint[i]) NOMORE(speed_factor, max_feedrate_mm_s_joint[i] / cs);
   }
-  SERIAL_ECHOLNPAIR_F("speed_factor : ",speed_factor);
+  //SERIAL_ECHOLNPAIR_F("speed_factor : ",speed_factor);
   /*
   // Correct the speed
   if (speed_factor < 1.0f) {

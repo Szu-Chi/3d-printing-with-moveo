@@ -387,7 +387,7 @@
 #define Z_HOME_BUMP_MM 2
 
 //joint
-#define Joint1_HOME_BUMP_MM 1240
+#define Joint1_HOME_BUMP_MM 620
 #define Joint2_HOME_BUMP_MM 2230
 #define Joint3_HOME_BUMP_MM 6085
 #define Joint4_HOME_BUMP_MM 8640
@@ -895,7 +895,7 @@
 #endif
 
 // Moves (or segments) with fewer steps than this will be joined with the next move
-#define MIN_STEPS_PER_SEGMENT 6
+#define MIN_STEPS_PER_SEGMENT 1
 
 /**
  * Minimum delay after setting the stepper DIR (in ns)

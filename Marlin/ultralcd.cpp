@@ -3031,13 +3031,13 @@ void lcd_quick_feedback(const bool clear_buttons) {
 
       #else
         static float old_E0_position = 0;
-        float current_position_liar[XYZE] = {current_position_Joint[Joint1_AXIS]/300,0,0,current_position[E_AXIS]};
+        //float current_position_liar[XYZE] = {current_position_Joint[Joint1_AXIS]/300,0,0,current_position[E_AXIS]};
         //planner.buffer_line_kinematic(current_position, current_position_Joint, MMM_TO_MMS(manual_feedrate_mm_m[manual_move_axis]), manual_move_axis == E_AXIS ? manual_move_e_index : active_extruder);
-        planner.buffer_line_kinematic( current_position_liar, current_position_Joint, 
+        planner.buffer_line_kinematic( current_position, current_position_Joint, 
                                       (current_position[E_AXIS] != old_E0_position) ? MMM_TO_MMS(manual_feedrate_mm_m[E_AXIS]):MMM_TO_MMS(manual_feedrate_mm_m_joint[manual_move_joint])
                                       , manual_move_axis == E_AXIS ? manual_move_e_index : active_extruder);
         //SERIAL_ECHOLNPAIR("current_position",current_position);
-        SERIAL_ECHOLNPAIR("current_position_Joint : ",current_position_Joint);
+        //SERIAL_ECHOLNPAIR("current_position_Joint : ",current_position_Joint);
         old_E0_position = current_position[E_AXIS];
         //manual_move_axis = (int8_t)NO_AXIS;
         manual_move_joint = (int8_t)NO_AXIS;
