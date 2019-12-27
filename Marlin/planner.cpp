@@ -3635,8 +3635,8 @@ bool Planner::_populate_block_joint_self(block_t * const block, bool split_move,
   delta_joint_mm[Joint5_AXIS] = (float) d4  * steps_to_mm_joint[Joint5_AXIS];   //  / 100.23;
 
   //if (block->steps[A_AXIS] < MIN_STEPS_PER_SEGMENT && block->steps[B_AXIS] < MIN_STEPS_PER_SEGMENT && block->steps[C_AXIS] < MIN_STEPS_PER_SEGMENT) {
-  if (block->step_Joint[Joint1_AXIS] < MIN_STEPS_PER_SEGMENT && block->step_Joint[Joint2_AXIS] < MIN_STEPS_PER_SEGMENT && block->step_Joint[Joint3_AXIS] < MIN_STEPS_PER_SEGMENT
-      && block->step_Joint[Joint4_AXIS] < MIN_STEPS_PER_SEGMENT && block->step_Joint[Joint5_AXIS] < MIN_STEPS_PER_SEGMENT) {//*/
+  if (block->step_Joint[Joint1_AXIS] < 50 && (block->step_Joint[Joint2_AXIS] < 1 && block->step_Joint[Joint3_AXIS] < 1
+      && block->step_Joint[Joint4_AXIS] < 1 && block->step_Joint[Joint5_AXIS] < 1)) {//*/
     block->millimeters = ABS(delta_mm[E_AXIS]);
   }
   else if (!millimeters) {
@@ -3678,8 +3678,8 @@ bool Planner::_populate_block_joint_self(block_t * const block, bool split_move,
       }
     }
   #endif
-  SERIAL_ECHOLNPAIR_F("inverse_millimeters : ", inverse_millimeters);
-  SERIAL_ECHOLNPAIR_F("inverse_secs : ",inverse_secs);
+  //SERIAL_ECHOLNPAIR_F("inverse_millimeters : ", inverse_millimeters);
+  //SERIAL_ECHOLNPAIR_F("inverse_secs : ",inverse_secs);
   #if ENABLED(ULTRA_LCD)
     // Protect the access to the position.
     const bool was_enabled = STEPPER_ISR_ENABLED();
@@ -3863,12 +3863,12 @@ bool Planner::_populate_block_joint_self(block_t * const block, bool split_move,
       LIMIT_ACCEL_FLOAT(E_AXIS, ACCEL_IDX);
     }
   }
-  SERIAL_ECHOLNPAIR_F("accel : ",accel);
+  /*SERIAL_ECHOLNPAIR_F("accel : ",accel);
   SERIAL_ECHOLNPAIR_F("steps_per_mm : ",steps_per_mm);
   block->acceleration_steps_per_s2 = accel;
   block->acceleration = accel / steps_per_mm;
   SERIAL_ECHOLNPAIR_F("acceleration_steps_per_s2 : ",block->acceleration_steps_per_s2);
-  SERIAL_ECHOLNPAIR_F("acceleration : ",block->acceleration);
+  SERIAL_ECHOLNPAIR_F("acceleration : ",block->acceleration);//*/
   #if DISABLED(S_CURVE_ACCELERATION)
     block->acceleration_rate = (uint32_t)(accel * (4096.0f * 4096.0f / (STEPPER_TIMER_RATE)));
   #endif
@@ -4130,16 +4130,16 @@ bool Planner::_populate_block_joint_self(block_t * const block, bool split_move,
   // the reverse and forward planners, the corresponding block junction speed will always be at the
   // the maximum junction speed and may always be ignored for any speed reduction checks.
   block->flag |= block->nominal_speed_sqr <= v_allowable_sqr ? BLOCK_FLAG_RECALCULATE | BLOCK_FLAG_NOMINAL_LENGTH : BLOCK_FLAG_RECALCULATE;
-  SERIAL_ECHOLNPAIR_F("millimeters : ", block->millimeters);
-  SERIAL_ECHOLNPAIR_F("nominal_speed_sqr : ", block->nominal_speed_sqr);
-  SERIAL_ECHOLNPAIR_F("acceleration_rate : ", block->acceleration_rate);
+  //SERIAL_ECHOLNPAIR_F("millimeters : ", block->millimeters);
+  //SERIAL_ECHOLNPAIR_F("nominal_speed_sqr : ", block->nominal_speed_sqr);
+  //SERIAL_ECHOLNPAIR_F("acceleration_rate : ", block->acceleration_rate);
   //SERIAL_ECHOLNPAIR("flag : ", block->flag);
-  SERIAL_ECHOLNPAIR("step_event_count : ", block->step_event_count);
-  SERIAL_ECHOLNPAIR_F("delta_joint_mm[Joint1_AXIS] : ", delta_joint_mm[Joint1_AXIS]);
-  SERIAL_ECHOLNPAIR_F("delta_joint_mm[Joint2_AXIS] : ", delta_joint_mm[Joint2_AXIS]);
-  SERIAL_ECHOLNPAIR_F("delta_joint_mm[Joint3_AXIS] : ", delta_joint_mm[Joint3_AXIS]);
-  SERIAL_ECHOLNPAIR_F("delta_joint_mm[Joint4_AXIS] : ", delta_joint_mm[Joint4_AXIS]);
-  SERIAL_ECHOLNPAIR_F("delta_joint_mm[Joint5_AXIS] : ", delta_joint_mm[Joint5_AXIS]);
+  //SERIAL_ECHOLNPAIR("step_event_count : ", block->step_event_count);
+  //SERIAL_ECHOLNPAIR_F("delta_joint_mm[Joint1_AXIS] : ", delta_joint_mm[Joint1_AXIS]);
+  //SERIAL_ECHOLNPAIR_F("delta_joint_mm[Joint2_AXIS] : ", delta_joint_mm[Joint2_AXIS]);
+  //SERIAL_ECHOLNPAIR_F("delta_joint_mm[Joint3_AXIS] : ", delta_joint_mm[Joint3_AXIS]);
+  //SERIAL_ECHOLNPAIR_F("delta_joint_mm[Joint4_AXIS] : ", delta_joint_mm[Joint4_AXIS]);
+  //SERIAL_ECHOLNPAIR_F("delta_joint_mm[Joint5_AXIS] : ", delta_joint_mm[Joint5_AXIS]);
   //SERIAL_ECHOLNPAIR("position : ", block->position);
   //SERIAL_ECHOLNPAIR("steps : ", block->steps);
   //SERIAL_ECHOLNPAIR("position_joint : ", block->position_Joint);

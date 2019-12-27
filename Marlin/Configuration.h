@@ -702,7 +702,7 @@
  *                                      X, Y, Z, E0 [, E1[, E2[, E3[, E4]]]]
  */
 #define DEFAULT_MAX_FEEDRATE {300, 300, 3, 25}
-#define DEFAULT_MAX_FEEDRATE_JOINT {60, 60, 50, 50, 50}
+#define DEFAULT_MAX_FEEDRATE_JOINT {100, 60, 50, 50, 50}
 
 /**
  * Default Max Acceleration (change/s) change = mm/s
@@ -711,7 +711,7 @@
  *                                      X, Y, Z, E0 [, E1[, E2[, E3[, E4]]]]
  */
 #define DEFAULT_MAX_ACCELERATION {100, 100, 30, 10000}
-#define DEFAULT_MAX_ACCELERATION_joint {50, 50, 15, 50, 50}
+#define DEFAULT_MAX_ACCELERATION_joint {200, 50, 15, 50, 50}
 /**
  * Default Acceleration (change/s) change = mm/s
  * Override with M204
@@ -736,7 +736,7 @@
 #define DEFAULT_YJERK 0.01
 #define DEFAULT_ZJERK 0.01
 
-#define DEFAULT_JJERK 0.01
+#define DEFAULT_JJERK 20
 #define DEFAULT_AJERK 0.01
 #define DEFAULT_BJERK 0.01
 #define DEFAULT_CJERK 0.01
