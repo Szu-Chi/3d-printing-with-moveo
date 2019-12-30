@@ -15,7 +15,7 @@ UM.Dialog
     title: catalog.i18nc("@title:window","About Cura")
 
     minimumWidth: 500 * screenScaleFactor
-    minimumHeight: 650 * screenScaleFactor
+    minimumHeight: 553 * screenScaleFactor // Because the image resolution of my computer is 1366*768, if use original setting, page will be cut.
     width: minimumWidth
     height: minimumHeight
 

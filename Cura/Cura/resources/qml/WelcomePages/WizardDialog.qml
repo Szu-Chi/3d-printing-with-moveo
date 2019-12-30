@@ -23,7 +23,7 @@ Window
     modality: Qt.ApplicationModal
 
     minimumWidth: 580 * screenScaleFactor
-    minimumHeight: 600 * screenScaleFactor
+    minimumHeight: 553 * screenScaleFactor // Because the image resolution of my computer is 1366*768, if use original setting, page will be cut.
 
     color: UM.Theme.getColor("main_background")
 
