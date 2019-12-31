@@ -269,7 +269,7 @@ private:
 
   // Delta error variables for the Bresenham line tracer
   static int32_t delta_error[NUM_AXIS];
-  static int32_t delta_error_Joint[5];
+  static int32_t delta_error_Joint[Joint_All];
   static uint32_t advance_dividend[NUM_AXIS], advance_dividend_Joint[Joint_All], advance_divisor,
       step_events_completed, // The number of step events executed in the current block
       accelerate_until,      // The point from where we need to stop acceleration

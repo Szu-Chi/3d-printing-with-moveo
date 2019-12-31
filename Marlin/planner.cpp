@@ -699,7 +699,7 @@ void Planner::init() {
 
 #endif // S_CURVE_ACCELERATION
 
-#define MINIMAL_STEP_RATE 1
+#define MINIMAL_STEP_RATE 120
 
 /**
  * Calculate trapezoid parameters, multiplying the entry- and exit-speeds
@@ -1698,11 +1698,11 @@ bool Planner::_buffer_steps_joint(const int32_t (&target)[NUM_AXIS], const int32
 
   // Recalculate and optimize trapezoidal speed profiles
   recalculate();
-  SERIAL_ECHOLNPAIR_F("accelerate_until : ", block->accelerate_until);
-  SERIAL_ECHOLNPAIR_F("decelerate_after : ", block->decelerate_after);
-  SERIAL_ECHOLNPAIR_F("initial_rate : ", block->initial_rate);
-  SERIAL_ECHOLNPAIR_F("nominal_rate : ", block->nominal_rate);
-  SERIAL_ECHOLNPAIR_F("final_rate : ", block->final_rate);
+  //SERIAL_ECHOLNPAIR_F("accelerate_until : ", block->accelerate_until);
+  //SERIAL_ECHOLNPAIR_F("decelerate_after : ", block->decelerate_after);
+  //SERIAL_ECHOLNPAIR_F("initial_rate : ", block->initial_rate);
+  //SERIAL_ECHOLNPAIR_F("nominal_rate : ", block->nominal_rate);
+  //SERIAL_ECHOLNPAIR_F("final_rate : ", block->final_rate);
   // Movement successfully queued!
   return true;
 }
@@ -3635,7 +3635,7 @@ bool Planner::_populate_block_joint_self(block_t * const block, bool split_move,
   delta_joint_mm[Joint5_AXIS] = (float) d4  * steps_to_mm_joint[Joint5_AXIS];   //  / 100.23;
 
   //if (block->steps[A_AXIS] < MIN_STEPS_PER_SEGMENT && block->steps[B_AXIS] < MIN_STEPS_PER_SEGMENT && block->steps[C_AXIS] < MIN_STEPS_PER_SEGMENT) {
-  if (abs(block->step_Joint[Joint1_AXIS]) < 40 && (block->step_Joint[Joint2_AXIS] < 1 && block->step_Joint[Joint3_AXIS] < 1
+  if (abs(block->step_Joint[Joint1_AXIS]) < 30 && (block->step_Joint[Joint2_AXIS] < 1 && block->step_Joint[Joint3_AXIS] < 1
       && block->step_Joint[Joint4_AXIS] < 1 && block->step_Joint[Joint5_AXIS] < 1)) {//*/
     block->millimeters = ABS(delta_mm[E_AXIS]);
   }
@@ -3651,11 +3651,11 @@ bool Planner::_populate_block_joint_self(block_t * const block, bool split_move,
   }
     
 
-  const float inverse_millimeters = 1.0f / block->millimeters;  // Inverse millimeters to remove multiple divides
+  const float inverse_millimeters = (float)1.0f / block->millimeters;  // Inverse millimeters to remove multiple divides
 
   // Calculate inverse time for this move. No divide by zero due to previous checks.
   // Example: At 120mm/s a 60mm move takes 0.5s. So this will give 2.0.
-  float inverse_secs = fr_mm_s * inverse_millimeters;
+  float inverse_secs = (float)fr_mm_s * inverse_millimeters;
 
   // Get the number of non busy movements in queue (non busy means that they can be altered)
   const uint8_t moves_queued = nonbusy_movesplanned();
@@ -3714,7 +3714,7 @@ bool Planner::_populate_block_joint_self(block_t * const block, bool split_move,
     #if ENABLED(DISTINCT_E_FACTORS)
       if (i == E_AXIS) i += extruder;
     #endif
-    if (cs > max_feedrate_mm_s_joint[i]) NOMORE(speed_factor, max_feedrate_mm_s_joint[i] / cs);
+    if (cs > max_feedrate_mm_s_joint[i]) NOMORE(speed_factor, (float)max_feedrate_mm_s_joint[i] / cs);
   }
   //SERIAL_ECHOLNPAIR_F("speed_factor : ",speed_factor);
   /*
@@ -3730,7 +3730,13 @@ bool Planner::_populate_block_joint_self(block_t * const block, bool split_move,
     block->nominal_rate *= speed_factor;
     block->nominal_speed_sqr = block->nominal_speed_sqr * sq(speed_factor);
   }
-  
+  //SERIAL_ECHOLNPAIR_F("current_joint_speed[1] : ",current_joint_speed[Joint1_AXIS]);
+  //SERIAL_ECHOLNPAIR_F("current_joint_speed[2] : ",current_joint_speed[Joint2_AXIS]);
+  //SERIAL_ECHOLNPAIR_F("current_joint_speed[3] : ",current_joint_speed[Joint3_AXIS]);
+  //SERIAL_ECHOLNPAIR_F("current_joint_speed[4] : ",current_joint_speed[Joint4_AXIS]);
+  //SERIAL_ECHOLNPAIR_F("current_joint_speed[5] : ",current_joint_speed[Joint5_AXIS]);
+
+
   // Compute and limit the acceleration rate for the trapezoid generator.
   const float steps_per_mm = block->step_event_count * inverse_millimeters;
   uint32_t accel;
@@ -3774,7 +3780,7 @@ bool Planner::_populate_block_joint_self(block_t * const block, bool split_move,
     }while(0)
 
     // Start with print or travel acceleration
-    accel = CEIL((esteps ? acceleration : travel_acceleration) * steps_per_mm);
+    accel = CEIL((float)(esteps ? acceleration : travel_acceleration) * steps_per_mm);
 
     #if ENABLED(LIN_ADVANCE)
 
@@ -3863,12 +3869,14 @@ bool Planner::_populate_block_joint_self(block_t * const block, bool split_move,
       LIMIT_ACCEL_FLOAT(E_AXIS, ACCEL_IDX);
     }
   }
-  /*SERIAL_ECHOLNPAIR_F("accel : ",accel);
-  SERIAL_ECHOLNPAIR_F("steps_per_mm : ",steps_per_mm);
   block->acceleration_steps_per_s2 = accel;
   block->acceleration = accel / steps_per_mm;
+  /*
+  SERIAL_ECHOLNPAIR_F("accel : ",accel);
+  SERIAL_ECHOLNPAIR_F("steps_per_mm : ",steps_per_mm);
   SERIAL_ECHOLNPAIR_F("acceleration_steps_per_s2 : ",block->acceleration_steps_per_s2);
-  SERIAL_ECHOLNPAIR_F("acceleration : ",block->acceleration);//*/
+  SERIAL_ECHOLNPAIR_F("acceleration : ",block->acceleration);
+  //*/
   #if DISABLED(S_CURVE_ACCELERATION)
     block->acceleration_rate = (uint32_t)(accel * (4096.0f * 4096.0f / (STEPPER_TIMER_RATE)));
   #endif

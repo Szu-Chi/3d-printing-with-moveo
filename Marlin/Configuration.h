@@ -693,7 +693,7 @@
  */
 
 #define DEFAULT_AXIS_STEPS_PER_UNIT {100.23, 99.86, 7999.52, 418.5}
-#define DEFAULT_JOINT_STEPS_PER_UNIT {100, 60, 60, 60, 40}
+#define DEFAULT_JOINT_STEPS_PER_UNIT {120, 60, 60, 60, 40}
 
 
 /**
@@ -702,7 +702,7 @@
  *                                      X, Y, Z, E0 [, E1[, E2[, E3[, E4]]]]
  */
 #define DEFAULT_MAX_FEEDRATE {300, 300, 3, 25}
-#define DEFAULT_MAX_FEEDRATE_JOINT {50, 50, 50, 50, 50}
+#define DEFAULT_MAX_FEEDRATE_JOINT {1.5, 50, 50, 50, 50}
 
 /**
  * Default Max Acceleration (change/s) change = mm/s
@@ -711,7 +711,7 @@
  *                                      X, Y, Z, E0 [, E1[, E2[, E3[, E4]]]]
  */
 #define DEFAULT_MAX_ACCELERATION {100, 100, 30, 10000}
-#define DEFAULT_MAX_ACCELERATION_joint {25, 50, 15, 50, 50}
+#define DEFAULT_MAX_ACCELERATION_joint {13, 50, 15, 50, 50}
 /**
  * Default Acceleration (change/s) change = mm/s
  * Override with M204
@@ -736,11 +736,11 @@
 #define DEFAULT_YJERK 0.01
 #define DEFAULT_ZJERK 0.01
 
-#define DEFAULT_JJERK 0.01
-#define DEFAULT_AJERK 0.01
-#define DEFAULT_BJERK 0.01
-#define DEFAULT_CJERK 0.01
-#define DEFAULT_DJERK 0.01
+#define DEFAULT_JJERK 20
+#define DEFAULT_AJERK 20
+#define DEFAULT_BJERK 20
+#define DEFAULT_CJERK 20
+#define DEFAULT_DJERK 20
 
 #define DEFAULT_EJERK 5.0
 
