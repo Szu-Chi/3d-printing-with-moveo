@@ -72,6 +72,8 @@ enum JointEnum: unsigned char {
 #define LOOP_NUM_AXIS(VAR) LOOP_S_L_N(VAR, A_AXIS, NUM_AXIS)
 #define LOOP_NUM_AXIS_N(VAR) LOOP_S_L_N(VAR, A_AXIS, NUM_AXIS_N)
 
+#define LOOP_NUM_JOINT(VAR) LOOP_S_L_N(VAR, Joint1_AXIS, NUM_JOINT)
+
 typedef enum {
   LINEARUNIT_MM,
   LINEARUNIT_INCH

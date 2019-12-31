@@ -1483,6 +1483,7 @@
 #else
   #define MOV_AXIS XYZ
   #define NUM_AXIS XYZE
+  #define NUM_JOINT Joint_All
 #endif
 
 #endif // CONDITIONALS_POST_H

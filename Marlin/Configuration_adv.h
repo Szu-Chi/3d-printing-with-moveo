@@ -387,7 +387,7 @@
 #define Z_HOME_BUMP_MM 2
 
 //joint
-#define Joint1_HOME_BUMP_MM 1240
+#define Joint1_HOME_BUMP_MM 620
 #define Joint2_HOME_BUMP_MM 2230
 #define Joint3_HOME_BUMP_MM 6085
 #define Joint4_HOME_BUMP_MM 8640
@@ -504,7 +504,7 @@
 #if ENABLED(ULTIPANEL)
 
 #define MANUAL_FEEDRATE {50 * 60, 50 * 60, 4 * 60, 60} // Feedrates for manual moves along X, Y, Z, E from panel
-#define MANUAL1_FEEDRATE {15 * 60, 45 * 60, 100 * 60, 50 * 60, 20 * 60}
+#define MANUAL1_FEEDRATE {33 * 60, 33 * 60, 120 * 60, 80 * 60, 33 * 60}
 #define MANUAL2_FEEDRATE {0.3 * 60, 0.45 * 60, 1.3 * 60, 1.5 * 60, 0.45 * 60}
 #define ULTIPANEL_FEEDMULTIPLY // Comment to disable setting feedrate multiplier via encoder
 #endif
