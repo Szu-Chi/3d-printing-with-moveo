@@ -3324,7 +3324,6 @@ bool Planner::_populate_block_joint_self(block_t * const block, bool split_move,
     , const bool count_it/*=true*/
   #endif
 ) {
-<<<<<<< HEAD
 
   const int32_t da = target[A_AXIS] - position[A_AXIS],
                 db = target[B_AXIS] - position[B_AXIS],
@@ -3334,13 +3333,6 @@ bool Planner::_populate_block_joint_self(block_t * const block, bool split_move,
                 #endif
               ;
 
-=======
-  ///*
-  const int32_t da = target[A_AXIS] - position[A_AXIS],
-                db = target[B_AXIS] - position[B_AXIS],
-                dc = target[C_AXIS] - position[C_AXIS];
-  //*/
->>>>>>> 3a22e8d13d811a1a6d2c87fa5171cac22f007283
   const int32_t d0 = joint[Joint1_AXIS] - position_joint[Joint1_AXIS],
                 d1 = joint[Joint2_AXIS] - position_joint[Joint2_AXIS],
                 d2 = joint[Joint3_AXIS] - position_joint[Joint3_AXIS],
@@ -3640,15 +3632,6 @@ bool Planner::_populate_block_joint_self(block_t * const block, bool split_move,
   delta_mm[E_AXIS] = esteps_float * steps_to_mm[E_AXIS_N];
   
   float delta_joint_mm[Joint_All];
-<<<<<<< HEAD
-  delta_joint_mm[Joint1_AXIS] = d0 * steps_to_mm[A_AXIS]; 
-  delta_joint_mm[Joint2_AXIS] = d1 * steps_to_mm[A_AXIS];
-  delta_joint_mm[Joint3_AXIS] = d2 * steps_to_mm[A_AXIS];
-  delta_joint_mm[Joint4_AXIS] = d3 * steps_to_mm[A_AXIS];
-  delta_joint_mm[Joint5_AXIS] = d4 * steps_to_mm[A_AXIS];
-
-  if (block->steps[A_AXIS] < MIN_STEPS_PER_SEGMENT && block->steps[B_AXIS] < MIN_STEPS_PER_SEGMENT && block->steps[C_AXIS] < MIN_STEPS_PER_SEGMENT) {
-=======
   delta_joint_mm[Joint1_AXIS] = (float) d0  * steps_to_mm_joint[Joint1_AXIS];   //  / 100.23;
   delta_joint_mm[Joint2_AXIS] = (float) d1  * steps_to_mm_joint[Joint2_AXIS];   //  / 100.23;
   delta_joint_mm[Joint3_AXIS] = (float) d2  * steps_to_mm_joint[Joint3_AXIS];   //  / 100.23;
@@ -3658,7 +3641,6 @@ bool Planner::_populate_block_joint_self(block_t * const block, bool split_move,
   //if (block->steps[A_AXIS] < MIN_STEPS_PER_SEGMENT && block->steps[B_AXIS] < MIN_STEPS_PER_SEGMENT && block->steps[C_AXIS] < MIN_STEPS_PER_SEGMENT) {
   if (abs(block->step_Joint[Joint1_AXIS]) < 30 && (block->step_Joint[Joint2_AXIS] < 1 && block->step_Joint[Joint3_AXIS] < 1
       && block->step_Joint[Joint4_AXIS] < 1 && block->step_Joint[Joint5_AXIS] < 1)) {//*/
->>>>>>> 3a22e8d13d811a1a6d2c87fa5171cac22f007283
     block->millimeters = ABS(delta_mm[E_AXIS]);
   }
   else if (!millimeters) {
