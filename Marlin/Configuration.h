@@ -692,14 +692,17 @@
  *                                      X, Y, Z, E0 [, E1[, E2[, E3[, E4]]]]
  */
 
-#define DEFAULT_AXIS_STEPS_PER_UNIT {100.23, 1, 1, 418.5}
+#define DEFAULT_AXIS_STEPS_PER_UNIT {100.23, 99.86, 7999.52, 418.5}
+#define DEFAULT_JOINT_STEPS_PER_UNIT {120, 60, 60, 60, 40}
+
 
 /**
  * Default Max Feed Rate (mm/s)
  * Override with M203
  *                                      X, Y, Z, E0 [, E1[, E2[, E3[, E4]]]]
  */
-#define DEFAULT_MAX_FEEDRATE {300, 300, 300, 25}
+#define DEFAULT_MAX_FEEDRATE {300, 300, 3, 25}
+#define DEFAULT_MAX_FEEDRATE_JOINT {1.5, 50, 50, 50, 50}
 
 /**
  * Default Max Acceleration (change/s) change = mm/s
@@ -707,8 +710,8 @@
  * Override with M201
  *                                      X, Y, Z, E0 [, E1[, E2[, E3[, E4]]]]
  */
-#define DEFAULT_MAX_ACCELERATION {100, 100, 10, 10000}
-
+#define DEFAULT_MAX_ACCELERATION {100, 100, 30, 10000}
+#define DEFAULT_MAX_ACCELERATION_joint {13, 50, 15, 50, 50}
 /**
  * Default Acceleration (change/s) change = mm/s
  * Override with M204
@@ -717,9 +720,9 @@
  *   M204 R    Retract Acceleration
  *   M204 T    Travel Acceleration
  */
-#define DEFAULT_ACCELERATION         25          // X, Y, Z and E acceleration for printing moves
-#define DEFAULT_RETRACT_ACCELERATION 3000        // E acceleration for retracts
-#define DEFAULT_TRAVEL_ACCELERATION  25          // X, Y, Z acceleration for travel (non printing) moves
+#define DEFAULT_ACCELERATION         25           // X, Y, Z and E acceleration for printing moves
+#define DEFAULT_RETRACT_ACCELERATION 3000         // E acceleration for retracts
+#define DEFAULT_TRAVEL_ACCELERATION  25           // X, Y, Z acceleration for travel (non printing) moves
 
 /**
  * Default Jerk (mm/s)
@@ -732,6 +735,13 @@
 #define DEFAULT_XJERK 0.01
 #define DEFAULT_YJERK 0.01
 #define DEFAULT_ZJERK 0.01
+
+#define DEFAULT_JJERK 20
+#define DEFAULT_AJERK 20
+#define DEFAULT_BJERK 20
+#define DEFAULT_CJERK 20
+#define DEFAULT_DJERK 20
+
 #define DEFAULT_EJERK 5.0
 
 /**
@@ -1006,27 +1016,27 @@
 #define Y_MAX_POS Y_BED_SIZE
 #define Z_MAX_POS 200
 
-#define J_MIN_POS_step -24800
+#define J_MIN_POS_step -12400
 #define A_MIN_POS_step -43560
 #define B_MIN_POS_step -96400
 #define C_MIN_POS_step -37990
 #define D_MIN_POS_step -19160
 
-#define J_MAX_POS_step 24800
+#define J_MAX_POS_step 12400
 #define A_MAX_POS_step 42000
 #define B_MAX_POS_step 100000
 #define C_MAX_POS_step 111810
 #define D_MAX_POS_step 20500
 
 // joint
-#define Joint1_MIN_POS -24800
+#define Joint1_MIN_POS -12400
 #define Joint2_MIN_POS -43560
 #define Joint3_MIN_POS -96400
 #define Joint4_MIN_POS -37990
 #define Joint5_MIN_POS -19160
 
 // joint
-#define Joint1_MAX_POS 24800
+#define Joint1_MAX_POS 12400
 #define Joint2_MAX_POS 42000
 #define Joint3_MAX_POS 110000
 #define Joint4_MAX_POS 118110

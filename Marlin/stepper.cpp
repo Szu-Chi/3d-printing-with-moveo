@@ -1730,14 +1730,14 @@ uint32_t Stepper::stepper_block_phase_isr() {
       }*/
       //Sync block? Sync the stepper counts and return
       while (TEST(current_block->flag, BLOCK_BIT_SYNC_POSITION)) {
-        _set_position(
+        /*_set_position(
           current_block->position[A_AXIS], current_block->position[B_AXIS], current_block->position[C_AXIS],
           #if ENABLED(HANGPRINTER)
             current_block->position[D_AXIS],
           #endif
           current_block->position[E_AXIS]
         );
-        
+        //*/
         _set_position_Joint(current_block->position_Joint[Joint1_AXIS],current_block->position_Joint[Joint2_AXIS],current_block->position_Joint[Joint3_AXIS],
         current_block->position_Joint[Joint4_AXIS],current_block->position_Joint[Joint5_AXIS]);
 
@@ -1869,9 +1869,9 @@ uint32_t Stepper::stepper_block_phase_isr() {
         advance_dividend[C_AXIS] = current_block->steps[C_AXIS] << 1;
         advance_dividend[D_AXIS] = current_block->steps[D_AXIS] << 1;
       #else
-        advance_dividend[X_AXIS] = current_block->steps[X_AXIS] << 1;
-        advance_dividend[Y_AXIS] = current_block->steps[Y_AXIS] << 1;
-        advance_dividend[Z_AXIS] = current_block->steps[Z_AXIS] << 1;
+        //advance_dividend[X_AXIS] = current_block->steps[X_AXIS] << 1;
+        //advance_dividend[Y_AXIS] = current_block->steps[Y_AXIS] << 1;
+        //advance_dividend[Z_AXIS] = current_block->steps[Z_AXIS] << 1;
 
         advance_dividend_Joint[Joint1_AXIS] = current_block->step_Joint[Joint1_AXIS] << 1;
         advance_dividend_Joint[Joint2_AXIS] = current_block->step_Joint[Joint2_AXIS] << 1;
