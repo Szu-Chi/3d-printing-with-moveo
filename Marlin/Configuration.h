@@ -878,7 +878,7 @@
 #define MIN_PROBE_EDGE 10
 
 // X and Y axis travel speed (mm/m) between probes
-#define XY_PROBE_SPEED 15*60//8000
+#define XY_PROBE_SPEED 50*60//8000
 
 // Feedrate (mm/m) for the first approach when double-probing (MULTIPLE_PROBING
 // == 2)
@@ -906,7 +906,7 @@
  * Example: `M851 Z-5` with a CLEARANCE of 4  =>  9mm from bed to nozzle.
  *     But: `M851 Z+1` with a CLEARANCE of 2  =>  2mm from bed to nozzle.
  */
-#define Z_CLEARANCE_DEPLOY_PROBE   20 // Z Clearance for Deploy/Stow
+#define Z_CLEARANCE_DEPLOY_PROBE   25 // Z Clearance for Deploy/Stow
 #define Z_CLEARANCE_BETWEEN_PROBES 5  // Z Clearance between probe points
 #define Z_CLEARANCE_MULTI_PROBE    5  // Z Clearance between multiple probes
 //#define Z_AFTER_PROBING           5 // Z position after probing is done
@@ -1018,7 +1018,7 @@
 
 #define J_MIN_POS_step -12400
 #define A_MIN_POS_step -43560
-#define B_MIN_POS_step -96400
+#define B_MIN_POS_step -96900
 #define C_MIN_POS_step -37990
 #define D_MIN_POS_step -19160
 
@@ -1031,7 +1031,7 @@
 // joint
 #define Joint1_MIN_POS -12400
 #define Joint2_MIN_POS -43560
-#define Joint3_MIN_POS -96400
+#define Joint3_MIN_POS -96900
 #define Joint4_MIN_POS -37990
 #define Joint5_MIN_POS -19160
 

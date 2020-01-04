@@ -530,10 +530,14 @@ void report_current_position();
   };
   float probe_pt(const float &rx, const float &ry, const ProbePtRaise raise_after=PROBE_PT_NONE, const uint8_t verbose_level=0, const bool probe_relative=true);
   #define DEPLOY_PROBE() set_probe_deployed(true)
+  #define DEPLOY_PROBE_ones() set_probe_deployed_ones(true)
   #define STOW_PROBE() set_probe_deployed(false)
+  #define STOW_PROBE_ones() set_probe_deployed_ones(false)
 #else
   #define DEPLOY_PROBE()
+  #define DEPLOY_PROBE_ones()
   #define STOW_PROBE()
+  #define STOW_PROBE_ones()
 #endif
 
 #if ENABLED(HOST_KEEPALIVE_FEATURE)
