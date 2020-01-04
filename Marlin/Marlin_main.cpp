@@ -4516,11 +4516,23 @@ static void homeJoint(const JointEnum axis) {
   /*/
 
   sync_plan_position();
-  if(axis==Joint2_AXIS) current_position_Joint[Joint3_AXIS]=70000;
-  buffer_line_to_current_position();
-  planner.synchronize();
-
+  float max_feedrate_joint_init[Joint_All] = DEFAULT_MAX_FEEDRATE_JOINT;
+  float joint_steps_per_init[Joint_All] = DEFAULT_JOINT_STEPS_PER_UNIT;
+  planner.max_feedrate_mm_s_joint[Joint1_AXIS] = 50;
+  //LOOP_NUM_JOINT(i) planner.axis_steps_per_mm_joint[i] +=80; 
+  
+  if(axis==Joint2_AXIS){
+    current_position_Joint[Joint3_AXIS]=70000;
+    planner.buffer_line_joint(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], 
+                              current_position_Joint[Joint1_AXIS], current_position_Joint[Joint2_AXIS], current_position_Joint[Joint3_AXIS], 
+                              current_position_Joint[Joint4_AXIS], current_position_Joint[Joint5_AXIS], 
+                              current_position[E_CART], manual_feedrate_mm_m_joint[axis], active_extruder);
+    planner.synchronize();
+    /*planner.buffer_line_kinematic( current_position, current_position_Joint, 
+                                  MMM_TO_MMS(manual_feedrate_mm_m_joint[manual_move_joint]), 0);*/
+  } 
   do_homing_move_Joint(axis, 1.5f * max_length_Joint(axis) * Joint_home_dir, manual_feedrate_mm_m_joint[axis]);
+
   //do_homing_move_Joint(axis, 1.5f * (base_max_pos_Joint(axis)-base_min_pos_Joint(axis)) * Joint_home_dir);
 
   #if HOMING_Z_WITH_PROBE && ENABLED(BLTOUCH)
@@ -4543,6 +4555,7 @@ static void homeJoint(const JointEnum axis) {
     #if ENABLED(DEBUG_LEVELING_FEATURE)
       if (DEBUGGING(LEVELING)) SERIAL_ECHOLNPGM("Move Away:");
     #endif
+ 
     do_homing_move_Joint(axis, -bump
       #if HOMING_Z_WITH_PROBE
         , axis == Z_AXIS ? MMM_TO_MMS(Z_PROBE_SPEED_FAST) : 0.00
@@ -4550,7 +4563,7 @@ static void homeJoint(const JointEnum axis) {
       , manual_feedrate_mm_m_joint[axis]/1.6
       #endif
     );
-
+   
     // Slow move towards endstop until triggered
     #if ENABLED(DEBUG_LEVELING_FEATURE)
       if (DEBUGGING(LEVELING)) SERIAL_ECHOLNPGM("Home 2 Slow:");
@@ -4560,6 +4573,7 @@ static void homeJoint(const JointEnum axis) {
       // BLTOUCH needs to be deployed every time
       if (axis == Z_AXIS && set_bltouch_deployed(true)) return;
     #endif
+    
     do_homing_move_Joint(axis, 2 * bump , get_homing_bump_feedrate_Joint(axis));
 
     #if HOMING_Z_WITH_PROBE && ENABLED(BLTOUCH)
@@ -4633,10 +4647,12 @@ static void homeJoint(const JointEnum axis) {
 
     // For cartesian/core machines,
     // set the axis to its home position
+  
     set_Joint_is_at_home(axis);    
     do_move_Joint(axis, 0, manual_feedrate_mm_m_joint[axis]);
     sync_plan_position();
-
+    planner.max_feedrate_mm_s_joint[Joint1_AXIS] = max_feedrate_joint_init[Joint1_AXIS];
+    //LOOP_NUM_JOINT(i) planner.axis_steps_per_mm_joint[i] = joint_steps_per_init[i];
     destination_Joint[axis] = current_position_Joint[axis];
 
     #if ENABLED(DEBUG_LEVELING_FEATURE)

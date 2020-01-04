@@ -702,7 +702,7 @@
  *                                      X, Y, Z, E0 [, E1[, E2[, E3[, E4]]]]
  */
 #define DEFAULT_MAX_FEEDRATE {300, 300, 3, 25}
-#define DEFAULT_MAX_FEEDRATE_JOINT {1.5, 50, 50, 50, 50}
+#define DEFAULT_MAX_FEEDRATE_JOINT {1.5, 50, 200, 200, 70}
 
 /**
  * Default Max Acceleration (change/s) change = mm/s
@@ -1017,7 +1017,7 @@
 #define Z_MAX_POS 200
 
 #define J_MIN_POS_step -12400
-#define A_MIN_POS_step -43560
+#define A_MIN_POS_step -42250
 #define B_MIN_POS_step -96400
 #define C_MIN_POS_step -37990
 #define D_MIN_POS_step -19160
@@ -1030,7 +1030,7 @@
 
 // joint
 #define Joint1_MIN_POS -12400
-#define Joint2_MIN_POS -43560
+#define Joint2_MIN_POS -42250
 #define Joint3_MIN_POS -96400
 #define Joint4_MIN_POS -37990
 #define Joint5_MIN_POS -19160

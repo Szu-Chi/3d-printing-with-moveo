@@ -1211,8 +1211,10 @@ void lcd_quick_feedback(const bool clear_buttons) {
     current_position[X_AXIS]=18.83;
     current_position[Y_AXIS]=70.83;
     current_position[Z_AXIS]=779.94;
-
+    float max_feedrate_joint_init[Joint_All] = DEFAULT_MAX_FEEDRATE_JOINT;
+    planner.max_feedrate_mm_s_joint[Joint1_AXIS] = 50;
     planner.buffer_line_kinematic(current_position, current_position_Joint, MMM_TO_MMS(manual_feedrate_mm_m_joint[0]), 0);
+    planner.max_feedrate_mm_s_joint[Joint1_AXIS] = max_feedrate_joint_init[Joint1_AXIS];
   }
 
   #if ENABLED(BABYSTEP_ZPROBE_GFX_OVERLAY) || ENABLED(MESH_EDIT_GFX_OVERLAY)
@@ -2996,7 +2998,7 @@ void lcd_quick_feedback(const bool clear_buttons) {
 
     if (processing_manual_move) return;
 
-    if ((manual_move_joint != (int8_t)NO_AXIS) && ELAPSED(millis(), manual_move_start_time) && !planner.is_full()) {
+    if ((manual_move_axis != (int8_t)NO_AXIS || manual_move_joint != (int8_t)NO_AXIS) && ELAPSED(millis(), manual_move_start_time) && !planner.is_full()) {
 
       #if IS_KINEMATIC
 
@@ -3031,17 +3033,19 @@ void lcd_quick_feedback(const bool clear_buttons) {
 
       #else
         static float old_E0_position = 0;
-        //float current_position_liar[XYZE] = {current_position_Joint[Joint1_AXIS]/300,0,0,current_position[E_AXIS]};
+        float max_feedrate_joint_init[Joint_All] = DEFAULT_MAX_FEEDRATE_JOINT;
+        planner.max_feedrate_mm_s_joint[Joint1_AXIS] = 50;
         //planner.buffer_line_kinematic(current_position, current_position_Joint, MMM_TO_MMS(manual_feedrate_mm_m[manual_move_axis]), manual_move_axis == E_AXIS ? manual_move_e_index : active_extruder);
         planner.buffer_line_kinematic( current_position, current_position_Joint, 
                                       (current_position[E_AXIS] != old_E0_position) ? MMM_TO_MMS(manual_feedrate_mm_m[E_AXIS]):MMM_TO_MMS(manual_feedrate_mm_m_joint[manual_move_joint])
                                       , manual_move_axis == E_AXIS ? manual_move_e_index : active_extruder);
+        planner.max_feedrate_mm_s_joint[Joint1_AXIS] = max_feedrate_joint_init[Joint1_AXIS];
+        //SERIAL_ECHOLNPAIR("E_AXIS",current_position[E_AXIS]);
         //SERIAL_ECHOLNPAIR("current_position",current_position);
         //SERIAL_ECHOLNPAIR("current_position_Joint : ",current_position_Joint);
         old_E0_position = current_position[E_AXIS];
-        //manual_move_axis = (int8_t)NO_AXIS;
+        manual_move_axis = (int8_t)NO_AXIS;
         manual_move_joint = (int8_t)NO_AXIS;
-        //manual_move_joint = (int8_t)NO_AXIS;
       #endif
     }
   }
