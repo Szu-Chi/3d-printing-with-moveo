@@ -1915,6 +1915,7 @@ static void set_Joint_is_at_home(const JointEnum axis) {
   /**
    * Z Probe Z Homing? Account for the probe's Z offset.
    */
+  /*
   #if HAS_BED_PROBE && Z_HOME_DIR < 0
     if (axis == Z_AXIS) {
       #if HOMING_Z_WITH_PROBE
@@ -1935,7 +1936,7 @@ static void set_Joint_is_at_home(const JointEnum axis) {
       #endif
     }
   #endif
-
+  //*/
   #if ENABLED(DEBUG_LEVELING_FEATURE)
     if (DEBUGGING(LEVELING)) {
       #if HAS_HOME_OFFSET
@@ -4956,7 +4957,7 @@ static void homeJoint(const JointEnum axis) {
     planner.buffer_line_joint(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], 
                               current_position_Joint[Joint1_AXIS], current_position_Joint[Joint2_AXIS], current_position_Joint[Joint3_AXIS], 
                               current_position_Joint[Joint4_AXIS], current_position_Joint[Joint5_AXIS], 
-                              current_position[E_CART], manual_feedrate_mm_m_joint[axis], active_extruder);
+                              current_position[E_CART], manual_feedrate_mm_m_joint[axis+1], active_extruder);
     planner.synchronize();
     /*planner.buffer_line_kinematic( current_position, current_position_Joint, 
                                   MMM_TO_MMS(manual_feedrate_mm_m_joint[manual_move_joint]), 0);*/
@@ -6296,11 +6297,17 @@ inline void gcode_G28(const bool always_home_all) {
     //*/
 
     //*
-    if(home_all || homeD)homeJoint(Joint5_AXIS);
+    if(home_all || homeD)
+    {
+      SERIAL_ECHOLNPAIR("Base_max_pos_Joint: ", pgm_read_any(&base_max_pos_Joint_P[4]));
+      SERIAL_ECHOLNPAIR("ase_min_pos_Joint: ", pgm_read_any(&base_min_pos_Joint_P[4]));
+      SERIAL_ECHOLNPAIR("Max_length_Joint: ", pgm_read_any(&max_length_Joint_P[4]));
+      homeJoint(Joint5_AXIS);
+    }
     if(home_all || homeC)homeJoint(Joint4_AXIS);
     if(home_all || homeB)homeJoint(Joint3_AXIS);
     if(home_all || homeA)homeJoint(Joint2_AXIS);
-    if(home_all || homeJ)homeJoint(Joint1_AXIS);   
+    if(home_all || homeJ)homeJoint(Joint1_AXIS);
     //*/
     SYNC_PLAN_POSITION_KINEMATIC();
 
@@ -7618,7 +7625,7 @@ void home_all_axes() { gcode_G28(true); }
     report_current_position();
 
     char str_G30[80];
-    dtostrf(measured_z - 2 * zprobe_zoffset, 5, 2, str_G30);
+    dtostrf(measured_z - zprobe_zoffset - Z_PROBE_OFFSET_FROM_EXTRUDER, 5, 2, str_G30);
     SERIAL_ECHOPAIR("Measured_z: ",str_G30);
     SERIAL_ECHOLNPAIR(" zprobe_zoffset: ",zprobe_zoffset);
     // char loc[8]="Mesh.txt";write_new_file

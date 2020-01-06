@@ -40,19 +40,21 @@
 #define Z_MAX_LENGTH (Z_MAX_POS - (Z_MIN_POS))
 
 //joint
-/*
+//*
 #define Joint1_MAX_LENGTH (Joint1_MAX_POS - (Joint1_MIN_POS))
 #define Joint2_MAX_LENGTH (Joint2_MAX_POS - (Joint2_MIN_POS))
 #define Joint3_MAX_LENGTH (Joint3_MAX_POS - (Joint3_MIN_POS))
 #define Joint4_MAX_LENGTH (Joint4_MAX_POS - (Joint4_MIN_POS))
-#define Joint5_MAX_LENGTH (Joint5_MAX_POS - (Joint5_MIN_POS))
+#define Joint5_MAX_LENGTH 38500//(Joint5_MAX_POS - (Joint5_MIN_POS))
 //*/
 
-#define Joint1_MAX_LENGTH 49600
+/*
+#define Joint1_MAX_LENGTH 24800
 #define Joint2_MAX_LENGTH 84000
 #define Joint3_MAX_LENGTH 220000
 #define Joint4_MAX_LENGTH 147500
 #define Joint5_MAX_LENGTH 38500
+//*/
 
 // Defined only if the sanity-check is bypassed
 #ifndef X_BED_SIZE
