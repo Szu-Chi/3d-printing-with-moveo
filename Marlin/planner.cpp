@@ -1532,7 +1532,7 @@ void Planner::finish_and_disable() {
 
   // planner.buffer_line_joint(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], 
   //                           0, 0, 0, 0, 0, current_position[E_CART], 0, active_extruder);
-  disable_all_steppers();
+  // disable_all_steppers();
 }
 
 /**

@@ -10904,12 +10904,6 @@ inline void gcode_M83() { axis_relative_modes[E_CART] = true; }
  * M18, M84: Disable stepper motors
  */
 inline void gcode_M18_M84() {
-  disable_Joint1();
-  disable_Joint2();
-  disable_Joint3();
-  disable_Joint4();
-  disable_Joint5();
-
   if (parser.seenval('S')) {
     stepper_inactive_time = parser.value_millis_from_seconds();
   }
@@ -10933,6 +10927,12 @@ inline void gcode_M18_M84() {
       if (ubl.lcd_map_control) ubl.lcd_map_control = defer_return_to_status = false;
     #endif
   }
+
+  disable_Joint1();
+  disable_Joint2();
+  disable_Joint3();
+  disable_Joint4();
+  disable_Joint5();
 }
 
 /**
