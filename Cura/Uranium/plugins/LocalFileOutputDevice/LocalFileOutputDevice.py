@@ -203,9 +203,7 @@ class LocalFileOutputDevice(OutputDevice):
         data = "check"
         Shape = CuraApplication.getInstance().getShapeFromBuildVolume()
         if Shape == "moveo" and self._type_of_file == ".gcode":
-            data = self._runGocdeTranslation(self._split)
-            if data != "Error":
-                data = self._runGocdeTranslation(self._inverse_kinematics)
+            data = self._runGocdeTranslation()
         if data == "Error":
             os.system("rm -f "+ self._save_name) # Remove error file
             message = Message(catalog.i18nc("@info:status", "gcode_translation went wrong saving to <filename>{0}</filename>: <message>{1}</message>").format(job.getFileName(), str(job.getError())), title = catalog.i18nc("@info:title", "Error"))
@@ -244,9 +242,10 @@ class LocalFileOutputDevice(OutputDevice):
             self._type_of_file = ".obj"
 
     # Run gcode translation
-    def _runGocdeTranslation(self, stages):
+    def _runGocdeTranslation(self):
         now_place = os.getcwd()
-        in_or_out = " inverse_kinematics.launch gcode_out:=" if stages else " split.launch gcode_in:="
-        os.system("roslaunch gcode_translation"+ in_or_out + self._save_name)
+        file_in = " gcode_in:="
+        file_out = " gcode_out:="
+        os.system("roslaunch gcode_translation  gcode_translation.launch"+ file_in + self._save_name + file_out + self._save_name)
         read_file = open(now_place[:-10]+'/gcode_translation/check_success/check_success.txt','r')
         return read_file.read().strip()

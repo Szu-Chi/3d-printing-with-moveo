@@ -17,7 +17,7 @@
   <arg name="eps" default="1e-5"/>
   <arg name="X_offset" default="0.0"/>
   <arg name="Y_offset" default="0.0"/>
-  <arg name="Z_offset" default="0.02"/>
+  <arg name="Z_offset" default="0.0018"/>
   <!--
     arg name="num_threads" default="16"/
     -->
