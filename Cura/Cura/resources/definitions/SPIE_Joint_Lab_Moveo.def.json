@@ -1,0 +1,115 @@
+{
+    "version": 2,
+    "name": "SPIE Joint Lab Moveo",
+    "inherits": "fdmprinter",
+    "metadata": {
+        "visible": true,
+        "author": "SPIE Joint Lab",
+        "manufacturer": "SPIE Joint Lab",
+        "file_formats": "text/x-gcode;application/x-stl-ascii;application/x-stl-binary;application/x-wavefront-obj",
+        "platform": "SPIE_Joint_Lab_Moveo.stl",
+        "preferred_quality_type": "normal",
+        "machine_extruder_trains":
+        {
+            "0": "maker_starter_extruder_0"
+        }
+    },
+
+    "overrides": {
+        "machine_name": { "default_value": "SPIE Joint Lab Moveo" },
+        "machine_shape":{
+            "default_value": "moveo"
+        },
+        "machine_width": {
+            "default_value": 964
+        },
+        "machine_depth": {
+            "default_value": 964
+        },
+        "machine_height": {
+            "default_value": 484
+        },
+        "machine_heated_bed": {
+            "default_value": false
+        },
+        "machine_center_is_zero": {
+            "default_value": true
+        },
+        "gantry_height": {
+            "value": "55"
+        },
+        "machine_gcode_flavor": {
+            "default_value": "RepRap (Marlin/Sprinter)"
+        },
+        "machine_disallowed_areas": {
+            "default_value": []
+        },
+        "machine_nozzle_tip_outer_diameter": {
+            "default_value": 1
+        },
+        "machine_nozzle_head_distance": {
+            "default_value": 3
+        },
+        "machine_nozzle_expansion_angle": {
+            "default_value": 45
+        },
+        "layer_height": {
+            "default_value": 0.32
+        },
+        "layer_height_0": {
+            "default_value": 0.32
+        },
+        "speed_print": {
+            "default_value": 37.5
+        },
+        "speed_travel": {
+            "default_value": 60
+        },
+        "speed_slowdown_layers": {
+            "default_value": 4
+        },
+        "infill_sparse_density": {
+            "default_value": 20
+        },
+        "cool_min_layer_time": {
+            "default_value": 5
+        },
+        "cool_min_layer_time_fan_speed_max": {
+            "default_value": 10
+        },
+        "support_type": {
+            "default_value": "Everywhere"
+        },
+        "support_angle": {
+            "default_value": 45
+        },
+        "support_xy_distance": {
+            "default_value": 1
+        },
+        "support_z_distance": {
+            "default_value": 0.2
+        },
+        "support_pattern": {
+            "default_value": "ZigZag"
+        },
+        "support_infill_rate": {
+            "value": "15 if support_enable else 0 if support_tree_enable else 15"
+        },
+        "adhesion_type": {
+            "default_value": "skirt"
+        },
+        "skirt_brim_minimal_length": {
+            "default_value": 100
+        },
+        "raft_airgap": {
+            "default_value": 0.2
+        },
+        "raft_surface_layers": {
+            "default_value": 2
+        },
+        "machine_start_gcode": {
+            "default_value": ";Sliced at: {day} {date} {time}\n;Prime the extruder\nM104 S{material_print_temperature} ;set temperatures\nM109 S{material_print_temperature} ;wait for temperature\nG92 E0\nG1 F200 E3\nG92 E0"},
+        "machine_end_gcode": {
+            "default_value": "M104 S0\n;Retract the filament\nG92 E1\nG1 E-1 F300\nG1 F2000 X0 Y300 Z300\nG28 ;home"}
+    }
+}
