@@ -1,4 +1,7 @@
 [submodule "trac_ik"]
 	path = trac_ik
 	url = https://bitbucket.org/traclabs/trac_ik.git
+[submodule "stb"]
+	path = Cura/CuraEngine/build/stb-prefix/src/stb
+	url = https://github.com/nothings/stb.git
 

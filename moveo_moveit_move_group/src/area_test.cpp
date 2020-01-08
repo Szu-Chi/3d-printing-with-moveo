@@ -42,7 +42,13 @@ bool check_trac_ik_valid(TRAC_IK::TRAC_IK &tracik_solver,KDL::Chain &chain, KDL:
 }
 
 void motor_setep_convert(Eigen::VectorXd &data){
-  static const double joint_division[5] = {200*32*10.533*0.95, 200*16*5.71428*0.95, 1028.57143*16*4.523809*0.95, 200*32, 200*32*4.3306};
+                                        // steps * micro_steps * belt * error
+  static const double joint_division[6] = {200          * 32  * 10       * 1,     //J 64000
+                                           200          * 128 * 5.5      * 1,     //A 140800
+                                           19810.111813 * 4   * 4.357143 * 1,     //B 345261.960060921
+                                           5370.24793   * 32  * 1        * 1,     //C 171847.93376
+                                           1036.36364   * 16  * 4.5      * 1      //D 74618.18208
+                                           };
   for(int i = 0; i < 5; i++){
     data(i) = data(i)/(M_PI)*180 * joint_division[i]/360;
   }
@@ -246,7 +252,7 @@ int main(int argc, char **argv)
     }
     end_ = ros::WallTime::now();
     double execution_time = (end_ - start_).toNSec() * 1e-9;
-    ROS_INFO_STREAM("Exectution time (ms): " << execution_time);
+    ROS_INFO_STREAM("Exectution time (s): " << execution_time);
     for(int i = 0; i < num_threads; i++){
       delete tracik_solver[i];
     }
