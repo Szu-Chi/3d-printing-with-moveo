@@ -807,6 +807,7 @@ class Planner {
      * For CORE machines apply translation from ABC to XYZ.
      */
     static float get_axis_position_mm(const AxisEnum axis);
+    static int32_t get_joint_position_mm(const JointEnum axis);
 
     // SCARA AB axes are in degrees, not mm
     #if IS_SCARA

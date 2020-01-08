@@ -1569,6 +1569,14 @@ float Planner::get_axis_position_mm(const AxisEnum axis) {
   return axis_steps * steps_to_mm[axis];
 }
 
+int32_t Planner::get_joint_position_mm(const JointEnum axis) {
+  int32_t axis_steps;
+
+  axis_steps = stepper.position_Joint(axis);
+
+  return axis_steps;
+}
+
 /**
  * Block until all buffered steps are executed / cleaned
  */
