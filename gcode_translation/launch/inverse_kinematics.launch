@@ -15,9 +15,9 @@
   <arg name="timeout" default="0.15" />
   <arg name="timeout_second" default="1" />
   <arg name="eps" default="1e-5"/>
-  <arg name="X_offset" default="0.0"/>
-  <arg name="Y_offset" default="0.0"/>
-  <arg name="Z_offset" default="0.0018"/>
+  <arg name="X_offset" default="-0.027"/>
+  <arg name="Y_offset" default="-0.007"/>
+  <arg name="Z_offset" default="0.0"/>
   <!--
     arg name="num_threads" default="16"/
     -->

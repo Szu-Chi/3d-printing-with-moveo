@@ -295,7 +295,7 @@ int main(int argc, char **argv){
             
             double z_pos = calc_z((end_effector_target_vol.data[0]+0.09)*1000, (end_effector_target_vol.data[1]-0.2)*1000)/1000;
             // 9.18 nozzle high
-            end_effector_target_vol.data[2] = z_init + 0.00462; //z_pos;
+            end_effector_target_vol.data[2] = z_init;// + 0.00462; //z_pos;
             find_end_effector_target_vol.push_back(end_effector_target_vol);
             save_place.push_back(i);
             // Calculate position angle
