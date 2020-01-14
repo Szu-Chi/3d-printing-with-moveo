@@ -48,7 +48,15 @@ enum AxisEnum : unsigned char {
   #endif
   X_HEAD, Y_HEAD, Z_HEAD,
   ALL_AXES  = 0xFE,
-  NO_AXIS   = 0xFF
+  NO_AXIS   = 0xFF 
+};
+
+enum JointEnum: unsigned char {
+  Joint1_AXIS = 0,
+  Joint2_AXIS = 1,
+  Joint3_AXIS = 2,
+  Joint4_AXIS = 3,
+  Joint5_AXIS = 4
 };
 
 #define LOOP_S_LE_N(VAR, S, N) for (uint8_t VAR=S; VAR<=N; VAR++)
@@ -63,6 +71,8 @@ enum AxisEnum : unsigned char {
 #define LOOP_MOV_AXIS(VAR) LOOP_S_L_N(VAR, A_AXIS, MOV_AXIS)
 #define LOOP_NUM_AXIS(VAR) LOOP_S_L_N(VAR, A_AXIS, NUM_AXIS)
 #define LOOP_NUM_AXIS_N(VAR) LOOP_S_L_N(VAR, A_AXIS, NUM_AXIS_N)
+
+#define LOOP_NUM_JOINT(VAR) LOOP_S_L_N(VAR, Joint1_AXIS, NUM_JOINT)
 
 typedef enum {
   LINEARUNIT_MM,
@@ -80,13 +90,15 @@ typedef enum {
  * Not yet widely applied
  */
 enum DebugFlags : unsigned char {
-  DEBUG_NONE          = 0,
+  //DEBUG_NONE          = 0,
+  DEBUG_NONE          = 1,
   DEBUG_ECHO          = _BV(0), ///< Echo commands in order as they are processed
   DEBUG_INFO          = _BV(1), ///< Print messages for code that has debug output
   DEBUG_ERRORS        = _BV(2), ///< Not implemented
   DEBUG_DRYRUN        = _BV(3), ///< Ignore temperature setting and E movement commands
   DEBUG_COMMUNICATION = _BV(4), ///< Not implemented
-  DEBUG_LEVELING      = _BV(5), ///< Print detailed output for homing and leveling
+  //DEBUG_LEVELING      = _BV(5), ///< Print detailed output for homing and leveling
+  DEBUG_LEVELING      = 1, ///< Print detailed output for homing and leveling
   DEBUG_MESH_ADJUST   = _BV(6), ///< UBL bed leveling
   DEBUG_ALL           = 0xFF
 };

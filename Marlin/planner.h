@@ -92,10 +92,12 @@ typedef struct {
     struct {
       // Fields used by the Bresenham algorithm for tracing the line
       uint32_t steps[NUM_AXIS];             // Step count along each axis
+      uint32_t step_Joint[Joint_All];
     };
     // Data used by all sync blocks
     struct {
       int32_t position[NUM_AXIS];           // New position to force when this sync block is executed
+      int32_t position_Joint[Joint_All];
     };
   };
   uint32_t step_event_count;                // The number of step events required to complete this block
@@ -121,6 +123,7 @@ typedef struct {
   #endif
 
   uint8_t direction_bits;                   // The direction bit set for this block (refers to *_DIRECTION_BIT in config.h)
+  uint8_t direction_bits_joint;
 
   // Advance extrusion
   #if ENABLED(LIN_ADVANCE)
@@ -195,9 +198,16 @@ class Planner {
     static uint32_t max_acceleration_mm_per_s2[NUM_AXIS_N],    // (mm/s^2) M201 XYZE
                     max_acceleration_steps_per_s2[NUM_AXIS_N], // (steps/s^2) Derived from mm_per_s2
                     min_segment_time_us;                       // (µs) M205 Q
+
+    static uint32_t max_acceleration_mm_per_s2_joint[NUM_JOINT],    // (mm/s^2) M201 XYZE
+                    max_acceleration_steps_per_s2_joint[NUM_JOINT]; // (steps/s^2) Derived from mm_per_s2
+                              
     static float max_feedrate_mm_s[NUM_AXIS_N], // (mm/s) M203 XYZE - Max speeds
+                 max_feedrate_mm_s_joint[NUM_JOINT],
                  axis_steps_per_mm[NUM_AXIS_N], // (steps) M92 XYZE - Steps per millimeter
+                 axis_steps_per_mm_joint[NUM_JOINT], 
                  steps_to_mm[NUM_AXIS_N],       // (mm) Millimeters per step
+                 steps_to_mm_joint[NUM_JOINT],      
                  min_feedrate_mm_s,             // (mm/s) M205 S - Minimum linear feedrate
                  acceleration,                  // (mm/s^2) M204 S - Normal acceleration. DEFAULT ACCELERATION for all printing moves.
                  retract_acceleration,          // (mm/s^2) M204 R - Retract acceleration. Filament pull-back and push-forward while standing still in the other axes
@@ -215,6 +225,7 @@ class Planner {
       #endif
     #else
       static float max_jerk[NUM_AXIS];          // (mm/s^2) M205 XYZE - The largest speed change requiring no acceleration.
+      static float max_jerk_joint[NUM_JOINT];
     #endif
 
     #if ENABLED(LINE_BUILDUP_COMPENSATION_FEATURE)
@@ -277,11 +288,13 @@ class Planner {
      * Recalculated if any axis_steps_per_mm are changed by gcode
      */
     static int32_t position[NUM_AXIS];
+    static int32_t position_joint[NUM_JOINT];
 
     /**
      * Speed of previous path line segment
      */
     static float previous_speed[NUM_AXIS];
+    static float previous_speed_joint[NUM_JOINT];
 
     /**
      * Nominal speed of previous path line segment (mm/s)^2
@@ -513,6 +526,18 @@ class Planner {
       #endif
     );
 
+    static bool _buffer_steps_joint(const int32_t (&target)[NUM_AXIS], const int32_t (&joint)[5]
+      #if HAS_POSITION_FLOAT
+        , const float (&target_float)[NUM_AXIS]
+      #endif
+      , float fr_mm_s, const uint8_t extruder, const float &millimeters=0.0
+      #if ENABLED(UNREGISTERED_MOVE_SUPPORT)
+        , const bool count_it=true
+      #endif
+    );
+
+
+
     /**
      * Planner::_populate_block
      *
@@ -537,6 +562,28 @@ class Planner {
       #endif
     );
 
+
+    static bool _populate_block_joint(block_t * const block, bool split_move,
+        const int32_t (&target)[NUM_AXIS], const int32_t (&joint)[Joint_All]
+      #if HAS_POSITION_FLOAT
+        , const float (&target_float)[NUM_AXIS]
+      #endif
+      , float fr_mm_s, const uint8_t extruder, const float &millimeters=0.0
+      #if ENABLED(UNREGISTERED_MOVE_SUPPORT)
+        , const bool count_it=true
+      #endif
+    );
+
+    static bool _populate_block_joint_self(block_t * const block, bool split_move,
+        const int32_t (&target)[NUM_AXIS], const int32_t (&joint)[Joint_All]
+      #if HAS_POSITION_FLOAT
+        , const float (&target_float)[NUM_AXIS]
+      #endif
+      , float fr_mm_s, const uint8_t extruder, const float &millimeters=0.0
+      #if ENABLED(UNREGISTERED_MOVE_SUPPORT)
+        , const bool count_it=true
+      #endif
+    );
     /**
      * Planner::buffer_sync_block
      * Add a block to the buffer that just updates the position
@@ -567,16 +614,16 @@ class Planner {
       #endif
     );
 
-    static bool buffer_segment_joint(const long &j1, const long &j2, const long &j3, const long &j4, const long &j5
+    static bool buffer_segment_joint(const float &a, const float &b, const float &c, 
+      const int32_t &j1, const int32_t &j2, const int32_t &j3, const int32_t &j4, const int32_t &j5,
       #if ENABLED(HANGPRINTER)
         const float &d,
       #endif
-      , const float &e, const float &fr_mm_s, const uint8_t extruder, const float &millimeters=0.0
+      const float &e, const float &fr_mm_s, const uint8_t extruder, const float &millimeters=0.0
       #if ENABLED(UNREGISTERED_MOVE_SUPPORT)
         , bool count_it=true
       #endif
     );
-
 
 
     static void _set_position_mm(const float &a, const float &b, const float &c,
@@ -585,6 +632,8 @@ class Planner {
       #endif
       const float &e
     );
+
+    static void _set_position_mm_Joint(const uint32_t &j1, const uint32_t &j2, const uint32_t &j3, const uint32_t &j4, const uint32_t &j5);
 
     /**
      * Add a new linear movement to the buffer.
@@ -617,28 +666,34 @@ class Planner {
       );
     }
 
-
-
-
-    FORCE_INLINE static bool buffer_line_to_joint(long j1, long j2, long j3, long j4, long j5
+    FORCE_INLINE static bool buffer_line_joint(ARG_X, ARG_Y, ARG_Z,
+      const int32_t &j1, const int32_t &j2, const int32_t &j3, const int32_t &j4, const int32_t &j5,
       #if ENABLED(HANGPRINTER)
         ARG_E1,
       #endif
-    , const float &e, const float &fr_mm_s, const uint8_t extruder, const float millimeters = 0.0)
-    {
+      const float &e, const float &fr_mm_s, const uint8_t extruder, const float millimeters = 0.0
+    ) {
+      /*
+      SERIAL_ECHOLNPGM(">>buffer_line_joint");
+      SERIAL_ECHOPAIR("feedrate_mm_s:",feedrate_mm_s);
+      SERIAL_ECHOPAIR(" J1:",j1); 
+      SERIAL_ECHOPAIR(" J2:",j2); 
+      SERIAL_ECHOPAIR(" J3:",j3); 
+      SERIAL_ECHOPAIR(" J4:",j4); 
+      SERIAL_ECHOLNPAIR(" J5:",j5);
+      //*/ 
+
       #if PLANNER_LEVELING && IS_CARTESIAN
         apply_leveling(rx, ry, rz);
       #endif
-
-      return buffer_segment_joint(j1, j2, j3, j4, j5
+      return buffer_segment_joint(rx, ry, rz, j1, j2, j3, j4, j5,
         #if ENABLED(HANGPRINTER)
           re1,
         #endif
         e, fr_mm_s, extruder, millimeters
       );
+      
     }
-
-
 
 
     /**
@@ -651,13 +706,15 @@ class Planner {
      *  extruder     - target extruder
      *  millimeters  - the length of the movement, if known
      */
-    FORCE_INLINE static bool buffer_line_kinematic(const float (&cart)[XYZE], const float &fr_mm_s, const uint8_t extruder, const float millimeters = 0.0) {
+    FORCE_INLINE static bool buffer_line_kinematic(const float (&cart)[XYZE], const int32_t (&jcart)[Joint_All], const float &fr_mm_s, const uint8_t extruder, const float millimeters = 0.0) {
       #if PLANNER_LEVELING
-        float raw[XYZ] = { cart[X_AXIS], cart[Y_AXIS], cart[Z_AXIS] };
+        float raw[XYZ] = { cart[X_AXIS], cart[Y_AXIS], cart[Z_AXIS]};
+        const int32_t (&jraw)[Joint_All] = jcart;
         apply_leveling(raw);
       #else
         const float (&raw)[XYZE] = cart;
       #endif
+      
       #if IS_KINEMATIC
         inverse_kinematics(raw);
         return buffer_segment(
@@ -669,7 +726,43 @@ class Planner {
           , cart[E_CART], fr_mm_s, extruder, millimeters
         );
       #else
-        return buffer_segment(raw[X_AXIS], raw[Y_AXIS], raw[Z_AXIS], cart[E_CART], fr_mm_s, extruder, millimeters);
+        //return buffer_segment(raw[X_AXIS], raw[Y_AXIS], raw[Z_AXIS], cart[E_CART], fr_mm_s, extruder, millimeters);
+        return buffer_segment_joint(raw[X_AXIS],raw[Y_AXIS],raw[Z_AXIS],jraw[Joint1_AXIS], jraw[Joint2_AXIS], jraw[Joint3_AXIS], jraw[Joint4_AXIS], jraw[Joint5_AXIS],cart[E_AXIS], fr_mm_s, extruder, millimeters);
+      #endif
+    }
+
+    /**
+     * Add a new linear movement to the buffer.
+     * The target is cartesian, it's translated to delta/scara if
+     * needed.
+     *
+     *  jcart        - J,A,B,C,D CARTESIAN target in mm
+     *  fr_mm_s      - (target) speed of the move (mm/s)
+     *  extruder     - target extruder
+     *  millimeters  - the length of the movement, if known
+     */
+
+    FORCE_INLINE static bool buffer_line_kinematic_joint(const int32_t (&jcart)[Joint_All], const float &fr_mm_s, const uint8_t extruder, const float millimeters = 0.0) {
+      /*#if PLANNER_LEVELING
+        //float jraw[XYZ] = { jcart[X_AXIS], jcart[Y_AXIS], jcart[Z_AXIS] };
+        const long (&jraw)[Joint_All] = jcart;
+        apply_leveling(jraw);
+      #else
+        const long (&jraw)[Joint_All] = jcart;
+      #endif*/
+      const int32_t (&jraw)[Joint_All] = jcart;
+      #if IS_KINEMATIC
+        inverse_kinematics(raw);
+        return buffer_segment(
+          #if ENABLED(HANGPRINTER)
+            line_lengths[A_AXIS], line_lengths[B_AXIS], line_lengths[C_AXIS], line_lengths[D_AXIS]
+          #else
+            delta[A_AXIS], delta[B_AXIS], delta[C_AXIS]
+          #endif
+          , cart[E_CART], fr_mm_s, extruder, millimeters
+        );
+      #else
+        return buffer_segment_joint(0,0,0,jraw[Joint1_AXIS], jraw[Joint2_AXIS], jraw[Joint3_AXIS], jraw[Joint4_AXIS], jraw[Joint5_AXIS], 0, fr_mm_s, extruder, millimeters);
       #endif
     }
 
@@ -686,7 +779,7 @@ class Planner {
       #if ENABLED(HANGPRINTER)
         ARG_E1,
       #endif
-      const float &e
+      int32_t &j1, int32_t &j2, int32_t &j3,int32_t &j4,int32_t &j5,const float &e
     ) {
       #if PLANNER_LEVELING && IS_CARTESIAN
         apply_leveling(rx, ry, rz);
@@ -697,9 +790,15 @@ class Planner {
         #endif
         e
       );
+      _set_position_mm_Joint(j1,j2,j3,j4,j5);
     }
+    /*FORCE_INLINE static void set_position_mm_Joint(int32_t &j1, int32_t &j2, int32_t &j3,int32_t &j4,int32_t &j5) {
+       _set_position_mm_Joint(j1,j2,j3,j4,j5);
+    }*/
+
     static void set_position_mm_kinematic(const float (&cart)[XYZE]);
     static void set_position_mm(const AxisEnum axis, const float &v);
+    static void set_position_mm_Joint(const JointEnum axis, const float &v);
     FORCE_INLINE static void set_z_position_mm(const float &z) { set_position_mm(Z_AXIS, z); }
     FORCE_INLINE static void set_e_position_mm(const float &e) { set_position_mm(E_AXIS, e); }
 
@@ -708,6 +807,7 @@ class Planner {
      * For CORE machines apply translation from ABC to XYZ.
      */
     static float get_axis_position_mm(const AxisEnum axis);
+    static int32_t get_joint_position_mm(const JointEnum axis);
 
     // SCARA AB axes are in degrees, not mm
     #if IS_SCARA
@@ -720,9 +820,11 @@ class Planner {
 
     // Called when an endstop is triggered. Causes the machine to stop inmediately
     static void endstop_triggered(const AxisEnum axis);
+    static void endstop_triggered_Joint(const JointEnum axis);
 
     // Triggered position of an axis in mm (not core-savvy)
     static float triggered_position_mm(const AxisEnum axis);
+    static int32_t triggered_position_mm_Joint(const JointEnum axis);
 
     // Block until all buffered steps are executed / cleaned
     static void synchronize();

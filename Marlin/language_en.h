@@ -64,8 +64,17 @@
 #ifndef MSG_AUTOSTART
   #define MSG_AUTOSTART                       _UxGT("Autostart")
 #endif
+#ifndef MSG_Go_Zero
+  #define MSG_Go_Zero                         _UxGT("Go to Joint Zero")
+#endif
 #ifndef MSG_DISABLE_STEPPERS
   #define MSG_DISABLE_STEPPERS                _UxGT("Disable steppers")
+#endif
+#ifndef MSG_ENABLE_STEPPERS
+  #define MSG_ENABLE_STEPPERS                 _UxGT("Enable steppers")
+#endif
+#ifndef MSG_ENABLE_ColdExtrudes
+  #define MSG_ENABLE_ColdExtrudes             _UxGT("Enable cold extrudes")
 #endif
 #ifndef MSG_DEBUG_MENU
   #define MSG_DEBUG_MENU                      _UxGT("Debug Menu")
@@ -75,6 +84,9 @@
 #endif
 #ifndef MSG_AUTO_HOME
   #define MSG_AUTO_HOME                       _UxGT("Auto home")
+#endif
+#ifndef MSG_AUTO_G29
+  #define MSG_AUTO_G29                        _UxGT("G29 P5 T")
 #endif
 #ifndef MSG_AUTO_HOME_X
   #define MSG_AUTO_HOME_X                     _UxGT("Home X")
@@ -444,6 +456,44 @@
 #ifndef MSG_MOVE_E
   #define MSG_MOVE_E                          _UxGT("Extruder")
 #endif
+
+//joint 
+#ifndef MSG_MOVE_J
+  #define MSG_MOVE_J                          _UxGT("Move J")
+#endif
+#ifndef MSG_MOVE_A
+  #define MSG_MOVE_A                          _UxGT("Move A")
+#endif
+#ifndef MSG_MOVE_B
+  #define MSG_MOVE_B                          _UxGT("Move B")
+#endif
+#ifndef MSG_MOVE_C
+  #define MSG_MOVE_C                          _UxGT("Move C")
+#endif
+#ifndef MSG_MOVE_D
+  #define MSG_MOVE_D                          _UxGT("Move D")
+#endif
+
+#ifndef MSG_HOME_J
+  #define MSG_HOME_J                          _UxGT("HOME J")
+#endif
+#ifndef MSG_HOME_A
+  #define MSG_HOME_A                          _UxGT("HOME A")
+#endif
+#ifndef MSG_HOME_B
+  #define MSG_HOME_B                          _UxGT("HOME B")
+#endif
+#ifndef MSG_HOME_C
+  #define MSG_HOME_C                          _UxGT("HOME C")
+#endif
+#ifndef MSG_HOME_D
+  #define MSG_HOME_D                          _UxGT("HOME D")
+#endif
+#ifndef MSG_HOME_ALL
+  #define MSG_HOME_ALL                        _UxGT("HOME ALL")
+#endif
+//end joint
+
 #ifndef MSG_MOVE_01MM
   #define MSG_MOVE_01MM                       _UxGT("Move 0.1mm")
 #endif
@@ -453,6 +503,24 @@
 #ifndef MSG_MOVE_10MM
   #define MSG_MOVE_10MM                       _UxGT("Move 10mm")
 #endif
+
+#ifndef MSG_MOVE_1step
+  #define MSG_MOVE_1step                      _UxGT("Move 1step")
+#endif
+#ifndef MSG_MOVE_10step
+  #define MSG_MOVE_10step                     _UxGT("Move 10step")
+#endif
+#ifndef MSG_MOVE_100step
+  #define MSG_MOVE_100step                    _UxGT("Move 100step")
+#endif
+#ifndef MSG_MOVE_500step
+  #define MSG_MOVE_500step                    _UxGT("Move 500step")
+#endif
+#ifndef MSG_MOVE_1000step
+  #define MSG_MOVE_1000step                   _UxGT("Move 1000step")
+#endif
+
+
 #ifndef MSG_SPEED
   #define MSG_SPEED                           _UxGT("Speed")
 #endif

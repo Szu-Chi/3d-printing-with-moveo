@@ -442,6 +442,69 @@ void reset_stepper_drivers();    // Called by settings.load / settings.reset
 #define E4_STEP_INIT SET_OUTPUT(E4_STEP_PIN)
 #define E4_STEP_WRITE(STATE) WRITE(E4_STEP_PIN,STATE)
 #define E4_STEP_READ READ(E4_STEP_PIN)
+/**
+.*.Joint
+.*/
+//Joint1
+#define Joint1_ENABLE_INIT         SET_OUTPUT(Joint1_ENABLE_PIN)
+#define Joint1_ENABLE_WRITE(STATE) WRITE(Joint1_ENABLE_PIN,STATE)
+#define Joint1_ENABLE_READ         READ(Joint1_ENABLE_PIN)
+
+#define Joint1_DIR_INIT            SET_OUTPUT(Joint1_DIR_PIN)
+#define Joint1_DIR_WRITE(STATE)    WRITE(Joint1_DIR_PIN,STATE)
+#define Joint1_DIR_READ            READ(Joint1_DIR_PIN)
+
+#define Joint1_STEP_INIT           SET_OUTPUT(Joint1_STEP_PIN)
+#define Joint1_STEP_WRITE(STATE)   WRITE(Joint1_STEP_PIN,STATE)
+#define Joint1_STEP_READ           READ(Joint1_STEP_PIN)
+//Joint2
+#define Joint2_ENABLE_INIT         SET_OUTPUT(Joint2_ENABLE_PIN)
+#define Joint2_ENABLE_WRITE(STATE) WRITE(Joint2_ENABLE_PIN,STATE)
+#define Joint2_ENABLE_READ         READ(Joint2_ENABLE_PIN)
+
+#define Joint2_DIR_INIT            SET_OUTPUT(Joint2_DIR_PIN)
+#define Joint2_DIR_WRITE(STATE)    WRITE(Joint2_DIR_PIN,STATE)
+#define Joint2_DIR_READ            READ(Joint2_DIR_PIN)
+
+#define Joint2_STEP_INIT           SET_OUTPUT(Joint2_STEP_PIN)
+#define Joint2_STEP_WRITE(STATE)   WRITE(Joint2_STEP_PIN,STATE)
+#define Joint2_STEP_READ           READ(Joint2_STEP_PIN)
+//Joint3
+#define Joint3_ENABLE_INIT         SET_OUTPUT(Joint3_ENABLE_PIN)
+#define Joint3_ENABLE_WRITE(STATE) WRITE(Joint3_ENABLE_PIN,STATE)
+#define Joint3_ENABLE_READ         READ(Joint3_ENABLE_PIN)
+
+#define Joint3_DIR_INIT            SET_OUTPUT(Joint3_DIR_PIN)
+#define Joint3_DIR_WRITE(STATE)    WRITE(Joint3_DIR_PIN,STATE)
+#define Joint3_DIR_READ            READ(Joint3_DIR_PIN)
+
+#define Joint3_STEP_INIT           SET_OUTPUT(Joint3_STEP_PIN)
+#define Joint3_STEP_WRITE(STATE)   WRITE(Joint3_STEP_PIN,STATE)
+#define Joint3_STEP_READ           READ(Joint3_STEP_PIN)
+//Joint4
+#define Joint4_ENABLE_INIT         SET_OUTPUT(Joint4_ENABLE_PIN)
+#define Joint4_ENABLE_WRITE(STATE) WRITE(Joint4_ENABLE_PIN,STATE)
+#define Joint4_ENABLE_READ         READ(Joint4_ENABLE_PIN)
+
+#define Joint4_DIR_INIT            SET_OUTPUT(Joint4_DIR_PIN)
+#define Joint4_DIR_WRITE(STATE)    WRITE(Joint4_DIR_PIN,STATE)
+#define Joint4_DIR_READ            READ(Joint4_DIR_PIN)
+
+#define Joint4_STEP_INIT           SET_OUTPUT(Joint4_STEP_PIN)
+#define Joint4_STEP_WRITE(STATE)   WRITE(Joint4_STEP_PIN,STATE)
+#define Joint4_STEP_READ           READ(Joint4_STEP_PIN)
+//Joint5
+#define Joint5_ENABLE_INIT         SET_OUTPUT(Joint5_ENABLE_PIN)
+#define Joint5_ENABLE_WRITE(STATE) WRITE(Joint5_ENABLE_PIN,STATE)
+#define Joint5_ENABLE_READ         READ(Joint5_ENABLE_PIN)
+
+#define Joint5_DIR_INIT            SET_OUTPUT(Joint5_DIR_PIN)
+#define Joint5_DIR_WRITE(STATE)    WRITE(Joint5_DIR_PIN,STATE)
+#define Joint5_DIR_READ            READ(Joint5_DIR_PIN)
+
+#define Joint5_STEP_INIT           SET_OUTPUT(Joint5_STEP_PIN)
+#define Joint5_STEP_WRITE(STATE)   WRITE(Joint5_STEP_PIN,STATE)
+#define Joint5_STEP_READ           READ(Joint5_STEP_PIN)
 
 /**
  * Extruder indirection for the single E axis
