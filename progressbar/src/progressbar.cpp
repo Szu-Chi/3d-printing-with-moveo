@@ -4,8 +4,9 @@
 #include <QString>
 #include "std_msgs/Float64MultiArray.h"
 
-int now_value = 0; 
-QString a = "N/A";
+int now_value = 0;
+bool start_judge = false;
+QString a = "Please wait";
 
 void receive(const std_msgs::Float64MultiArray& transfre_data){
   double remind = transfre_data.data[2]/1000.0*int(transfre_data.data[0]-transfre_data.data[1]);
@@ -20,14 +21,25 @@ void receive(const std_msgs::Float64MultiArray& transfre_data){
   now_value = int(transfre_data.data[1]/transfre_data.data[0]*10000);
 }
 
+void start(const std_msgs::Float64MultiArray& receive){
+  start_judge = true;
+}
+
 int main(int argc, char **argv)
 {
   ros::init(argc, argv, "progressbar");
   ros::NodeHandle node_handle("~");
   ros::AsyncSpinner spinner(2);
   spinner.start();
-  ros::Publisher shutdown_pub = node_handle.advertise<std_msgs::Float64MultiArray>("shutdown", 1000);
+
   ros::Subscriber gcode_translation_sub = node_handle.subscribe("/inverse_kinematics/progress", 100000, receive);
+  ros::Subscriber inverse_kinematics_sub = node_handle.subscribe("/inverse_kinematics/progress_start", 100000, start);
+
+  while(!start_judge){
+    if(ros::ok()) ros::spinOnce();
+    else return -1;
+  }
+
   QApplication app(argc, argv);
   QProgressDialog dialog("Progress", "Cancel", 0, 10000);
   dialog.setWindowTitle("Gcode Translation");
@@ -38,16 +50,7 @@ int main(int argc, char **argv)
     dialog.setValue(now_value);
     dialog.setLabelText(a);
     QCoreApplication::processEvents();
-    if(dialog.wasCanceled()){
-      std_msgs::Float64MultiArray push;
-      push.data.resize(1);
-      push.data[0] = 1;
-      shutdown_pub.publish(push);
-      break;
-    }
-    if(now_value == 10000){
-      break;
-    }
+    if(dialog.wasCanceled() || now_value == 10000) break;
   }
   ros::shutdown();  
   return 0;

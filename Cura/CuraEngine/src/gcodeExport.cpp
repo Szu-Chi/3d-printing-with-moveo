@@ -14,6 +14,7 @@
 #include "Slice.h"
 #include "communication/Communication.h" //To send layer view data.
 #include "settings/types/LayerIndex.h"
+#include "settings/EnumSettings.h" //For EFillMethod.
 #include "utils/Date.h"
 #include "utils/logoutput.h"
 #include "utils/string.h" // MMtoStream, PrecisionedDouble
@@ -270,8 +271,13 @@ std::string GCodeExport::getFileHeader(const std::vector<bool>& extruder_is_used
         prefix << ";MAXX:" << INT2MM(total_bounding_box.max.x) << new_line;
         prefix << ";MAXY:" << INT2MM(total_bounding_box.max.y) << new_line;
         prefix << ";MAXZ:" << INT2MM(total_bounding_box.max.z) << new_line;
-        prefix << "G28 ;Home" << new_line;
-        prefix << "G1 X0 Y300 Z15 F2000" << new_line;
+        const Settings& mesh_group_settings = Application::getInstance().current_slice->scene.current_mesh_group->settings;
+        if(mesh_group_settings.get<BuildPlateShape>("machine_shape") == BuildPlateShape::MOVEO)
+        {
+            prefix << "G28 ;Home" << new_line;
+            prefix << "G1 X0 Y300 Z15 F2000" << new_line;
+            prefix << "M400" << new_line;
+        }
     }
 
     return prefix.str();

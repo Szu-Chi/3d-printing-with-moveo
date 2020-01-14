@@ -439,7 +439,7 @@ class BuildVolume(SceneNode):
             #        y = float(y + a[i]*(z**(10-i)))
             #        y_before = float(y_before + a[i]*(z_before**(10-i)))
             #    y = y + a[10]
-            for x in range(-9,38):
+            for x in range(-8,38):
                 z = float(x)
                 y = float(0)
                 for i in range(10):
