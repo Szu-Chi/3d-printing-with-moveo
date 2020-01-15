@@ -14,7 +14,7 @@ class CuraSplashScreen(QSplashScreen):
         super().__init__()
         self._scale = 0.7
 
-        splash_image = QPixmap(Resources.getPath(Resources.Images, "cura.png"))
+        splash_image = QPixmap(Resources.getPath(Resources.Images, "moveo.jpg"))
         self.setPixmap(splash_image)
 
         self._current_message = ""
