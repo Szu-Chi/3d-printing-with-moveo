@@ -8,12 +8,16 @@
 
 ## How to Use:
 ### 1. 環境準備
-- 1. 安裝ROS及MoveIt
+- 1. 安裝ROS、MoveIt和trac-ik
         1.  安裝ros-melodic-desktop-full\
-            參考 http://wiki.ros.org/melodic/Installation/Ubuntu\
+            參考 http://wiki.ros.org/melodic/Installation/Ubuntu
 
         2.  使用原始碼安裝MoveIt\
             參考 https://moveit.ros.org/install/source/
+        3.  安裝trac-ik
+            ```
+            sudo apt-get install ros-melodic-trac-ik
+            ```
 - 2. 建立工作區 moveo_ws
     ```
     cd ~
@@ -22,31 +26,47 @@
 - 3. 下載3d-printing-with-movoe資料
     ```
     cd ~/moveo_ws
-    git cloone https://github.com/Szu-Chi/3d-printing-with-moveo.git
+    git clone https://github.com/Szu-Chi/3d-printing-with-moveo.git
     ``` 
 - 4. 變更資料夾名稱為src
     ```
     mv ~/moveo_ws/3d-printing-with-moveo ~/moveo_ws/src
     ``` 
-
+- 5. 建構原始碼build source code
+    ```
+    catkin_make
+    source ~/moveo_ws/devel/setup.bash
+    echo "source ~/moveo_ws/devel/setup.bash" >> ~/.bashrc
+    ```
 
 ### 2. 安裝 Cura SIPE version
 ![image](https://github.com/Szu-Chi/3d-printing-with-moveo/blob/Feature_Position_Control/img/curaLoadingImg.png)
 - 使用autoInstall.bash
     ```
     cd ~/moveo_ws/src/Cura
-    bash autoInsatll.bash
+    bash autoInstall.bash
+    source ~/.bashrc
     ```
 or
 
 - 參考 https://github.com/Ultimaker/Cura/wiki/Running-Cura-from-Source-on-Ubuntu 手動安裝
 
 ### 3. 燒錄Marlin
-- 1. 開啟Arduino
+- 1. 開啟Arduino ~/moveo_ws/src/Marlin/Marlin.ino
 - 2. Tool->Board->Arduino Mega or Mega 2560
 - 3. 按下上傳按鈕(Ctrl+U) 
 ### 4. 開始列印
-
+- 1. 開啟Cura
+    ```
+    cura
+    ```
+- 2. 放入要列印的STL
+- 3. 按下Slice開始切片
+- 4. 存檔並等待G-code生成
+- 5. 開啟3D列印機
+- 6. Prepare->Auto home->Home ALL
+- 7. Print from SD
+- 8. 開始列印
 ## About Directories
 ### CAD
 我們更改過後的Moveo，變更內容如下:
@@ -82,7 +102,8 @@ or
 ### gcode_translation
 將原始G-code的笛卡爾座標轉換成機械軸
 
-### moveo_moveit
+### moveo_moveit_move_group
+ROS中用來測試Moveo動作、列印範圍及IK解答效能
 
 ### moveo_moveit_config
 使用MoveIt Setup Assistant設定Moveo的參數檔(如:各軸活動極限、虛擬機械軸、規劃運動群組...等)，此參數檔用於MoveIt
