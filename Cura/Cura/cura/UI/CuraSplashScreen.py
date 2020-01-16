@@ -14,7 +14,7 @@ class CuraSplashScreen(QSplashScreen):
         super().__init__()
         self._scale = 0.7
 
-        splash_image = QPixmap(Resources.getPath(Resources.Images, "cura.png"))
+        splash_image = QPixmap(Resources.getPath(Resources.Images, "moveo.jpg"))
         self.setPixmap(splash_image)
 
         self._current_message = ""
@@ -60,7 +60,7 @@ class CuraSplashScreen(QSplashScreen):
         font = QFont()  # Using system-default font here
         font.setPixelSize(37)
         painter.setFont(font)
-        painter.drawText(60, 66, 330 * self._scale, 230 * self._scale, Qt.AlignLeft | Qt.AlignTop, version[0])
+        painter.drawText(60, 66, 400 * self._scale, 230 * self._scale, Qt.AlignLeft | Qt.AlignTop, version[0])
         if len(version) > 1:
             font.setPixelSize(16)
             painter.setFont(font)
