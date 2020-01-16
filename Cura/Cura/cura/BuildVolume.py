@@ -184,11 +184,6 @@ class BuildVolume(SceneNode):
         if shape:
             self._shape = shape
 
-    def getShape(self) -> str:
-        self._global_container_stack = self._application.getGlobalContainerStack()
-        self._shape = self._global_container_stack.getProperty("machine_shape", "value")
-        return self._shape
-
     ##  Get the length of the 3D diagonal through the build volume.
     #
     #   This gives a sense of the scale of the build volume in general.

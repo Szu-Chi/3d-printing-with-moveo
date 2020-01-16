@@ -201,7 +201,7 @@ class LocalFileOutputDevice(OutputDevice):
             self.writeError.emit(self)
 
         data = "check"
-        Shape = CuraApplication.getInstance().getShapeFromBuildVolume()
+        Shape = CuraApplication.getInstance().getShape()
         if Shape == "moveo" and self._type_of_file == ".gcode":
             data = self._runGocdeTranslation()
         if data == "Error":

@@ -12,7 +12,9 @@
 
 #include <trac_ik/trac_ik.hpp>
 #include <ros/ros.h>
-std::vector<double> euler_to_quaternion(double r,double p,double y);
+
+#include <tf/tf.h>
+tf::Quaternion euler_to_quaternion(double yaw,double pitch,double roll);
 
 std::vector<double> solveJoint(KDL::Frame end_effector_pose){
   ros::NodeHandle node_handle("~");
@@ -89,16 +91,10 @@ void print_current_pose(geometry_msgs::PoseStamped current_pose){
   ROS_INFO_NAMED("moveo", "w orientation: %f", current_pose.pose.orientation.w);
 }
 
-std::vector<double> euler_to_quaternion(double r,double p,double y){
-    double roll = r;
-    double pitch = p;
-    double yaw = y;
-    std::vector<double> q(4);
-    q.at(0) = sin(roll/2) * cos(pitch/2) * cos(yaw/2) - cos(roll/2) * sin(pitch/2) * sin(yaw/2);
-    q.at(1) = cos(roll/2) * sin(pitch/2) * cos(yaw/2) + sin(roll/2) * cos(pitch/2) * sin(yaw/2);
-    q.at(2) = cos(roll/2) * cos(pitch/2) * sin(yaw/2) - sin(roll/2) * sin(pitch/2) * cos(yaw/2);
-    q.at(3) = cos(roll/2) * cos(pitch/2) * cos(yaw/2) + sin(roll/2) * sin(pitch/2) * sin(yaw/2);
-    return q;
+tf::Quaternion euler_to_quaternion(double yaw,double pitch,double roll){
+  tf::Quaternion q;
+  q.setRPY(yaw,pitch,roll);
+  return q;
 }
 
 void set_target_pose(const geometry_msgs::PoseStamped& chain_end){
@@ -162,13 +158,13 @@ void set_target_pose(const geometry_msgs::PoseStamped& chain_end){
     }
   }
   ROS_INFO_STREAM("angle_neg = " << angle_neg);
-  std::vector<double> b = euler_to_quaternion(0.0,0.0,angle_neg);
-  ROS_INFO_STREAM("quaternionX = " << b.at(0));
-  ROS_INFO_STREAM("quaternionY = " << b.at(1));
-  ROS_INFO_STREAM("quaternionZ = " << b.at(2));
-  ROS_INFO_STREAM("quaternionW = " << b.at(3));
+  tf::Quaternion b = euler_to_quaternion(0.0,0.0,angle_neg);
+  ROS_INFO_STREAM("quaternionX = " << b[0]);
+  ROS_INFO_STREAM("quaternionY = " << b[1]);
+  ROS_INFO_STREAM("quaternionZ = " << b[2]);
+  ROS_INFO_STREAM("quaternionW = " << b[3]);
 
-  end_effector_target_rot  = KDL::Rotation::Quaternion(b.at(0), b.at(1), b.at(2), b.at(3));
+  end_effector_target_rot  = KDL::Rotation::Quaternion(b[0], b[1], b[2], b[3]);
 
   //node_handle.param("end_effector_target_rot", end_effector_rot,(0, 0.3, 0.4));
   KDL::Frame end_effector_pose(end_effector_target_rot, end_effector_target_vol);

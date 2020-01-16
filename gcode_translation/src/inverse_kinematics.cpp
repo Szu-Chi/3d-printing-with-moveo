@@ -25,6 +25,8 @@
 #include "std_msgs/Float64MultiArray.h"
 #include "../include/Mesh/Mesh.h"
 
+#include <tf/tf.h>
+
 int decimal_point(double &A){
   std::string change = std::to_string(A);
   bool point = 0;
@@ -43,13 +45,10 @@ int decimal_point(double &A){
   }
 }
 
-std::vector<double> euler_to_quaternion(double roll,double pitch,double yaw){
-  std::vector<double> quaternion(4);
-  quaternion.at(0) = sin(roll/2) * cos(pitch/2) * cos(yaw/2) - cos(roll/2) * sin(pitch/2) * sin(yaw/2);
-  quaternion.at(1) = cos(roll/2) * sin(pitch/2) * cos(yaw/2) + sin(roll/2) * cos(pitch/2) * sin(yaw/2);
-  quaternion.at(2) = cos(roll/2) * cos(pitch/2) * sin(yaw/2) - sin(roll/2) * sin(pitch/2) * cos(yaw/2);
-  quaternion.at(3) = cos(roll/2) * cos(pitch/2) * cos(yaw/2) + sin(roll/2) * sin(pitch/2) * sin(yaw/2);
-  return quaternion;
+tf::Quaternion euler_to_quaternion(double yaw,double pitch,double roll){
+  tf::Quaternion q;
+  q.setRPY(yaw,pitch,roll);
+  return q;
 }
 
 bool check_trac_ik_valid(TRAC_IK::TRAC_IK &tracik_solver,KDL::Chain &chain, KDL::JntArray &ll, KDL::JntArray &ul){
@@ -323,8 +322,8 @@ int main(int argc, char **argv){
           int rc = -1;
           int thread_num = omp_get_thread_num();
           KDL::JntArray result;
-          std::vector<double> quaternion = euler_to_quaternion(0.0,0.0,find_angle[j]);
-          KDL::Rotation end_effector_target_rot = KDL::Rotation::Quaternion(quaternion.at(0),quaternion.at(1),quaternion.at(2),quaternion.at(3));
+          tf::Quaternion q = euler_to_quaternion(0.0,0.0,find_angle[j]);
+          KDL::Rotation end_effector_target_rot = KDL::Rotation::Quaternion(q[0],q[1],q[2],q[3]);
           KDL::Frame end_effector_pose(end_effector_target_rot, find_end_effector_target_vol[j]);
 
           if(save_p_or_n[j] == 0) rc = tracik_solver_turn[thread_num]->CartToJnt(nominal, end_effector_pose, result, target_bounds); // Need turn
@@ -348,8 +347,8 @@ int main(int argc, char **argv){
           int rc = -1;
           second_execution++;
           KDL::JntArray result;
-          std::vector<double> quaternion = euler_to_quaternion(0.0,0.0,find_angle[use_onecore[l]]);
-          KDL::Rotation end_effector_target_rot = KDL::Rotation::Quaternion(quaternion.at(0),quaternion.at(1),quaternion.at(2),quaternion.at(3));
+          tf::Quaternion q = euler_to_quaternion(0.0,0.0,find_angle[use_onecore[l]]);
+          KDL::Rotation end_effector_target_rot = KDL::Rotation::Quaternion(q[0],q[1],q[2],q[3]);
           KDL::Frame end_effector_pose(end_effector_target_rot, find_end_effector_target_vol[use_onecore[l]]);
 
           if(save_p_or_n[use_onecore[l]] == 0) rc = tracik_solver_onecore_turn.CartToJnt(nominal, end_effector_pose, result, target_bounds);
@@ -392,17 +391,17 @@ int main(int argc, char **argv){
                 KDL::JntArray result;
                 KDL::Rotation end_effector_target_rot;
                 KDL::Vector output_end_effector_target_vol;
-                std::vector<double> quaternion;
+                tf::Quaternion q;
                 // chose one point to let joint4 turn back
                 if(save_p_or_n[pop_out] == 0){
                   output_end_effector_target_vol = previous_end_effector_target_vol;
-                  quaternion = euler_to_quaternion(0.0,0.0,(previous_angle+M_PI));
+                  q = euler_to_quaternion(0.0,0.0,(previous_angle+M_PI));
                 }
                 else{
                   output_end_effector_target_vol = find_end_effector_target_vol[pop_out];
-                  quaternion = euler_to_quaternion(0.0,0.0,(find_angle[pop_out]+M_PI));
+                  q = euler_to_quaternion(0.0,0.0,(find_angle[pop_out]+M_PI));
                 }
-                end_effector_target_rot = KDL::Rotation::Quaternion(quaternion.at(0),quaternion.at(1),quaternion.at(2),quaternion.at(3));
+                end_effector_target_rot = KDL::Rotation::Quaternion(q[0],q[1],q[2],q[3]);
                 KDL::Frame end_effector_pose(end_effector_target_rot, output_end_effector_target_vol);
                 rc = tracik_solver_p_n.CartToJnt(nominal, end_effector_pose, result, target_bounds);
                 if(rc < 0){

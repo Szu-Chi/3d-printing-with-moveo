@@ -22,6 +22,11 @@ if TYPE_CHECKING:
     from UM.Mesh.MeshData import MeshData
     from UM.Math.Matrix import Matrix
 
+from UM.Math.Quaternion import Quaternion
+from UM.Operations.SetTransformOperation import SetTransformOperation
+from UM.Operations.GroupedOperation import GroupedOperation
+from UM.Math.Vector import Vector
+import math
 
 ##  The convex hull decorator is a scene node decorator that adds the convex hull functionality to a scene node.
 #   If a scene node has a convex hull decorator, it will have a shadow in which other objects can not be printed.
@@ -29,6 +34,13 @@ class ConvexHullDecorator(SceneNodeDecorator):
     def __init__(self) -> None:
         super().__init__()
 
+        self._now_node_quaternion = Quaternion()
+        self._save_quaternion = Quaternion()
+        self._seve_world_position_x = None
+        self._seve_world_position_y = None
+        self._seve_world_position_z = None
+        self._rotate_mesh = None
+        self._rotate_world_transform = None
         self._convex_hull_node = None  # type: Optional["SceneNode"]
         self._init2DConvexHullCache()
 
@@ -223,6 +235,19 @@ class ConvexHullDecorator(SceneNodeDecorator):
         self._2d_convex_hull_mesh_world_transform = None  # type: Optional[Matrix]
         self._2d_convex_hull_mesh_result = None  # type: Optional[Polygon]
 
+    def eulerToQuaternion(self, roll, pitch, yaw):
+        quaternion_x = math.sin(roll/2) * math.cos(pitch/2) * math.cos(yaw/2) - math.cos(roll/2) * math.sin(pitch/2) * math.sin(yaw/2)
+        quaternion_y = math.cos(roll/2) * math.sin(pitch/2) * math.cos(yaw/2) + math.sin(roll/2) * math.cos(pitch/2) * math.sin(yaw/2)
+        quaternion_z = math.cos(roll/2) * math.cos(pitch/2) * math.sin(yaw/2) - math.sin(roll/2) * math.sin(pitch/2) * math.cos(yaw/2)
+        quaternion_w = math.cos(roll/2) * math.cos(pitch/2) * math.cos(yaw/2) + math.sin(roll/2) * math.sin(pitch/2) * math.sin(yaw/2)
+        return [quaternion_x,quaternion_y,quaternion_z,quaternion_w]
+
+    def quaternionToEuler(self, quaternion_x, quaternion_y, quaternion_z, quaternion_w):
+        roll = math.atan2(2.0*(quaternion_w*quaternion_x+quaternion_y*quaternion_z),1.0-2.0*(quaternion_x*quaternion_x+quaternion_y*quaternion_y))
+        pitch = math.asin(2.0*(quaternion_w*quaternion_y-quaternion_z*quaternion_x))
+        yaw = math.atan2(2.0*(quaternion_w*quaternion_z+quaternion_x*quaternion_y),1.0-2.0*(quaternion_z*quaternion_z+quaternion_y*quaternion_y))
+        return [roll,pitch,yaw]
+
     def _compute2DConvexHull(self, moveo_check_xz_or_yz = None) -> Optional[Polygon]:
         if self._node is None:
             return None
@@ -255,6 +280,36 @@ class ConvexHullDecorator(SceneNodeDecorator):
 
         else:
             offset_hull = Polygon([])
+            ## Check out of range any angle
+            if moveo_check_xz_or_yz != None:
+                if self._now_node_quaternion != self._node.getOrientation() or self._seve_world_position_x != self._node.getWorldPosition().x or self._seve_world_position_y != self._node.getWorldPosition().y or self._seve_world_position_z != self._node.getWorldPosition().z:
+                    ## Save data
+                    self._now_node_quaternion = self._node.getOrientation()
+                    self._save_world_position = self._node.getWorldPosition
+                    self._seve_world_position_x = self._node.getWorldPosition().x
+                    self._seve_world_position_y = self._node.getWorldPosition().y
+                    self._seve_world_position_z = self._node.getWorldPosition().z
+
+                    self._save_quaternion = self._node.getOrientation()
+                    self._save_quaternion.normalize()
+                    world_euler_angle = self.quaternionToEuler(self._save_quaternion.x,self._save_quaternion.y,self._save_quaternion.z,self._save_quaternion.w)
+                    hypotenuse = (self._node.getWorldPosition().x**2+self._node.getWorldPosition().z**2)**0.5
+                    angle = math.asin(self._node.getWorldPosition().x/hypotenuse)
+                    if self._node.getWorldPosition().x == 0.0 or self._node.getWorldPosition().z == 0:
+                        angle = 0.0
+                    else:    
+                        angle = angle if self._node.getWorldPosition().z < 0 else angle*(math.pi/abs(angle)-1)
+                    node_quaternion = self.eulerToQuaternion(world_euler_angle[0],world_euler_angle[1]+angle,world_euler_angle[2])
+                    op = GroupedOperation()
+                    op.addOperation(SetTransformOperation(self._node, Vector(0.0, self._node.getWorldPosition().y, -hypotenuse), Quaternion(node_quaternion[0],node_quaternion[1],node_quaternion[2],node_quaternion[3])))
+                    op.push()
+                    self._rotate_mesh = self._node.getMeshData()
+                    self._rotate_world_transform = self._node.getWorldTransformation()
+                    ## Puch back
+                    op = GroupedOperation()
+                    op.addOperation(SetTransformOperation(self._node, Vector(self._seve_world_position_x, self._node.getWorldPosition().y, self._seve_world_position_z),self._save_quaternion))
+                    op.push()
+            
             mesh = self._node.getMeshData()
             if mesh is None:
                 return Polygon([])  # Node has no mesh data, so just return an empty Polygon.
@@ -265,6 +320,9 @@ class ConvexHullDecorator(SceneNodeDecorator):
             if moveo_check_xz_or_yz != 1 and moveo_check_xz_or_yz != 2:
                 if mesh is self._2d_convex_hull_mesh and world_transform == self._2d_convex_hull_mesh_world_transform:
                     return self._2d_convex_hull_mesh_result
+            else:
+                mesh = self._rotate_mesh
+                world_transform = self._rotate_world_transform
 
             vertex_data = mesh.getConvexHullTransformedVertices(world_transform)
             # Don't use data below 0.

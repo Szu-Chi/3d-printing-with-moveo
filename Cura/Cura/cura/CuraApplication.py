@@ -281,14 +281,11 @@ class CuraApplication(QtApplication):
     def ultimakerCloudAccountRootUrl(self) -> str:
         return UltimakerCloudAuthentication.CuraCloudAccountAPIRoot
 
+    def getShape(self):
+        return self.getGlobalContainerStack().getProperty("machine_shape", "value")
+
     # Adds command line options to the command line parser. This should be called after the application is created and
     # before the pre-start.
-    def getShapeFromBuildVolume(self):
-        root = self.getController().getScene().getRoot()
-        build_volume_moveo = BuildVolume.BuildVolume(self, root)
-        Shape = build_volume_moveo.getShape()
-        return Shape
-
     def addCommandLineOptions(self):
         super().addCommandLineOptions()
         self._cli_parser.add_argument("--help", "-h",
@@ -1255,6 +1252,13 @@ class CuraApplication(QtApplication):
                 op.addOperation(SetTransformOperation(node, Vector(0, center_y, 0)))
             op.push()
 
+    ## Replace Moveo Object.
+    def replaceMoveoObject(self,node):
+        op = GroupedOperation()
+        node.removeDecorator(ZOffsetDecorator.ZOffsetDecorator)
+        op.addOperation(SetTransformOperation(node, Vector(node.getWorldPosition().x, 0, -290.0)))
+        op.push()
+
     ## Reset all transformations on nodes with mesh data.
     @pyqtSlot()
     def resetAll(self):
@@ -1730,6 +1734,9 @@ class CuraApplication(QtApplication):
                 if(original_node.getScale() != Vector(1.0, 1.0, 1.0)):
                     node.scale(original_node.getScale())
 
+            if self.getGlobalContainerStack().getProperty("machine_shape", "value") == "moveo":
+                self.replaceMoveoObject(node)
+
             node.setSelectable(True)
             node.setName(os.path.basename(file_name))
             self.getBuildVolume().checkBoundsAndUpdate(node)
@@ -1771,6 +1778,10 @@ class CuraApplication(QtApplication):
 
                         # Step is for skipping tests to make it a lot faster. it also makes the outcome somewhat rougher
                         arranger.findNodePlacement(node, offset_shape_arr, hull_shape_arr, step = 10)
+
+            ## Position is cleaned 
+            if self.getGlobalContainerStack().getProperty("machine_shape", "value") == "moveo":
+                self.replaceMoveoObject(node)
 
             # This node is deep copied from some other node which already has a BuildPlateDecorator, but the deepcopy
             # of BuildPlateDecorator produces one that's associated with build plate -1. So, here we need to check if
