@@ -14,12 +14,17 @@ import cura.CuraApplication  # To get the build plate.
 from cura.Settings.ExtruderStack import ExtruderStack  # For typing.
 from cura.Settings.SettingOverrideDecorator import SettingOverrideDecorator  # For per-object settings.
 
+import threading
+import queue
 
 ##  Scene nodes that are models are only seen when selecting the corresponding build plate
 #   Note that many other nodes can just be UM SceneNode objects.
 class CuraSceneNode(SceneNode):
     def __init__(self, parent: Optional["SceneNode"] = None, visible: bool = True, name: str = "", no_setting_override: bool = False) -> None:
         super().__init__(parent = parent, visible = visible, name = name)
+        self._lock = threading.Lock()
+        self._check = True
+        self._queue = queue.Queue()
         if not no_setting_override:
             self.addDecorator(SettingOverrideDecorator())  # Now we always have a getActiveExtruderPosition, unless explicitly disabled
         self._outside_buildarea = False
@@ -87,13 +92,8 @@ class CuraSceneNode(SceneNode):
         ]
 
     ##  Return if any area collides with the convex hull of this scene node
-    def collidesWithAreas(self, areas: List[Polygon], moveo_check_collidesWithAreas = None) -> bool:
-        if moveo_check_collidesWithAreas == 1:
-            convex_hull = self.callDecoration("getConvexHullForMoveo_XZ")
-        elif moveo_check_collidesWithAreas == 2:
-            convex_hull = self.callDecoration("getConvexHullForMoveo_YZ")
-        else: 
-            convex_hull = self.callDecoration("getConvexHull")
+    def collidesWithAreas(self, areas: List[Polygon]) -> bool:
+        convex_hull = self.callDecoration("getConvexHull")
         if convex_hull:
             if not convex_hull.isValid():
                 return False
@@ -105,6 +105,37 @@ class CuraSceneNode(SceneNode):
                     continue
                 return True
         return False
+
+    def collidesWithAreasForMoveo(self, areas: List[Polygon]) -> bool:
+        convex_hull = self.callDecoration("getConvexHullForMoveo")
+        self._check = True
+        threads = []
+        # Check for collisions between provided areas and the object
+        if convex_hull:
+            for area in areas:
+                self._queue.put(area)
+            for j in range(4):
+                for k in range(2):
+                    threads.append(threading.Thread(target=self.parallelCheck, args=(convex_hull,k)))
+                    threads[j*2+k].start()
+
+            for thread in threads:
+                thread.join()
+        if self._check:
+            return False
+        else:
+            return True
+    
+    def parallelCheck(self,convex_hull,num):
+        while self._queue.qsize() > 0:
+            area = self._queue.get()
+            if self._check:
+                overlap = convex_hull[num].intersectsPolygon(area)
+                if overlap is None:
+                    continue
+                self._lock.acquire()
+                self._check = False
+                self._lock.release()
 
     ##  Override of SceneNode._calculateAABB to exclude non-printing-meshes from bounding box
     def _calculateAABB(self) -> None:

@@ -36,6 +36,7 @@ if TYPE_CHECKING:
     from cura.Settings.ExtruderStack import ExtruderStack
     from UM.Settings.ContainerStack import ContainerStack
 
+from UM.Logger import Logger
 # Radius of disallowed area in mm around prime. I.e. how much distance to keep from prime position.
 PRIME_CLEARANCE = 6.5
 
@@ -259,18 +260,15 @@ class BuildVolume(SceneNode):
                 if node.collidesWithBbox(build_volume_bounding_box):
                     node.setOutsideBuildArea(True)
                     continue
-                if self._shape == "moveo":
-                    if node.collidesWithAreas(self.getDisallowedAreasForMoveo(), moveo_check_collidesWithAreas = 1):
-                        node.setOutsideBuildArea(True)
-                        continue
-
-                    if node.collidesWithAreas(self.getDisallowedAreasForMoveo(), moveo_check_collidesWithAreas = 2):
-                        node.setOutsideBuildArea(True)
-                        continue
 
                 if node.collidesWithAreas(self.getDisallowedAreas()):
                     node.setOutsideBuildArea(True)
                     continue
+
+                if self._shape == "moveo":
+                    if node.collidesWithAreasForMoveo(self.getDisallowedAreasForMoveo()):
+                        node.setOutsideBuildArea(True)
+                        continue
                 # If the entire node is below the build plate, still mark it as outside.
                 node_bounding_box = node.getBoundingBox()
                 if node_bounding_box and node_bounding_box.top < 0:
@@ -1082,7 +1080,7 @@ class BuildVolume(SceneNode):
                 half_machine_width = 482
                 half_machine_depth = 482
                 border_size = 0
-                sections = 320
+                sections = 32
                 arc_vertex = [0, half_machine_depth - border_size]
                 for i in range(0, sections):
                     quadrant = math.floor(4 * i / sections)
@@ -1213,30 +1211,11 @@ class BuildVolume(SceneNode):
             half_machine_width = 482
             half_machine_depth = 482
             arc_vertex = [half_machine_width, -half_machine_depth]
-            #OpenFilePath = os.path.abspath('.')
-            #OpenFilePath = OpenFilePath + "/cura/Outmost/Outmost.txt"
-            #fp = open(OpenFilePath, "r")
-            #line = fp.readline()
-            #x = -85
-            #while line:
-            #    y =  float(line.strip())
-            #    vertices = []
-            #    if x < 0:
-            #        vertices.append([half_machine_width, -half_machine_depth])
-            #    else:
-            #        vertices.append([half_machine_width, half_machine_depth])
-            #    vertices.append(arc_vertex)
-            #    arc_vertex = [y*10, x+85]
-            #    vertices.append(arc_vertex)
-            #    x = x + 1
-            #    line = fp.readline()
-            #    result[extruder_id].append(Polygon(numpy.array(vertices, numpy.float32)))
-            #fp.close()
 
-            for x in range(-85,384):
+            for x in range(-28,128):
                 a = [-5.84496390332700e-14, 3.56282507993945e-12, 1.96598578522008e-11, -4.08500656982012e-09, 1.32273243218637e-08, 1.84264287266674e-06, -1.04208238003648e-05, -0.000262072884367316, -0.0107090984034695, 0.197575980978460, 46.4820460203409]
                 
-                z = float(x/10)
+                z = float(x*3/10)
                 y = float(0)
                 for i in range(10):
                     y = float(y + a[i]*(z**(10-i)))
@@ -1254,30 +1233,13 @@ class BuildVolume(SceneNode):
                 result[extruder_id].append(Polygon(numpy.array(vertices, numpy.float32)))
                 
             arc_vertex = [-half_machine_width, -half_machine_depth]
-            #fp = open(OpenFilePath, "r")
-            #line = fp.readline()
-            #x = -85
-            #while line:
-            #    y =  float(line.strip())
-            #    vertices = []
-            #    if x < 0:
-            #        vertices.append([-half_machine_width, -half_machine_depth])
-            #    else:
-            #        vertices.append([-half_machine_width, half_machine_depth])
-            #    vertices.append(arc_vertex)
-            #    arc_vertex = [-y*10, x+85]
-            #    vertices.append(arc_vertex)
-            #    x = x + 1
-            #    line = fp.readline()
-            #    result[extruder_id].append(Polygon(numpy.array(vertices, numpy.float32)))
-            #fp.close()
-            
-            for x in range(-85,384):
+
+            for x in range(-28,128):
                 vertices = []
                 vertices.append(arc_vertex)
                 a = [-5.84496390332700e-14, 3.56282507993945e-12, 1.96598578522008e-11, -4.08500656982012e-09, 1.32273243218637e-08, 1.84264287266674e-06, -1.04208238003648e-05, -0.000262072884367316, -0.0107090984034695, 0.197575980978460, 46.4820460203409]
                 
-                z = float(x/10)
+                z = float(x*3/10)
                 y = float(0)
                 for i in range(10):
                     y = float(y + a[i]*(z**(10-i)))

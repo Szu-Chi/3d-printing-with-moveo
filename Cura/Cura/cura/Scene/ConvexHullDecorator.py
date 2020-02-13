@@ -28,6 +28,9 @@ from UM.Operations.GroupedOperation import GroupedOperation
 from UM.Math.Vector import Vector
 import math
 
+import threading
+from queue import Queue
+
 ##  The convex hull decorator is a scene node decorator that adds the convex hull functionality to a scene node.
 #   If a scene node has a convex hull decorator, it will have a shadow in which other objects can not be printed.
 class ConvexHullDecorator(SceneNodeDecorator):
@@ -114,31 +117,59 @@ class ConvexHullDecorator(SceneNodeDecorator):
                 hull = self._add2DAdhesionMargin(hull)
         return hull
 
-    def getConvexHullForMoveo_XZ(self) -> Optional[Polygon]:
+    def getConvexHullForMoveo(self) -> Optional[Polygon]:
         if self._node is None:
             return None
         if self._node.callDecoration("isNonPrintingMesh"):
             return None
-        hull = self._compute2DConvexHull(moveo_check_xz_or_yz = 2)
-        if self._global_stack and self._node is not None and hull is not None:
-            # Parent can be None if node is just loaded.
-            if self._global_stack.getProperty("print_sequence", "value") == "one_at_a_time" and not self.hasGroupAsParent(self._node):
-                hull = hull.getMinkowskiHull(Polygon(numpy.array(self._global_stack.getProperty("machine_head_polygon", "value"), numpy.float32)))
-                hull = self._add2DAdhesionMargin(hull)
-        return hull
 
-    def getConvexHullForMoveo_YZ(self) -> Optional[Polygon]:
-        if self._node is None:
-            return None
-        if self._node.callDecoration("isNonPrintingMesh"):
-            return None
-        hull = self._compute2DConvexHull(moveo_check_xz_or_yz = 1)
-        if self._global_stack and self._node is not None and hull is not None:
+        if self._now_node_quaternion != self._node.getOrientation() or self._seve_world_position_x != self._node.getWorldPosition().x or self._seve_world_position_y != self._node.getWorldPosition().y or self._seve_world_position_z != self._node.getWorldPosition().z:
+            ## Save data
+            self._now_node_quaternion = self._node.getOrientation()
+            self._save_world_position = self._node.getWorldPosition
+            self._seve_world_position_x = self._node.getWorldPosition().x
+            self._seve_world_position_y = self._node.getWorldPosition().y
+            self._seve_world_position_z = self._node.getWorldPosition().z
+            
+            self._save_quaternion = self._node.getOrientation()
+            self._save_quaternion.normalize()
+            world_euler_angle = self.quaternionToEuler(self._save_quaternion.x,self._save_quaternion.y,self._save_quaternion.z,self._save_quaternion.w)
+            hypotenuse = (self._node.getWorldPosition().x**2+self._node.getWorldPosition().z**2)**0.5
+            angle = math.asin(self._node.getWorldPosition().x/hypotenuse)
+            if self._node.getWorldPosition().x == 0.0 or self._node.getWorldPosition().z == 0:
+                angle = 0.0
+            else:    
+                angle = angle if self._node.getWorldPosition().z < 0 else angle*(math.pi/abs(angle)-1)
+            node_quaternion = self.eulerToQuaternion(world_euler_angle[0],world_euler_angle[1]+angle,world_euler_angle[2])
+            op = GroupedOperation()
+            op.addOperation(SetTransformOperation(self._node, Vector(0.0, self._node.getWorldPosition().y, -hypotenuse), Quaternion(node_quaternion[0],node_quaternion[1],node_quaternion[2],node_quaternion[3])))
+            op.push()
+            self._rotate_mesh = self._node.getMeshData()
+            self._rotate_world_transform = self._node.getWorldTransformation()
+            ## Push back
+            op = GroupedOperation()
+            op.addOperation(SetTransformOperation(self._node, Vector(self._seve_world_position_x, self._node.getWorldPosition().y, self._seve_world_position_z),self._save_quaternion))
+            op.push()
+        q = Queue()
+        threads = []
+
+        for i in range(2):
+            threads.append(threading.Thread(target=self._compute2DConvexHullForMoveo, args=(i+1, q)))
+            threads[i].start()
+
+        for thread in threads:
+            thread.join()
+
+        results = []
+        for _ in range(2):
+            hull = q.get()
+            if self._global_stack and self._node is not None and hull is not None:
             # Parent can be None if node is just loaded.
-            if self._global_stack.getProperty("print_sequence", "value") == "one_at_a_time" and not self.hasGroupAsParent(self._node):
-                hull = hull.getMinkowskiHull(Polygon(numpy.array(self._global_stack.getProperty("machine_head_polygon", "value"), numpy.float32)))
-                hull = self._add2DAdhesionMargin(hull)
-        return hull
+                if self._global_stack.getProperty("print_sequence", "value") == "one_at_a_time" and not self.hasGroupAsParent(self._node):
+                    hull = hull.getMinkowskiHull(Polygon(numpy.array(self._global_stack.getProperty("machine_head_polygon", "value"), numpy.float32)))
+                    hull = self._add2DAdhesionMargin(hull)
+            results.append(hull)
+        return results
 
     ##  Get the convex hull of the node with the full head size
     def getConvexHullHeadFull(self) -> Optional[Polygon]:
@@ -248,7 +279,7 @@ class ConvexHullDecorator(SceneNodeDecorator):
         yaw = math.atan2(2.0*(quaternion_w*quaternion_z+quaternion_x*quaternion_y),1.0-2.0*(quaternion_z*quaternion_z+quaternion_y*quaternion_y))
         return [roll,pitch,yaw]
 
-    def _compute2DConvexHull(self, moveo_check_xz_or_yz = None) -> Optional[Polygon]:
+    def _compute2DConvexHull(self) -> Optional[Polygon]:
         if self._node is None:
             return None
         if self._node.callDecoration("isGroup"):
@@ -280,36 +311,6 @@ class ConvexHullDecorator(SceneNodeDecorator):
 
         else:
             offset_hull = Polygon([])
-            ## Check out of range any angle
-            if moveo_check_xz_or_yz != None:
-                if self._now_node_quaternion != self._node.getOrientation() or self._seve_world_position_x != self._node.getWorldPosition().x or self._seve_world_position_y != self._node.getWorldPosition().y or self._seve_world_position_z != self._node.getWorldPosition().z:
-                    ## Save data
-                    self._now_node_quaternion = self._node.getOrientation()
-                    self._save_world_position = self._node.getWorldPosition
-                    self._seve_world_position_x = self._node.getWorldPosition().x
-                    self._seve_world_position_y = self._node.getWorldPosition().y
-                    self._seve_world_position_z = self._node.getWorldPosition().z
-
-                    self._save_quaternion = self._node.getOrientation()
-                    self._save_quaternion.normalize()
-                    world_euler_angle = self.quaternionToEuler(self._save_quaternion.x,self._save_quaternion.y,self._save_quaternion.z,self._save_quaternion.w)
-                    hypotenuse = (self._node.getWorldPosition().x**2+self._node.getWorldPosition().z**2)**0.5
-                    angle = math.asin(self._node.getWorldPosition().x/hypotenuse)
-                    if self._node.getWorldPosition().x == 0.0 or self._node.getWorldPosition().z == 0:
-                        angle = 0.0
-                    else:    
-                        angle = angle if self._node.getWorldPosition().z < 0 else angle*(math.pi/abs(angle)-1)
-                    node_quaternion = self.eulerToQuaternion(world_euler_angle[0],world_euler_angle[1]+angle,world_euler_angle[2])
-                    op = GroupedOperation()
-                    op.addOperation(SetTransformOperation(self._node, Vector(0.0, self._node.getWorldPosition().y, -hypotenuse), Quaternion(node_quaternion[0],node_quaternion[1],node_quaternion[2],node_quaternion[3])))
-                    op.push()
-                    self._rotate_mesh = self._node.getMeshData()
-                    self._rotate_world_transform = self._node.getWorldTransformation()
-                    ## Puch back
-                    op = GroupedOperation()
-                    op.addOperation(SetTransformOperation(self._node, Vector(self._seve_world_position_x, self._node.getWorldPosition().y, self._seve_world_position_z),self._save_quaternion))
-                    op.push()
-            
             mesh = self._node.getMeshData()
             if mesh is None:
                 return Polygon([])  # Node has no mesh data, so just return an empty Polygon.
@@ -317,12 +318,8 @@ class ConvexHullDecorator(SceneNodeDecorator):
             world_transform = self._node.getWorldTransformation()
 
             # Check the cache
-            if moveo_check_xz_or_yz != 1 and moveo_check_xz_or_yz != 2:
-                if mesh is self._2d_convex_hull_mesh and world_transform == self._2d_convex_hull_mesh_world_transform:
-                    return self._2d_convex_hull_mesh_result
-            else:
-                mesh = self._rotate_mesh
-                world_transform = self._rotate_world_transform
+            if mesh is self._2d_convex_hull_mesh and world_transform == self._2d_convex_hull_mesh_world_transform:
+                return self._2d_convex_hull_mesh_result
 
             vertex_data = mesh.getConvexHullTransformedVertices(world_transform)
             # Don't use data below 0.
@@ -335,12 +332,9 @@ class ConvexHullDecorator(SceneNodeDecorator):
                 # This is done to greatly speed up further convex hull calculations as the convex hull
                 # becomes much less complex when dealing with highly detailed models.
                 vertex_data = numpy.round(vertex_data, 1)
-                if moveo_check_xz_or_yz == 1:
-                    vertex_data = vertex_data[:, [0, 1]]  # Drop the Z components to project to 2D.(Y)
-                elif moveo_check_xz_or_yz == 2:
-                    vertex_data = vertex_data[:, [2, 1]]  # Drop the X components to project to 2D.(X)
-                else:
-                    vertex_data = vertex_data[:, [0, 2]]  # Drop the Y components to project to 2D.(Z)
+
+                vertex_data = vertex_data[:, [0, 2]]  # Drop the Y components to project to 2D.
+
                 # Grab the set of unique points.
                 #
                 # This basically finds the unique rows in the array by treating them as opaque groups of bytes
@@ -358,12 +352,85 @@ class ConvexHullDecorator(SceneNodeDecorator):
                     offset_hull = self._offsetHull(convex_hull)
 
             # Store the result in the cache
-            if moveo_check_xz_or_yz != 1 and moveo_check_xz_or_yz != 2:
-                self._2d_convex_hull_mesh = mesh
-                self._2d_convex_hull_mesh_world_transform = world_transform
-                self._2d_convex_hull_mesh_result = offset_hull
+            self._2d_convex_hull_mesh = mesh
+            self._2d_convex_hull_mesh_world_transform = world_transform
+            self._2d_convex_hull_mesh_result = offset_hull
 
             return offset_hull
+
+    def _compute2DConvexHullForMoveo(self, moveo_check_xz_or_yz = None, q = None) -> Optional[Polygon]:
+        if self._node is None:
+            q.put(None)
+        if self._node.callDecoration("isGroup"):
+            points = numpy.zeros((0, 2), dtype=numpy.int32)
+            for child in self._node.getChildren():
+                child_hull = child.callDecoration("_compute2DConvexHull")
+                if child_hull:
+                    try:
+                        points = numpy.append(points, child_hull.getPoints(), axis = 0)
+                    except ValueError:
+                        pass
+
+                if points.size < 3:
+                    q.put(None)
+            child_polygon = Polygon(points)
+
+            # Check the cache
+            if child_polygon == self._2d_convex_hull_group_child_polygon:
+                q.put(self._2d_convex_hull_group_result)
+
+            convex_hull = child_polygon.getConvexHull() #First calculate the normal convex hull around the points.
+            offset_hull = self._offsetHull(convex_hull) #Then apply the offset from the settings.
+
+            # Store the result in the cache
+            self._2d_convex_hull_group_child_polygon = child_polygon
+            self._2d_convex_hull_group_result = offset_hull
+            q.put(offset_hull)
+        else:
+            offset_hull = Polygon([])
+
+            mesh = self._node.getMeshData()
+            if mesh is None:
+                q.put(Polygon([]))
+
+            world_transform = self._node.getWorldTransformation()
+
+            # Check the cache
+            mesh = self._rotate_mesh
+            world_transform = self._rotate_world_transform
+
+            vertex_data = mesh.getConvexHullTransformedVertices(world_transform)
+            # Don't use data below 0.
+            # TODO; We need a better check for this as this gives poor results for meshes with long edges.
+            # Do not throw away vertices: the convex hull may be too small and objects can collide.
+            # vertex_data = vertex_data[vertex_data[:,1] >= -0.01]
+
+            if len(vertex_data) >= 4:  # type: ignore # mypy and numpy don't play along well just yet.
+                # Round the vertex data to 1/10th of a mm, then remove all duplicate vertices
+                # This is done to greatly speed up further convex hull calculations as the convex hull
+                # becomes much less complex when dealing with highly detailed models.
+                vertex_data = numpy.round(vertex_data, 1)
+                if moveo_check_xz_or_yz == 1:
+                    vertex_data = vertex_data[:, [0, 1]]  # Drop the Z components to project to 2D.(Y)
+                elif moveo_check_xz_or_yz == 2:
+                    vertex_data = vertex_data[:, [2, 1]]  # Drop the X components to project to 2D.(X)
+                # Grab the set of unique points.
+                #
+                # This basically finds the unique rows in the array by treating them as opaque groups of bytes
+                # which are as long as the 2 float64s in each row, and giving this view to numpy.unique() to munch.
+                # See http://stackoverflow.com/questions/16970982/find-unique-rows-in-numpy-array
+                vertex_byte_view = numpy.ascontiguousarray(vertex_data).view(
+                    numpy.dtype((numpy.void, vertex_data.dtype.itemsize * vertex_data.shape[1])))
+                _, idx = numpy.unique(vertex_byte_view, return_index = True)
+                vertex_data = vertex_data[idx]  # Select the unique rows by index.
+
+                hull = Polygon(vertex_data)
+
+                if len(vertex_data) >= 3:
+                    convex_hull = hull.getConvexHull()
+                    offset_hull = self._offsetHull(convex_hull)
+
+            q.put(offset_hull)
 
     def _getHeadAndFans(self) -> Polygon:
         if not self._global_stack:

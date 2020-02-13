@@ -76,6 +76,9 @@ void motor_setep_convert(Eigen::VectorXd &data){
                                            };
   for(int i = 0; i < 5; i++){
     data(i) = data(i)/(M_PI)*180 * joint_division[i]/360;
+    if(i==1) data(i) = data(i) - 390;
+    else if(i==2) data(i) = data(i) - 959;
+    else if(i==4) data(i) = data(i) - 207;
   }
 }
 
