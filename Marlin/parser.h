@@ -153,10 +153,23 @@ public:
     }
 
     static bool seen_dont_care(const char c) {
-      char *e = value_ptr;
-      const char value = *e;
-      value_ptr++;
-      return (c==value)?true:false;
+      //char *e = value_ptr;
+      //const char value = *e;
+      //value_ptr++;
+      //return (c==value)?true:false;
+      const uint8_t ind = LETTER_BIT(c);
+      if (ind >= COUNT(param)) return false; 
+      const bool b = TEST32(codebits, ind);
+      if (b) {
+        #if ENABLED(DEBUG_GCODE_PARSER)
+          if (codenum == 800) {
+            SERIAL_CHAR('\''); SERIAL_CHAR(c); SERIAL_ECHOLNPGM("' is seen");
+          }
+        #endif
+        char * const ptr = command_ptr + param[ind];
+        value_ptr = param[ind] && valid_float(ptr) ? ptr : (char*)NULL;
+      }
+      return b;
     }
 
     static bool seen_any() { return !!codebits; }

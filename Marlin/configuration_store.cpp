@@ -1087,7 +1087,7 @@ void MarlinSettings::postprocess() {
         planner.axis_steps_per_mm[i]          = i < MOV_AXIS + esteppers ? tmp2[i] : def2[i < COUNT(def2) ? i : COUNT(def2) - 1];
         planner.max_feedrate_mm_s[i]          = i < MOV_AXIS + esteppers ? tmp3[i] : def3[i < COUNT(def3) ? i : COUNT(def3) - 1];
       }
-
+      
       EEPROM_READ(planner.acceleration);
       EEPROM_READ(planner.retract_acceleration);
       EEPROM_READ(planner.travel_acceleration);
@@ -1805,12 +1805,17 @@ void MarlinSettings::postprocess() {
  */
 void MarlinSettings::reset() {
   static const float tmp1[] PROGMEM = DEFAULT_AXIS_STEPS_PER_UNIT, tmp2[] PROGMEM = DEFAULT_MAX_FEEDRATE;
-
   static const uint32_t tmp3[] PROGMEM = DEFAULT_MAX_ACCELERATION;
+  static const float tmp4[] PROGMEM = DEFAULT_JOINT_STEPS_PER_UNIT, tmp5[] PROGMEM = DEFAULT_MAX_FEEDRATE_JOINT;
+
   LOOP_NUM_AXIS_N(i) {
     planner.axis_steps_per_mm[i]          = pgm_read_float(&tmp1[i < COUNT(tmp1) ? i : COUNT(tmp1) - 1]);
     planner.max_feedrate_mm_s[i]          = pgm_read_float(&tmp2[i < COUNT(tmp2) ? i : COUNT(tmp2) - 1]);
     planner.max_acceleration_mm_per_s2[i] = pgm_read_dword_near(&tmp3[i < COUNT(tmp3) ? i : COUNT(tmp3) - 1]);
+  }
+  LOOP_NUM_JOINT(i) {
+    planner.axis_steps_per_mm_joint[i] = pgm_read_float(&tmp4[i < COUNT(tmp4) ? i : COUNT(tmp4) - 1]);
+    planner.max_feedrate_mm_s_joint[i] = pgm_read_float(&tmp5[i < COUNT(tmp5) ? i : COUNT(tmp5) - 1]);
   }
 
   planner.min_segment_time_us = DEFAULT_MINSEGMENTTIME;
@@ -1832,6 +1837,12 @@ void MarlinSettings::reset() {
       planner.max_jerk[X_AXIS] = DEFAULT_XJERK;
       planner.max_jerk[Y_AXIS] = DEFAULT_YJERK;
       planner.max_jerk[Z_AXIS] = DEFAULT_ZJERK;
+
+      planner.max_jerk_joint[Joint1_AXIS] = DEFAULT_JJERK;
+      planner.max_jerk_joint[Joint2_AXIS] = DEFAULT_AJERK;
+      planner.max_jerk_joint[Joint3_AXIS] = DEFAULT_BJERK;
+      planner.max_jerk_joint[Joint4_AXIS] = DEFAULT_CJERK;
+      planner.max_jerk_joint[Joint5_AXIS] = DEFAULT_DJERK;
     #endif
     planner.max_jerk[E_AXIS] = DEFAULT_EJERK;
   #endif

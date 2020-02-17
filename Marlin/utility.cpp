@@ -187,6 +187,18 @@ void safe_delay(millis_t ms) {
     return &conv[2];
   }
 
+  // Convert signed float to string with +12345 format
+  char* ftostr5sign(const float &f) {
+    int i = f; //(f * 10 + (f < 0 ? -5: 5)) / 10;
+    conv[1] = MINUSOR(i, '+');
+    conv[2] = RJDIGIT(i, 10000);
+    conv[3] = RJDIGIT(i, 1000);
+    conv[4] = RJDIGIT(i, 100);
+    conv[5] = RJDIGIT(i, 10);
+    conv[6] = DIGIMOD(i, 1);
+    return &conv[1];
+  }
+
   // Convert signed float to string with +1234.5 format
   char* ftostr51sign(const float &f) {
     long i = (f * 100 + (f < 0 ? -5: 5)) / 10;
@@ -209,6 +221,19 @@ void safe_delay(millis_t ms) {
     conv[3] = DIGIMOD(i, 100);
     conv[4] = '.';
     conv[5] = DIGIMOD(i, 10);
+    conv[6] = DIGIMOD(i, 1);
+    return conv;
+  }
+
+  // Convert signed float to string with +12345 format
+  char* ftostr6sign(const long &f) {
+    long i = f; //(f * 10 + (f < 0 ? -5: 5)) / 10;
+    conv[0] = MINUSOR(i, '+');
+    conv[1] = RJDIGIT(i, 100000);
+    conv[2] = RJDIGIT(i, 10000);
+    conv[3] = RJDIGIT(i, 1000);
+    conv[4] = RJDIGIT(i, 100);
+    conv[5] = RJDIGIT(i, 10);
     conv[6] = DIGIMOD(i, 1);
     return conv;
   }

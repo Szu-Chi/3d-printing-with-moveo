@@ -41,12 +41,16 @@ Endstops endstops;
 
 bool Endstops::enabled, Endstops::enabled_globally; // Initialized by settings.load()
 volatile uint8_t Endstops::hit_state;
+volatile uint16_t Endstops::hit_state_Joint;
 
 Endstops::esbits_t Endstops::live_state = 0;
+Endstops::esbits_t Endstops::live_state_Joint = 0;
 
 #if ENABLED(ENDSTOP_NOISE_FILTER)
   Endstops::esbits_t Endstops::validated_live_state;
+  Endstops::esbits_t Endstops::validated_live_state_Joint;
   uint8_t Endstops::endstop_poll_count;
+  uint8_t Endstops::endstop_poll_count_Joint;
 #endif
 
 #if HAS_BED_PROBE
@@ -178,6 +182,46 @@ void Endstops::init() {
     setup_endstop_interrupts();
   #endif
 
+  #if HAS_Joint1_MIN
+    #if ENABLED(ENDSTOPPULLUP_Joint1MIN)
+      SET_INPUT_PULLUP(Joint1_MIN_PIN);
+    #else 
+      SET_INPUT(Joint1_MIN_PIN);
+    #endif
+  #endif
+
+  #if HAS_Joint2_MIN
+    #if ENABLED(ENDSTOPPULLUP_Joint2MIN)
+      SET_INPUT_PULLUP(Joint2_MIN_PIN);
+    #else 
+      SET_INPUT(Joint2_MIN_PIN);
+    #endif
+  #endif
+
+  #if HAS_Joint3_MIN
+    #if ENABLED(ENDSTOPPULLUP_Joint3MIN)
+      SET_INPUT_PULLUP(Joint3_MIN_PIN);
+    #else 
+      SET_INPUT(Joint3_MIN_PIN);
+    #endif
+  #endif
+
+  #if HAS_Joint4_MIN
+    #if ENABLED(ENDSTOPPULLUP_Joint4MIN)
+      SET_INPUT_PULLUP(Joint4_MIN_PIN);
+    #else 
+      SET_INPUT(Joint4_MIN_PIN);
+    #endif
+  #endif
+
+  #if HAS_Joint5_MIN
+    #if ENABLED(ENDSTOPPULLUP_Joint5MIN)
+      SET_INPUT_PULLUP(Joint5_MIN_PIN);
+    #else 
+      SET_INPUT(Joint5_MIN_PIN);
+    #endif
+  #endif
+
   // Enable endstops
   enable_globally(
     #if ENABLED(ENDSTOPS_ALWAYS_ON_DEFAULT)
@@ -235,6 +279,11 @@ void Endstops::not_homing() {
     if (trigger_state()) hit_on_purpose();
     else kill(PSTR(MSG_ERR_HOMING_FAILED));
   }
+
+  void Endstops::validate_homing_move_Joint() {
+    if (trigger_state_Joint()) hit_on_purpose_Joint();
+    else kill(PSTR(MSG_ERR_HOMING_FAILED));
+  }
 #endif
 
 // Enable / disable endstop z-probe checking
@@ -260,6 +309,55 @@ void Endstops::not_homing() {
 
 void Endstops::event_handler() {
   static uint8_t prev_hit_state; // = 0
+  static uint16_t prev_hit_state_Joint; // = 0
+  
+  if (hit_state_Joint && hit_state_Joint != prev_hit_state_Joint) {
+    #if ENABLED(ULTRA_LCD)
+      char chrJoint1 = ' ', chrJoint2 = ' ', chrJoint3 = ' ', chrJoint4 = ' ', chrJoint5 = ' ';
+      #define _SET_STOP_CHAR(A,C) (chr## A = C)
+    #else
+      #define _SET_STOP_CHAR(A,C) ;
+    #endif
+
+    #define _ENDSTOP_HIT_ECHO_Joint(A,C) do{ \
+      SERIAL_ECHOPAIR(" " STRINGIFY(A) ":", planner.triggered_position_mm_Joint(_AXIS(A))); \
+      _SET_STOP_CHAR(A,C); }while(0)
+
+    #define _ENDSTOP_HIT_TEST_Joint(A,C) \
+      if (TEST(hit_state_Joint, A ##_MIN) || TEST(hit_state_Joint, A ##_MAX)) \
+        _ENDSTOP_HIT_ECHO_Joint(A,C)
+
+    #define ENDSTOP_HIT_TEST_Joint1() _ENDSTOP_HIT_TEST_Joint(Joint1,'J')
+    #define ENDSTOP_HIT_TEST_Joint2() _ENDSTOP_HIT_TEST_Joint(Joint2,'A')
+    #define ENDSTOP_HIT_TEST_Joint3() _ENDSTOP_HIT_TEST_Joint(Joint3,'B')
+    #define ENDSTOP_HIT_TEST_Joint4() _ENDSTOP_HIT_TEST_Joint(Joint4,'C')
+    #define ENDSTOP_HIT_TEST_Joint5() _ENDSTOP_HIT_TEST_Joint(Joint5,'D')
+
+    SERIAL_ECHO_START();
+    SERIAL_ECHOPGM(MSG_ENDSTOPS_HIT);
+
+    ENDSTOP_HIT_TEST_Joint1();
+    ENDSTOP_HIT_TEST_Joint2();
+    ENDSTOP_HIT_TEST_Joint3();
+    ENDSTOP_HIT_TEST_Joint4();
+    ENDSTOP_HIT_TEST_Joint5();
+
+    SERIAL_EOL();
+
+    #if ENABLED(ULTRA_LCD)
+      lcd_status_printf_P(0, PSTR(MSG_LCD_ENDSTOPS " %c %c %c %c %c"), chrJoint1, chrJoint2, chrJoint3, chrJoint4, chrJoint5);
+    #endif
+
+    #if ENABLED(ABORT_ON_ENDSTOP_HIT_FEATURE_ENABLED) && ENABLED(SDSUPPORT)
+      if (planner.abort_on_endstop_hit) {
+        card.sdprinting = false;
+        card.closefile();
+        quickstop_stepper();
+        thermalManager.disable_all_heaters(); // switch off all heaters.
+      }
+    #endif
+  }
+
   if (hit_state && hit_state != prev_hit_state) {
     #if ENABLED(ULTRA_LCD)
       char chrX = ' ', chrY = ' ', chrZ = ' ', chrP = ' ';
@@ -306,6 +404,7 @@ void Endstops::event_handler() {
     #endif
   }
   prev_hit_state = hit_state;
+  prev_hit_state_Joint = hit_state_Joint;
 } // Endstops::report_state
 
 static void print_es_state(const bool is_hit, const char * const label=NULL) {
@@ -321,7 +420,8 @@ void _O2 Endstops::M119() {
     _bltouch_set_SW_mode();
   #endif
   SERIAL_PROTOCOLLNPGM(MSG_M119_REPORT);
-  #define ES_REPORT(S) print_es_state(READ(S##_PIN) != S##_ENDSTOP_INVERTING, PSTR(MSG_##S))
+  #define ES_REPORT(S) print_es_state(READ(S##_PIN) != S##_ENDSTOP_INVERTING, PSTR(MSG_##S)) 
+  /*
   #if HAS_X_MIN
     ES_REPORT(X_MIN);
   #endif
@@ -358,6 +458,23 @@ void _O2 Endstops::M119() {
   #if HAS_Z2_MAX
     ES_REPORT(Z2_MAX);
   #endif
+  //*/
+  #if HAS_Joint1_MIN
+    ES_REPORT(Joint1_MIN);
+  #endif
+  #if HAS_Joint2_MIN
+    ES_REPORT(Joint2_MIN);
+  #endif
+  #if HAS_Joint3_MIN
+    ES_REPORT(Joint3_MIN);
+  #endif
+  #if HAS_Joint4_MIN
+    ES_REPORT(Joint4_MIN);
+  #endif
+  #if HAS_Joint5_MIN
+    ES_REPORT(Joint5_MIN);
+  #endif
+
   #if ENABLED(Z_MIN_PROBE_ENDSTOP)
     print_es_state(READ(Z_MIN_PROBE_PIN) != Z_MIN_PROBE_ENDSTOP_INVERTING, PSTR(MSG_Z_PROBE));
   #endif
@@ -409,6 +526,8 @@ void Endstops::update() {
 
   #define UPDATE_ENDSTOP_BIT(AXIS, MINMAX) SET_BIT_TO(live_state, _ENDSTOP(AXIS, MINMAX), (READ(_ENDSTOP_PIN(AXIS, MINMAX)) != _ENDSTOP_INVERTING(AXIS, MINMAX)))
   #define COPY_LIVE_STATE(SRC_BIT, DST_BIT) SET_BIT_TO(live_state, DST_BIT, TEST(live_state, SRC_BIT))
+  #define UPDATE_ENDSTOP_BIT_Joint(AXIS, MINMAX) SET_BIT_TO(live_state_Joint, _ENDSTOP(AXIS, MINMAX), (READ(_ENDSTOP_PIN(AXIS, MINMAX)) != _ENDSTOP_INVERTING(AXIS, MINMAX)))
+  #define COPY_LIVE_STATE_Joint(SRC_BIT, DST_BIT) SET_BIT_TO(live_state_Joint, DST_BIT, TEST(live_state, SRC_BIT))
 
   #if ENABLED(G38_PROBE_TARGET) && PIN_EXISTS(Z_MIN_PROBE) && !(CORE_IS_XY || CORE_IS_XZ)
     // If G38 command is active check Z_MIN_PROBE for ALL movement
@@ -531,6 +650,39 @@ void Endstops::update() {
       UPDATE_ENDSTOP_BIT(Z, MAX);
     #endif
   #endif
+  //joint
+  // SERIAL_ECHOLNPAIR("live_state_Joint",live_state_Joint);
+  #if HAS_Joint1_MIN
+    UPDATE_ENDSTOP_BIT_Joint(Joint1, MIN);
+  #endif
+  #if HAS_Joint2_MIN
+    UPDATE_ENDSTOP_BIT_Joint(Joint2, MIN);
+  #endif
+  #if HAS_Joint3_MIN
+    UPDATE_ENDSTOP_BIT_Joint(Joint3, MIN);
+  #endif
+  #if HAS_Joint4_MIN
+    UPDATE_ENDSTOP_BIT_Joint(Joint4, MIN);
+  #endif
+  #if HAS_Joint5_MIN
+    UPDATE_ENDSTOP_BIT_Joint(Joint5, MIN);
+  #endif
+
+  #if HAS_Joint1_MAX
+    UPDATE_ENDSTOP_BIT_Joint(Joint1, MAX);
+  #endif
+  #if HAS_Joint2_MAX
+    UPDATE_ENDSTOP_BIT_Joint(Joint2, MAX);
+  #endif
+  #if HAS_Joint3_MAX
+    UPDATE_ENDSTOP_BIT_Joint(Joint3, MAX);
+  #endif
+  #if HAS_Joint4_MAX
+    UPDATE_ENDSTOP_BIT_Joint(Joint4, MAX);
+  #endif
+  #if HAS_Joint5_MAX
+    UPDATE_ENDSTOP_BIT_Joint(Joint5, MAX);
+  #endif
 
   #if ENABLED(ENDSTOP_NOISE_FILTER)
     /**
@@ -544,12 +696,21 @@ void Endstops::update() {
      * To reduce the chance to 1% (1/128th) requires 7 samples (adding 7ms of delay).
      */
     static esbits_t old_live_state;
+    static esbits_t old_live_state_Joint;
     if (old_live_state != live_state) {
       endstop_poll_count = 7;
       old_live_state = live_state;
-    }
+    }    
     else if (endstop_poll_count && !--endstop_poll_count)
       validated_live_state = live_state;
+
+    if (old_live_state_Joint != live_state_Joint) {
+      endstop_poll_count_Joint = 7;
+      old_live_state_Joint = live_state_Joint;
+    }
+    else if (endstop_poll_count_Joint && !--endstop_poll_count_Joint) 
+       validated_live_state_Joint = live_state_Joint;
+    
 
     if (!abort_enabled()) return;
 
@@ -557,15 +718,24 @@ void Endstops::update() {
 
   // Test the current status of an endstop
   #define TEST_ENDSTOP(ENDSTOP) (TEST(state(), ENDSTOP))
+  #define TEST_ENDSTOP_Joint(ENDSTOP) (TEST(state_Joint(), ENDSTOP))
 
   // Record endstop was hit
   #define _ENDSTOP_HIT(AXIS, MINMAX) SBI(hit_state, _ENDSTOP(AXIS, MINMAX))
+  #define _ENDSTOP_HIT_Joint(AXIS, MINMAX) SBI(hit_state_Joint, _ENDSTOP(AXIS, MINMAX))
 
   // Call the endstop triggered routine for single endstops
   #define PROCESS_ENDSTOP(AXIS,MINMAX) do { \
     if (TEST_ENDSTOP(_ENDSTOP(AXIS, MINMAX))) { \
       _ENDSTOP_HIT(AXIS, MINMAX); \
       planner.endstop_triggered(_AXIS(AXIS)); \
+    } \
+  }while(0)
+
+  #define PROCESS_ENDSTOP_Joint(AXIS,MINMAX) do { \
+    if (TEST_ENDSTOP_Joint(_ENDSTOP(AXIS, MINMAX))) { \
+      _ENDSTOP_HIT_Joint(AXIS, MINMAX); \
+      planner.endstop_triggered_Joint(_AXIS(AXIS)); \
     } \
   }while(0)
 
@@ -592,6 +762,76 @@ void Endstops::update() {
     }
   #endif
 
+  #if ENABLED(Z_MIN_PROBE_ENDSTOP)
+      if (z_probe_enabled) PROCESS_ENDSTOP(Z, MIN_PROBE);
+  #endif
+
+  if (stepper.axis_is_moving_Joint(Joint1_AXIS)) {
+    if (stepper.motor_direction_Joint(Joint1_AXIS)) { // -direction
+      #if HAS_Joint1_MIN       
+          PROCESS_ENDSTOP_Joint(Joint1, MIN);
+      #endif
+    }
+    else { // +direction
+      #if HAS_Joint1_MAX
+        PROCESS_ENDSTOP_Joint(Joint1, MAX);
+      #endif
+    }
+  }
+
+  if (stepper.axis_is_moving_Joint(Joint2_AXIS)) {
+    if (stepper.motor_direction_Joint(Joint2_AXIS)) { // -direction
+      #if HAS_Joint2_MIN       
+          PROCESS_ENDSTOP_Joint(Joint2, MIN);
+      #endif
+    }
+    else { // +direction
+      #if HAS_Joint2_MAX
+        PROCESS_ENDSTOP_Joint(Joint2, MAX);
+      #endif
+    }
+  }
+
+  if (stepper.axis_is_moving_Joint(Joint3_AXIS)) {
+    if (stepper.motor_direction_Joint(Joint3_AXIS)) { // -direction
+      #if HAS_Joint3_MIN       
+          PROCESS_ENDSTOP_Joint(Joint3, MIN);
+      #endif
+    }
+    else { // +direction
+      #if HAS_Joint3_MAX
+        PROCESS_ENDSTOP_Joint(Joint3, MAX);
+      #endif
+    }    
+  }
+
+  if (stepper.axis_is_moving_Joint(Joint4_AXIS)) {
+    if (stepper.motor_direction_Joint(Joint4_AXIS)) { // -direction
+      #if HAS_Joint4_MIN       
+          PROCESS_ENDSTOP_Joint(Joint4, MIN);
+      #endif
+    }
+    else { // +direction
+      #if HAS_Joint4_MAX
+        PROCESS_ENDSTOP_Joint(Joint4, MAX);
+      #endif
+    }
+  }
+
+  if (stepper.axis_is_moving_Joint(Joint5_AXIS)) {
+    if (stepper.motor_direction_Joint(Joint5_AXIS)) { // -direction
+      #if HAS_Joint5_MIN       
+          PROCESS_ENDSTOP_Joint(Joint5, MIN);
+      #endif
+    }
+    else { // +direction
+      #if HAS_Joint5_MAX
+        PROCESS_ENDSTOP_Joint(Joint5, MAX);
+      #endif
+    }
+  }
+  
+  /*
   // Now, we must signal, after validation, if an endstop limit is pressed or not
   if (stepper.axis_is_moving(X_AXIS)) {
     if (stepper.motor_direction(X_AXIS_HEAD)) { // -direction
@@ -633,10 +873,11 @@ void Endstops::update() {
         #endif
       #endif
     }
-  }
-
+  }  
   if (stepper.axis_is_moving(Z_AXIS)) {
+    SERIAL_ECHOLNPGM("HA+");
     if (stepper.motor_direction(Z_AXIS_HEAD)) { // Z -direction. Gantry down, bed up.
+        SERIAL_ECHOLNPGM("HA-");
       #if HAS_Z_MIN
         #if ENABLED(Z_DUAL_ENDSTOPS)
           PROCESS_DUAL_ENDSTOP(Z, Z2, MIN);
@@ -668,6 +909,7 @@ void Endstops::update() {
       #endif
     }
   }
+  //*/ 
 } // Endstops::update()
 
 #if ENABLED(PINS_DEBUGGING)
@@ -687,9 +929,12 @@ void Endstops::update() {
   void Endstops::monitor() {
 
     static uint16_t old_live_state_local = 0;
+    static uint16_t old_live_state_local_Joint = 0;
     static uint8_t local_LED_status = 0;
     uint16_t live_state_local = 0;
+    uint16_t live_state_local_Joint = 0;
 
+    /*
     #if HAS_X_MIN
       if (READ(X_MIN_PIN)) SBI(live_state_local, X_MIN);
     #endif
@@ -708,6 +953,7 @@ void Endstops::update() {
     #if HAS_Z_MAX
       if (READ(Z_MAX_PIN)) SBI(live_state_local, Z_MAX);
     #endif
+    //*/
     #if HAS_Z_MIN_PROBE_PIN
       if (READ(Z_MIN_PROBE_PIN)) SBI(live_state_local, Z_MIN_PROBE);
     #endif
@@ -730,9 +976,28 @@ void Endstops::update() {
       if (READ(Z2_MAX_PIN)) SBI(live_state_local, Z2_MAX);
     #endif
 
+    //Joint
+    #if HAS_Joint1_MIN
+      if(READ(Joint1_MIN_PIN)) SBI(live_state_local_Joint,Joint1_MIN);
+    #endif
+    #if HAS_Joint2_MIN
+      if(READ(Joint2_MIN_PIN)) SBI(live_state_local_Joint,Joint2_MIN);
+    #endif
+    #if HAS_Joint3_MIN
+      if(READ(Joint3_MIN_PIN)) SBI(live_state_local_Joint,Joint3_MIN);
+    #endif
+    #if HAS_Joint4_MIN
+      if(READ(Joint4_MIN_PIN)) SBI(live_state_local_Joint,Joint4_MIN);
+    #endif
+    #if HAS_Joint5_MIN
+      if(READ(Joint5_MIN_PIN)) SBI(live_state_local_Joint,Joint5_MIN);
+    #endif
+
     uint16_t endstop_change = live_state_local ^ old_live_state_local;
+    uint16_t endstop_change_Joint = live_state_local_Joint ^ old_live_state_local_Joint;
 
     if (endstop_change) {
+      /*
       #if HAS_X_MIN
         if (TEST(endstop_change, X_MIN)) SERIAL_PROTOCOLPAIR("  X_MIN:", TEST(live_state_local, X_MIN));
       #endif
@@ -751,6 +1016,7 @@ void Endstops::update() {
       #if HAS_Z_MAX
         if (TEST(endstop_change, Z_MAX)) SERIAL_PROTOCOLPAIR("  Z_MAX:", TEST(live_state_local, Z_MAX));
       #endif
+      //*/
       #if HAS_Z_MIN_PROBE_PIN
         if (TEST(endstop_change, Z_MIN_PROBE)) SERIAL_PROTOCOLPAIR("  PROBE:", TEST(live_state_local, Z_MIN_PROBE));
       #endif
@@ -772,10 +1038,29 @@ void Endstops::update() {
       #if HAS_Z2_MAX
         if (TEST(endstop_change, Z2_MAX)) SERIAL_PROTOCOLPAIR("  Z2_MAX:", TEST(live_state_local, Z2_MAX));
       #endif
+
+      //Joint
+      #if HAS_Joint1_MIN
+        if (TEST(endstop_change_Joint, Joint1_MIN)) SERIAL_PROTOCOLPAIR("  J_MIN:", TEST(live_state_local_Joint, Joint1_MIN));
+      #endif
+      #if HAS_Joint2_MIN
+        if (TEST(endstop_change_Joint, Joint2_MIN)) SERIAL_PROTOCOLPAIR("  A_MIN:", TEST(live_state_local_Joint, Joint2_MIN));
+      #endif
+      #if HAS_Joint3_MIN
+        if (TEST(endstop_change_Joint, Joint3_MIN)) SERIAL_PROTOCOLPAIR("  B_MIN:", TEST(live_state_local_Joint, Joint3_MIN));
+      #endif
+      #if HAS_Joint4_MIN
+        if (TEST(endstop_change_Joint, Joint4_MIN)) SERIAL_PROTOCOLPAIR("  C_MIN:", TEST(live_state_local_Joint, Joint4_MIN));
+      #endif
+      #if HAS_Joint5_MIN
+        if (TEST(endstop_change_Joint, Joint5_MIN)) SERIAL_PROTOCOLPAIR("  D_MIN:", TEST(live_state_local_Joint, Joint5_MIN));
+      #endif
+
       SERIAL_PROTOCOLPGM("\n\n");
       analogWrite(LED_PIN, local_LED_status);
       local_LED_status ^= 255;
       old_live_state_local = live_state_local;
+      old_live_state_local_Joint = live_state_local_Joint;
     }
   }
 

@@ -87,7 +87,7 @@
 #include "cardreader.h"
 #include "speed_lookuptable.h"
 #include "delay.h"
-
+#include <avr/wdt.h>
 #if HAS_DIGIPOTSS
   #include <SPI.h>
 #endif
@@ -109,7 +109,9 @@ Stepper stepper; // Singleton
 block_t* Stepper::current_block = NULL; // A pointer to the block currently being traced
 
 uint8_t Stepper::last_direction_bits = 0,
-        Stepper::axis_did_move;
+        Stepper::last_direction_bits_joint = 31,
+        Stepper::axis_did_move,
+        Stepper::axis_did_move_Joint;
 
 bool Stepper::abort_current_block;
 
@@ -135,8 +137,10 @@ uint8_t Stepper::steps_per_isr;
 #endif
     uint8_t Stepper::oversampling_factor;
 
-int32_t Stepper::delta_error[NUM_AXIS] = { 0 };
+int32_t  Stepper::delta_error[NUM_AXIS] = { 0 },
+         Stepper::delta_error_Joint[5] = { 0 };
 uint32_t Stepper::advance_dividend[NUM_AXIS] = { 0 },
+         Stepper::advance_dividend_Joint[5] = { 0 },
          Stepper::advance_divisor = 0,
          Stepper::step_events_completed = 0, // The number of step events executed in the current block
          Stepper::accelerate_until,          // The point from where we need to stop acceleration
@@ -185,13 +189,17 @@ int32_t Stepper::ticks_nominal = -1;
 #endif
 
 volatile int32_t Stepper::endstops_trigsteps[XYZ],
-                 Stepper::count_position[NUM_AXIS] = { 0 };
+                 Stepper::endstops_trigsteps_Joint[Joint_All],
+                 Stepper::count_position[NUM_AXIS] = { 0 },
+                 Stepper::count_position_Joint[Joint_All] = { 0 },
+                 Stepper::count_position_Joint_manual[Joint_All] = { 0 };
 int8_t Stepper::count_direction[NUM_AXIS] = {
   1, 1, 1, 1
   #if ENABLED(HANGPRINTER)
     , 1
   #endif
 };
+int8_t Stepper::count_direction_Joint[Joint_All] = {1,1,1,1,1};
 
 #if ENABLED(X_DUAL_ENDSTOPS) || ENABLED(Y_DUAL_ENDSTOPS) || ENABLED(Z_DUAL_ENDSTOPS)
   #define DUAL_ENDSTOP_APPLY_STEP(A,V)                                                                                        \
@@ -263,6 +271,18 @@ int8_t Stepper::count_direction[NUM_AXIS] = {
   #define Z_APPLY_DIR(v,Q) Z_DIR_WRITE(v)
   #define Z_APPLY_STEP(v,Q) Z_STEP_WRITE(v)
 #endif
+
+//Joint
+#define Joint1_APPLY_DIR(v,Q)  Joint1_DIR_WRITE(v)
+#define Joint1_APPLY_STEP(v,Q) Joint1_STEP_WRITE(v)
+#define Joint2_APPLY_DIR(v,Q)  Joint2_DIR_WRITE(v)
+#define Joint2_APPLY_STEP(v,Q) Joint2_STEP_WRITE(v)
+#define Joint3_APPLY_DIR(v,Q)  Joint3_DIR_WRITE(v)
+#define Joint3_APPLY_STEP(v,Q) Joint3_STEP_WRITE(v)
+#define Joint4_APPLY_DIR(v,Q)  Joint4_DIR_WRITE(v)
+#define Joint4_APPLY_STEP(v,Q) Joint4_STEP_WRITE(v)
+#define Joint5_APPLY_DIR(v,Q)  Joint5_DIR_WRITE(v)
+#define Joint5_APPLY_STEP(v,Q) Joint5_STEP_WRITE(v)
 
 /**
  * Hangprinter's mapping {A,B,C,D} <-> {X,Y,Z,E1} happens here.
@@ -363,7 +383,6 @@ void Stepper::wake_up() {
  *   COREYZ: Y_AXIS=B_AXIS and Z_AXIS=C_AXIS
  */
 void Stepper::set_directions() {
-
   #define SET_STEP_DIR(A) \
     if (motor_direction(_AXIS(A))) { \
       A##_APPLY_DIR(INVERT_## A##_DIR, false); \
@@ -373,6 +392,7 @@ void Stepper::set_directions() {
       A##_APPLY_DIR(!INVERT_## A##_DIR, false); \
       count_direction[_AXIS(A)] = 1; \
     }
+    // count_direction_Joint[_AXIS]
 
   #if HAS_X_DIR
     SET_STEP_DIR(X); // A
@@ -414,6 +434,36 @@ void Stepper::set_directions() {
     DELAY_NS(MINIMUM_STEPPER_DIR_DELAY);
   #endif
 }
+
+void Stepper::set_directions_Joint() {
+      // SERIAL_ECHO(last_direction_bits_joint);
+    #define SET_STEP_DIR_Joint(A) \
+    if (motor_direction_Joint(_AXIS(A))) { \
+      A##_APPLY_DIR(INVERT_## A##_DIR, false); \
+      count_direction_Joint[_AXIS(A)] = -1; \
+    } \
+    else { \
+      A##_APPLY_DIR(!INVERT_## A##_DIR, false); \
+      count_direction_Joint[_AXIS(A)] = 1; \
+    }
+
+    //Joint
+    #if HAS_Joint1_DIR 
+      SET_STEP_DIR_Joint(Joint1);
+    #endif
+    #if HAS_Joint2_DIR 
+      SET_STEP_DIR_Joint(Joint2);
+    #endif
+    #if HAS_Joint3_DIR 
+      SET_STEP_DIR_Joint(Joint3);
+    #endif
+    #if HAS_Joint4_DIR 
+      SET_STEP_DIR_Joint(Joint4);
+    #endif
+    #if HAS_Joint5_DIR 
+      SET_STEP_DIR_Joint(Joint5);
+    #endif
+  }
 
 #if ENABLED(S_CURVE_ACCELERATION)
   /**
@@ -1157,8 +1207,8 @@ HAL_STEP_TIMER_ISR {
 #define STEP_MULTIPLY(A,B) MultiU24X32toH16(A, B)
 
 void Stepper::isr() {
+  //wdt_reset();
   DISABLE_ISRS();
-
   // Program timer compare for the maximum period, so it does NOT
   // flag an interrupt while this ISR is running - So changes from small
   // periods to big periods are respected and the timer does not reset to 0
@@ -1293,14 +1343,18 @@ void Stepper::stepper_pulse_phase_isr() {
     abort_current_block = false;
     if (current_block) {
       axis_did_move = 0;
+      axis_did_move_Joint = 0;
       current_block = NULL;
       planner.discard_current_block();
     }
+    //SERIAL_ECHOLNPGM("abort_current_block");
   }
-
+  
   // If there is no current block, do nothing
-  if (!current_block) return;
-
+  if (!current_block) {
+    //SERIAL_ECHOLNPAIR("current_block : ",current_block);
+    return;
+  }
   // Count of pending loops and events for this iteration
   const uint32_t pending_events = step_event_count - step_events_completed;
   uint8_t events_to_do = MIN(pending_events, steps_per_isr);
@@ -1316,7 +1370,7 @@ void Stepper::stepper_pulse_phase_isr() {
   // Take multiple steps per interrupt (For high speed moves)
   do {
 
-    #define _APPLY_STEP(AXIS) AXIS ##_APPLY_STEP
+    #define _APPLY_STEP(AXIS) AXIS ##_APPLY_STEP 
     #define _INVERT_STEP_PIN(AXIS) INVERT_## AXIS ##_STEP_PIN
 
     // Start an active pulse, if Bresenham says so, and update position
@@ -1328,10 +1382,25 @@ void Stepper::stepper_pulse_phase_isr() {
       } \
     }while(0)
 
+    #define PULSE_START_Joint(AXIS) do{ \
+      delta_error_Joint[_AXIS(AXIS)] += advance_dividend_Joint[_AXIS(AXIS)]; \
+      if (delta_error_Joint[_AXIS(AXIS)] >= 0) { \   
+        _APPLY_STEP(AXIS)(!_INVERT_STEP_PIN(AXIS), 0); \
+        if (COUNT_IT) count_position_Joint[_AXIS(AXIS)] += count_direction_Joint[_AXIS(AXIS)]; \
+      } \
+    }while(0)
+
     // Stop an active pulse, if any, and adjust error term
     #define PULSE_STOP(AXIS) do { \
       if (delta_error[_AXIS(AXIS)] >= 0) { \
         delta_error[_AXIS(AXIS)] -= advance_divisor; \
+        _APPLY_STEP(AXIS)(_INVERT_STEP_PIN(AXIS), 0); \
+      } \
+    }while(0)
+
+    #define PULSE_STOP_Joint(AXIS) do { \
+      if (delta_error_Joint[_AXIS(AXIS)] >= 0) { \
+        delta_error_Joint[_AXIS(AXIS)] -= advance_divisor; \
         _APPLY_STEP(AXIS)(_INVERT_STEP_PIN(AXIS), 0); \
       } \
     }while(0)
@@ -1361,6 +1430,58 @@ void Stepper::stepper_pulse_phase_isr() {
         PULSE_START(Z);
       #endif
     #endif // HANGPRINTER
+
+    //Joint
+    #if HAS_Joint1_STEP
+        PULSE_START_Joint(Joint1);
+    #endif
+    #if HAS_Joint2_STEP
+        PULSE_START_Joint(Joint2);
+    #endif
+    #if HAS_Joint3_STEP
+        PULSE_START_Joint(Joint3);
+    #endif
+    #if HAS_Joint4_STEP
+        PULSE_START_Joint(Joint4);
+    #endif
+    #if HAS_Joint5_STEP
+        PULSE_START_Joint(Joint5);
+    #endif
+   
+    // SERIAL_ECHOPAIR(" ",count_position_Joint[Joint1_AXIS]);
+    // SERIAL_ECHOPAIR(" ",count_position_Joint[Joint2_AXIS]);
+    // SERIAL_ECHOPAIR(" ",count_position_Joint[Joint3_AXIS]);
+    // SERIAL_ECHOPAIR(" ",count_position_Joint[Joint4_AXIS]);
+    // SERIAL_ECHOLNPAIR(" ",count_position_Joint[Joint5_AXIS]);
+
+    /*
+    SERIAL_ECHOPAIR(" ",current_block->step_Joint[Joint1_AXIS]);
+    SERIAL_ECHOPAIR(" ",current_block->step_Joint[Joint2_AXIS]);
+    SERIAL_ECHOPAIR(" ",current_block->step_Joint[Joint3_AXIS]);
+    SERIAL_ECHOPAIR(" ",current_block->step_Joint[Joint4_AXIS]);
+    SERIAL_ECHOPAIR(" ",current_block->step_Joint[Joint5_AXIS]);
+
+    SERIAL_ECHOPAIR(" ",delta_error_Joint[0]);
+    SERIAL_ECHOPAIR(" ",delta_error_Joint[1]);
+    SERIAL_ECHOPAIR(" ",delta_error_Joint[2]);
+    SERIAL_ECHOPAIR(" ",delta_error_Joint[3]);
+    SERIAL_ECHOPAIR(" ",delta_error_Joint[4]);
+
+    SERIAL_ECHOPAIR(" ",count_direction_Joint[0]);
+    SERIAL_ECHOPAIR(" ",count_direction_Joint[1]);
+    SERIAL_ECHOPAIR(" ",count_direction_Joint[2]);
+    SERIAL_ECHOPAIR(" ",count_direction_Joint[3]);
+    SERIAL_ECHOPAIR(" ",count_direction_Joint[4]);   
+    
+    SERIAL_ECHOPAIR(" ",advance_dividend_Joint[0]);
+    SERIAL_ECHOPAIR(" ",advance_dividend_Joint[1]);
+    SERIAL_ECHOPAIR(" ",advance_dividend_Joint[2]);
+    SERIAL_ECHOPAIR(" ",advance_dividend_Joint[3]);
+    SERIAL_ECHOLNPAIR(" ",advance_dividend_Joint[4]);    
+    //*/
+    
+    // SERIAL_ECHO(advance_dividend_Joint[1]);
+    // SERIAL_ECHOLN(advance_dividend_Joint[2]);
 
     // Pulse E/Mixing extruders
     #if ENABLED(LIN_ADVANCE)
@@ -1429,6 +1550,23 @@ void Stepper::stepper_pulse_phase_isr() {
       #endif
     #endif
 
+    //Joint
+    #if HAS_Joint1_STEP
+        PULSE_STOP_Joint(Joint1);
+    #endif
+    #if HAS_Joint2_STEP
+        PULSE_STOP_Joint(Joint2);
+    #endif
+    #if HAS_Joint3_STEP
+        PULSE_STOP_Joint(Joint3);
+    #endif
+    #if HAS_Joint4_STEP
+        PULSE_STOP_Joint(Joint4);
+    #endif
+    #if HAS_Joint5_STEP
+        PULSE_STOP_Joint(Joint5);
+    #endif
+
     #if DISABLED(LIN_ADVANCE)
       #if ENABLED(MIXING_EXTRUDER)
         MIXING_STEPPERS_LOOP(j) {
@@ -1473,6 +1611,7 @@ uint32_t Stepper::stepper_block_phase_isr() {
     // If current block is finished, reset pointer
     if (step_events_completed >= step_event_count) {
       axis_did_move = 0;
+      axis_did_move_Joint = 0;
       current_block = NULL;
       planner.discard_current_block();
     }
@@ -1498,6 +1637,8 @@ uint32_t Stepper::stepper_block_phase_isr() {
         // step_rate to timer interval and steps per stepper isr
         interval = calc_timer_interval(acc_step_rate, oversampling_factor, &steps_per_isr);
         acceleration_time += interval;
+
+        //SERIAL_ECHOPAIR(" ",interval);
 
         #if ENABLED(LIN_ADVANCE)
           if (LA_use_advance_lead) {
@@ -1530,6 +1671,7 @@ uint32_t Stepper::stepper_block_phase_isr() {
 
           // Using the old trapezoidal control
           step_rate = STEP_MULTIPLY(deceleration_time, current_block->acceleration_rate);
+          // SERIAL_ECHOPAIR("acceleration_rate:", current_block->acceleration_rate);
           if (step_rate < acc_step_rate) { // Still decelerating?
             step_rate = acc_step_rate - step_rate;
             NOLESS(step_rate, current_block->final_rate);
@@ -1537,7 +1679,7 @@ uint32_t Stepper::stepper_block_phase_isr() {
           else
             step_rate = current_block->final_rate;
         #endif
-
+          // SERIAL_ECHOPAIR("step_rate: ",step_rate);
         // step_rate is in steps/second
 
         // step_rate to timer interval and steps per stepper isr
@@ -1581,16 +1723,24 @@ uint32_t Stepper::stepper_block_phase_isr() {
 
     // Anything in the buffer?
     if ((current_block = planner.get_current_block())) {
-
-      // Sync block? Sync the stepper counts and return
+      /*for(int i1=1;i1<6;i1++) {
+        SERIAL_ECHOPAIR("J",i1);
+    	  SERIAL_ECHOPAIR(" = ",current_block->position_Joint[i1-1]);
+        SERIAL_PROTOCOLCHAR(" ");
+      }*/
+      //Sync block? Sync the stepper counts and return
       while (TEST(current_block->flag, BLOCK_BIT_SYNC_POSITION)) {
-        _set_position(
+        /*_set_position(
           current_block->position[A_AXIS], current_block->position[B_AXIS], current_block->position[C_AXIS],
           #if ENABLED(HANGPRINTER)
             current_block->position[D_AXIS],
           #endif
           current_block->position[E_AXIS]
         );
+        //*/
+        _set_position_Joint(current_block->position_Joint[Joint1_AXIS],current_block->position_Joint[Joint2_AXIS],current_block->position_Joint[Joint3_AXIS],
+        current_block->position_Joint[Joint4_AXIS],current_block->position_Joint[Joint5_AXIS]);
+
         planner.discard_current_block();
 
         // Try to get a new block
@@ -1660,15 +1810,30 @@ uint32_t Stepper::stepper_block_phase_isr() {
         #define Z_MOVE_TEST !!current_block->steps[C_AXIS]
       #endif
 
+      #define Joint1_MOVE_TEST !!current_block->step_Joint[Joint1_AXIS]
+      #define Joint2_MOVE_TEST !!current_block->step_Joint[Joint2_AXIS]
+      #define Joint3_MOVE_TEST !!current_block->step_Joint[Joint3_AXIS]
+      #define Joint4_MOVE_TEST !!current_block->step_Joint[Joint4_AXIS]
+      #define Joint5_MOVE_TEST !!current_block->step_Joint[Joint5_AXIS]
+
       uint8_t axis_bits = 0;
+      uint8_t axis_bits_Joint = 0;
       if (X_MOVE_TEST) SBI(axis_bits, A_AXIS);
       if (Y_MOVE_TEST) SBI(axis_bits, B_AXIS);
       if (Z_MOVE_TEST) SBI(axis_bits, C_AXIS);
+      //SERIAL_ECHOLNPAIR("axis_bits:",axis_bits);
+      if(Joint1_MOVE_TEST)SBI(axis_bits_Joint, Joint1_AXIS);
+      if(Joint2_MOVE_TEST)SBI(axis_bits_Joint, Joint2_AXIS);
+      if(Joint3_MOVE_TEST)SBI(axis_bits_Joint, Joint3_AXIS);
+      if(Joint4_MOVE_TEST)SBI(axis_bits_Joint, Joint4_AXIS);
+      if(Joint5_MOVE_TEST)SBI(axis_bits_Joint, Joint5_AXIS);
+      //SERIAL_ECHOLNPAIR("axis_bits_Joint:",axis_bits_Joint);
       //if (!!current_block->steps[E_AXIS]) SBI(axis_bits, E_AXIS);
       //if (!!current_block->steps[A_AXIS]) SBI(axis_bits, X_HEAD);
       //if (!!current_block->steps[B_AXIS]) SBI(axis_bits, Y_HEAD);
       //if (!!current_block->steps[C_AXIS]) SBI(axis_bits, Z_HEAD);
       axis_did_move = axis_bits;
+      axis_did_move_Joint = axis_bits_Joint;
 
       // No acceleration / deceleration time elapsed so far
       acceleration_time = deceleration_time = 0;
@@ -1694,6 +1859,7 @@ uint32_t Stepper::stepper_block_phase_isr() {
         delta_error[A_AXIS] = delta_error[B_AXIS] = delta_error[C_AXIS] = delta_error[D_AXIS] = delta_error[E_AXIS] = -int32_t(step_event_count);
       #else
         delta_error[X_AXIS] = delta_error[Y_AXIS] = delta_error[Z_AXIS] = delta_error[E_AXIS] = -int32_t(step_event_count);
+        delta_error_Joint[Joint1_AXIS]=delta_error_Joint[Joint2_AXIS]=delta_error_Joint[Joint3_AXIS]=delta_error_Joint[Joint4_AXIS]=delta_error_Joint[Joint5_AXIS] = -int32_t(step_event_count);
       #endif
 
       // Calculate Bresenham dividends
@@ -1703,9 +1869,15 @@ uint32_t Stepper::stepper_block_phase_isr() {
         advance_dividend[C_AXIS] = current_block->steps[C_AXIS] << 1;
         advance_dividend[D_AXIS] = current_block->steps[D_AXIS] << 1;
       #else
-        advance_dividend[X_AXIS] = current_block->steps[X_AXIS] << 1;
-        advance_dividend[Y_AXIS] = current_block->steps[Y_AXIS] << 1;
-        advance_dividend[Z_AXIS] = current_block->steps[Z_AXIS] << 1;
+        //advance_dividend[X_AXIS] = current_block->steps[X_AXIS] << 1;
+        //advance_dividend[Y_AXIS] = current_block->steps[Y_AXIS] << 1;
+        //advance_dividend[Z_AXIS] = current_block->steps[Z_AXIS] << 1;
+
+        advance_dividend_Joint[Joint1_AXIS] = current_block->step_Joint[Joint1_AXIS] << 1;
+        advance_dividend_Joint[Joint2_AXIS] = current_block->step_Joint[Joint2_AXIS] << 1;
+        advance_dividend_Joint[Joint3_AXIS] = current_block->step_Joint[Joint3_AXIS] << 1;
+        advance_dividend_Joint[Joint4_AXIS] = current_block->step_Joint[Joint4_AXIS] << 1;
+        advance_dividend_Joint[Joint5_AXIS] = current_block->step_Joint[Joint5_AXIS] << 1;
       #endif
       advance_dividend[E_AXIS] = current_block->steps[E_AXIS] << 1;
 
@@ -1718,6 +1890,9 @@ uint32_t Stepper::stepper_block_phase_isr() {
       // Compute the acceleration and deceleration points
       accelerate_until = current_block->accelerate_until << oversampling;
       decelerate_after = current_block->decelerate_after << oversampling;
+
+      // SERIAL_ECHO(accelerate_rate);
+      // SERIAL_ECHOPAIR(" ",current_block->final_rate);
 
       #if ENABLED(MIXING_EXTRUDER)
         const uint32_t e_steps = (
@@ -1764,6 +1939,24 @@ uint32_t Stepper::stepper_block_phase_isr() {
         #endif
         set_directions();
       }
+      
+      // SERIAL_ECHOPAIR(" ",last_direction_bits_joint);
+      // SERIAL_ECHOPAIR(" ",current_block->direction_bits_joint);
+
+      if (current_block->direction_bits_joint != last_direction_bits_joint) {
+        last_direction_bits_joint = current_block->direction_bits_joint;
+        set_directions_Joint();
+        //SERIAL_ECHOLNPAIR("djm : ",last_direction_bits_joint); 
+      }
+
+      // SERIAL_ECHOPAIR(" ",last_direction_bits_joint);
+      // SERIAL_ECHOPAIR(" ",current_block->direction_bits_joint);
+
+      // SERIAL_ECHOPAIR(" ",count_direction_Joint[0]);
+      // SERIAL_ECHOPAIR(" ",count_direction_Joint[1]);
+      // SERIAL_ECHOPAIR(" ",count_direction_Joint[2]);
+      // SERIAL_ECHOPAIR(" ",count_direction_Joint[3]);
+      // SERIAL_ECHOPAIR(" ",count_direction_Joint[4]);
 
       // At this point, we must ensure the movement about to execute isn't
       // trying to force the head against a limit switch. If using interrupt-
@@ -1828,7 +2021,7 @@ uint32_t Stepper::stepper_block_phase_isr() {
     }
     else
       interval = LA_ADV_NEVER;
-
+    
       #if ENABLED(MIXING_EXTRUDER)
         if (LA_steps >= 0)
           MIXING_STEPPERS_LOOP(j) NORM_E_DIR(j);
@@ -1969,6 +2162,23 @@ void Stepper::init() {
     E4_DIR_INIT;
   #endif
 
+  //Joint
+  #if HAS_Joint1_DIR
+    Joint1_DIR_INIT;
+  #endif
+  #if HAS_Joint2_DIR
+    Joint2_DIR_INIT;
+  #endif
+  #if HAS_Joint3_DIR
+    Joint3_DIR_INIT;
+  #endif
+  #if HAS_Joint4_DIR
+    Joint4_DIR_INIT;
+  #endif
+  #if HAS_Joint5_DIR
+    Joint5_DIR_INIT;
+  #endif
+
   // Init Enable Pins - steppers default to disabled.
   #if HAS_X_ENABLE
     X_ENABLE_INIT;
@@ -2015,6 +2225,29 @@ void Stepper::init() {
     if (!E_ENABLE_ON) E4_ENABLE_WRITE(HIGH);
   #endif
 
+  //Joint
+  #if HAS_Joint1_ENABLE
+  Joint1_ENABLE_INIT; 
+  if (!Joint1_ENABLE_ON) {Joint1_ENABLE_WRITE(HIGH);
+  }
+  #endif
+  #if HAS_Joint2_ENABLE
+  Joint2_ENABLE_INIT;
+  if (!Joint2_ENABLE_ON) Joint2_ENABLE_WRITE(HIGH);
+  #endif
+  #if HAS_Joint3_ENABLE
+  Joint3_ENABLE_INIT;
+  if (!Joint3_ENABLE_ON) Joint3_ENABLE_WRITE(HIGH);
+  #endif
+  #if HAS_Joint4_ENABLE
+  Joint4_ENABLE_INIT;
+  if (!Joint4_ENABLE_ON) Joint4_ENABLE_WRITE(HIGH);
+  #endif
+  #if HAS_Joint5_ENABLE
+  Joint5_ENABLE_INIT;
+  if (!Joint5_ENABLE_ON) Joint5_ENABLE_WRITE(HIGH);
+  #endif
+
   #define _STEP_INIT(AXIS) AXIS ##_STEP_INIT
   #define _WRITE_STEP(AXIS, HIGHLOW) AXIS ##_STEP_WRITE(HIGHLOW)
   #define _DISABLE(AXIS) disable_## AXIS()
@@ -2039,8 +2272,8 @@ void Stepper::init() {
     #if ENABLED(Y_DUAL_STEPPER_DRIVERS)
       Y2_STEP_INIT;
       Y2_STEP_WRITE(INVERT_Y_STEP_PIN);
-    #endif
-    AXIS_INIT(Y, Y);
+    #endif      
+    AXIS_INIT(Y, Y);     
   #endif
 
   #if HAS_Z_STEP
@@ -2049,6 +2282,23 @@ void Stepper::init() {
       Z2_STEP_WRITE(INVERT_Z_STEP_PIN);
     #endif
     AXIS_INIT(Z, Z);
+  #endif
+
+  //Joint
+  #if HAS_Joint1_STEP
+    AXIS_INIT(Joint1, Joint1);
+  #endif
+    #if HAS_Joint2_STEP
+    AXIS_INIT(Joint2, Joint2);
+  #endif
+    #if HAS_Joint3_STEP
+    AXIS_INIT(Joint3, Joint3);
+  #endif
+    #if HAS_Joint4_STEP
+    AXIS_INIT(Joint4, Joint4);
+  #endif
+    #if HAS_Joint5_STEP
+    AXIS_INIT(Joint5, Joint5);
   #endif
 
   #if E_STEPPERS > 0 && HAS_E0_STEP
@@ -2087,12 +2337,12 @@ void Stepper::init() {
  * This allows get_axis_position_mm to correctly
  * derive the current XYZ position later on.
  */
-void Stepper::_set_position(const int32_t &a, const int32_t &b, const int32_t &c,
+void Stepper::_set_position
+(const int32_t &a, const int32_t &b, const int32_t &c,
     #if ENABLED(HANGPRINTER)
       const int32_t &d,
     #endif
-  const int32_t &e
-) {
+  const int32_t &e) {
   #if CORE_IS_XY
     // corexy positioning
     // these equations follow the form of the dA and dB equations on http://www.corexy.com/theory.html
@@ -2118,7 +2368,15 @@ void Stepper::_set_position(const int32_t &a, const int32_t &b, const int32_t &c
       count_position[D_AXIS] = d;
     #endif
   #endif
-  count_position[E_AXIS] = e;
+  count_position[E_AXIS] = e;    
+}
+
+void Stepper::_set_position_Joint(const int32_t &J1, const int32_t &J2, const int32_t &J3, const int32_t &J4, const int32_t &J5){
+  count_position_Joint[Joint1_AXIS]=J1;
+  count_position_Joint[Joint2_AXIS]=J2;
+  count_position_Joint[Joint3_AXIS]=J3;
+  count_position_Joint[Joint4_AXIS]=J4;
+  count_position_Joint[Joint5_AXIS]=J5;
 }
 
 /**
@@ -2133,6 +2391,98 @@ int32_t Stepper::position(const AxisEnum axis) {
   if (was_enabled) ENABLE_STEPPER_DRIVER_INTERRUPT();
   return v;
 }
+
+int32_t Stepper::position_Joint(const JointEnum axis) {
+  const bool was_enabled = STEPPER_ISR_ENABLED();
+  if (was_enabled) DISABLE_STEPPER_DRIVER_INTERRUPT();
+
+  const int32_t v = count_position_Joint[axis];
+
+  if (was_enabled) ENABLE_STEPPER_DRIVER_INTERRUPT();
+  return v;
+}
+
+void Stepper::set_position_Joint_manual(const int32_t &J1, const int32_t &J2, const int32_t &J3, const int32_t &J4, const int32_t &J5){
+
+  #define _APPLY_STEP(AXIS) AXIS ##_APPLY_STEP 
+  #define _INVERT_STEP_PIN(AXIS) INVERT_## AXIS ##_STEP_PIN 
+  #define SET_DIR_Joint(A)    A##_APPLY_DIR(INVERT_## A##_DIR, false)
+  #define RESET_DIR_Joint(A)  A##_APPLY_DIR(!INVERT_## A##_DIR, false)
+ 
+    
+  const int32_t d0 = J1 - count_position_Joint_manual[Joint1_AXIS],
+                d1 = J2 - count_position_Joint_manual[Joint2_AXIS],
+                d2 = J3 - count_position_Joint_manual[Joint3_AXIS],
+                d3 = J4 - count_position_Joint_manual[Joint4_AXIS],
+                d4 = J5 - count_position_Joint_manual[Joint5_AXIS];
+                
+  count_position_Joint_manual[Joint1_AXIS] = J1;
+  count_position_Joint_manual[Joint2_AXIS] = J2;
+  count_position_Joint_manual[Joint3_AXIS] = J3;
+  count_position_Joint_manual[Joint4_AXIS] = J4;
+  count_position_Joint_manual[Joint5_AXIS] = J5;
+
+  if(d0<0) SET_DIR_Joint(Joint1); else RESET_DIR_Joint(Joint1);
+  if(d1<0) SET_DIR_Joint(Joint2); else RESET_DIR_Joint(Joint2);
+  if(d2<0) SET_DIR_Joint(Joint3); else RESET_DIR_Joint(Joint3);
+  if(d3<0) SET_DIR_Joint(Joint4); else RESET_DIR_Joint(Joint4);
+  if(d4<0) SET_DIR_Joint(Joint5); else RESET_DIR_Joint(Joint5);
+ 
+  const int32_t target_micro_step[Joint_All] = {abs(d0),abs(d1),abs(d2),abs(d3),abs(d4)};
+
+  for(int joint_axis=0;joint_axis<Joint_All;joint_axis++){
+    for (int microstep = 0; microstep < target_micro_step[joint_axis]; microstep++) {
+      // These four lines result in 1 step:
+      switch (joint_axis)
+      {
+        case Joint1_AXIS:
+          _APPLY_STEP(Joint1)(!_INVERT_STEP_PIN(Joint1), 0);
+          _delay_us(1500);
+          _APPLY_STEP(Joint1)(_INVERT_STEP_PIN(Joint1), 0);
+          _delay_us(1500);
+          break;
+        case Joint2_AXIS:
+          _APPLY_STEP(Joint2)(!_INVERT_STEP_PIN(Joint2), 0);
+          _delay_us(1500);
+          _APPLY_STEP(Joint2)(_INVERT_STEP_PIN(Joint2), 0);
+          _delay_us(1500);
+          break;
+        case Joint3_AXIS:
+          _APPLY_STEP(Joint3)(!_INVERT_STEP_PIN(Joint3), 0);
+          _delay_us(1500);
+          _APPLY_STEP(Joint3)(_INVERT_STEP_PIN(Joint3), 0);
+          _delay_us(1500);
+          break;
+        case Joint4_AXIS:
+          _APPLY_STEP(Joint4)(!_INVERT_STEP_PIN(Joint4), 0);
+          _delay_us(1500);
+          _APPLY_STEP(Joint4)(_INVERT_STEP_PIN(Joint4), 0);
+          _delay_us(1500);
+          break;
+        case Joint5_AXIS:
+          _APPLY_STEP(Joint5)(!_INVERT_STEP_PIN(Joint5), 0);
+          _delay_us(1500);
+          _APPLY_STEP(Joint5)(_INVERT_STEP_PIN(Joint5), 0);
+          _delay_us(1500);
+          break;
+      }
+    }
+  }
+  
+
+  
+
+}
+
+
+
+
+
+
+
+
+
+
 
 // Signal endstops were triggered - This function can be called from
 // an ISR context  (Temperature, Stepper or limits ISR), so we must
@@ -2164,11 +2514,33 @@ void Stepper::endstop_triggered(const AxisEnum axis) {
   if (was_enabled) ENABLE_STEPPER_DRIVER_INTERRUPT();
 }
 
+void Stepper::endstop_triggered_Joint(const JointEnum axis) {
+
+  const bool was_enabled = STEPPER_ISR_ENABLED();
+  if (was_enabled) DISABLE_STEPPER_DRIVER_INTERRUPT();
+    endstops_trigsteps_Joint[axis] = count_position_Joint[axis];
+  // Discard the rest of the move if there is a current block
+  quick_stop();
+
+  if (was_enabled) ENABLE_STEPPER_DRIVER_INTERRUPT();
+}
+
 int32_t Stepper::triggered_position(const AxisEnum axis) {
   const bool was_enabled = STEPPER_ISR_ENABLED();
   if (was_enabled) DISABLE_STEPPER_DRIVER_INTERRUPT();
 
   const int32_t v = endstops_trigsteps[axis];
+
+  if (was_enabled) ENABLE_STEPPER_DRIVER_INTERRUPT();
+
+  return v;
+}
+
+int32_t Stepper::triggered_position_Joint(const JointEnum axis) {
+  const bool was_enabled = STEPPER_ISR_ENABLED();
+  if (was_enabled) DISABLE_STEPPER_DRIVER_INTERRUPT();
+
+  const int32_t v = endstops_trigsteps_Joint[axis];
 
   if (was_enabled) ENABLE_STEPPER_DRIVER_INTERRUPT();
 
@@ -2187,6 +2559,12 @@ void Stepper::report_positions() {
                   dpos = count_position[D_AXIS],
                 #endif
                 zpos = count_position[Z_AXIS];
+
+  const int32_t Joint1pos = count_position_Joint[Joint1_AXIS],
+                Joint2pos = count_position_Joint[Joint2_AXIS],
+                Joint3pos = count_position_Joint[Joint3_AXIS],
+                Joint4pos = count_position_Joint[Joint4_AXIS],
+                Joint5pos = count_position_Joint[Joint5_AXIS];
 
   if (was_enabled) ENABLE_STEPPER_DRIVER_INTERRUPT();
 
@@ -2210,6 +2588,18 @@ void Stepper::report_positions() {
     SERIAL_PROTOCOLPGM(" Z:");
   #endif
   SERIAL_PROTOCOL(zpos);
+
+  SERIAL_PROTOCOLPGM(" J1:");
+  SERIAL_PROTOCOL(Joint1pos);
+  SERIAL_PROTOCOLPGM(" J2:");
+  SERIAL_PROTOCOL(Joint2pos);
+  SERIAL_PROTOCOLPGM(" J3:");
+  SERIAL_PROTOCOL(Joint3pos);
+  SERIAL_PROTOCOLPGM(" J4:");
+  SERIAL_PROTOCOL(Joint4pos);
+  SERIAL_PROTOCOLPGM(" J5:");
+  SERIAL_PROTOCOL(Joint5pos);
+
 
   #if ENABLED(HANGPRINTER)
     SERIAL_PROTOCOLPAIR(" D:", dpos);

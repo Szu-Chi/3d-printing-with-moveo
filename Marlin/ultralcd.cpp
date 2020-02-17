@@ -34,6 +34,7 @@
 #include "configuration_store.h"
 #include "utility.h"
 #include "parser.h"
+#include <avr/wdt.h>
 
 #if HAS_BUZZER && DISABLED(LCD_USE_I2C_BUZZER)
   #include "buzzer.h"
@@ -175,6 +176,7 @@ uint16_t max_display_update_time = 0;
   void lcd_tune_menu();
   void lcd_prepare_menu();
   void lcd_move_menu();
+  void lcd_home_menu();
   void lcd_control_menu();
   void lcd_control_temperature_menu();
   void lcd_control_motion_menu();
@@ -457,8 +459,10 @@ uint16_t max_display_update_time = 0;
 
   // Manual Moves
   const float manual_feedrate_mm_m[] = MANUAL_FEEDRATE;
+  const float manual_feedrate_mm_m_joint[] = MANUAL1_FEEDRATE;
   millis_t manual_move_start_time = 0;
   int8_t manual_move_axis = (int8_t)NO_AXIS;
+  int8_t manual_move_joint = (int8_t)NO_AXIS;
   #if EXTRUDERS > 1
     int8_t manual_move_e_index = 0;
   #else
@@ -825,7 +829,7 @@ void lcd_quick_feedback(const bool clear_buttons) {
   }
 
   inline void line_to_current_z() {
-    planner.buffer_line_kinematic(current_position, MMM_TO_MMS(manual_feedrate_mm_m[Z_AXIS]), active_extruder);
+    planner.buffer_line_kinematic(current_position, current_position_Joint, MMM_TO_MMS(manual_feedrate_mm_m[Z_AXIS]), active_extruder);
   }
 
   inline void line_to_z(const float &z) {
@@ -1195,6 +1199,23 @@ void lcd_quick_feedback(const bool clear_buttons) {
       lcd_return_to_status();
     }
   #endif
+
+  void Go_to_Joint_Zero()
+  {
+    current_position_Joint[Joint1_AXIS]=0;
+    current_position_Joint[Joint2_AXIS]=0;
+    current_position_Joint[Joint3_AXIS]=0;
+    current_position_Joint[Joint4_AXIS]=0;
+    current_position_Joint[Joint5_AXIS]=0;
+    
+    current_position[X_AXIS]=18.83;
+    current_position[Y_AXIS]=70.83;
+    current_position[Z_AXIS]=779.94;
+    float max_feedrate_joint_init[Joint_All] = DEFAULT_MAX_FEEDRATE_JOINT;
+    planner.max_feedrate_mm_s_joint[Joint1_AXIS] = 50;
+    planner.buffer_line_kinematic(current_position, current_position_Joint, MMM_TO_MMS(manual_feedrate_mm_m_joint[0]), 0);
+    planner.max_feedrate_mm_s_joint[Joint1_AXIS] = max_feedrate_joint_init[Joint1_AXIS];
+  }
 
   #if ENABLED(BABYSTEP_ZPROBE_GFX_OVERLAY) || ENABLED(MESH_EDIT_GFX_OVERLAY)
 
@@ -2702,12 +2723,19 @@ void lcd_quick_feedback(const bool clear_buttons) {
     //
     // Auto Home
     //
-    MENU_ITEM(gcode, MSG_AUTO_HOME, PSTR("G28"));
+    MENU_ITEM(submenu, MSG_AUTO_HOME, lcd_home_menu);
+    /*MENU_ITEM(gcode, MSG_AUTO_HOME, PSTR("G28"));
     #if ENABLED(INDIVIDUAL_AXIS_HOMING_MENU)
       MENU_ITEM(gcode, MSG_AUTO_HOME_X, PSTR("G28 X"));
       MENU_ITEM(gcode, MSG_AUTO_HOME_Y, PSTR("G28 Y"));
       MENU_ITEM(gcode, MSG_AUTO_HOME_Z, PSTR("G28 Z"));
     #endif
+    */
+
+   //
+   // G29 P5 T
+   //
+    MENU_ITEM(gcode, MSG_AUTO_G29, PSTR("G29 P5 T"));
 
     //
     // TMC Z Calibration
@@ -2761,6 +2789,15 @@ void lcd_quick_feedback(const bool clear_buttons) {
     // Disable Steppers
     //
     MENU_ITEM(gcode, MSG_DISABLE_STEPPERS, PSTR("M84"));
+
+    //
+    // Enable Steppers
+    //
+    MENU_ITEM(gcode, MSG_ENABLE_STEPPERS, PSTR("M17"));
+
+    MENU_ITEM(gcode, MSG_ENABLE_ColdExtrudes, PSTR("M302 P1"));
+
+    MENU_ITEM(function, MSG_Go_Zero, Go_to_Joint_Zero);
 
     //
     // Change filament
@@ -2945,11 +2982,23 @@ void lcd_quick_feedback(const bool clear_buttons) {
    * If the most recent manual move hasn't been fed to the planner yet,
    * and the planner can accept one, send immediately
    */
+  inline void manage_manual_move_joint() {
+
+    if (processing_manual_move) return;
+
+    if (manual_move_joint != (int8_t)NO_AXIS && ELAPSED(millis(), manual_move_start_time) && !planner.is_full()) {
+        planner.buffer_line_kinematic_joint(current_position_Joint, 
+                                            MMM_TO_MMS(manual_feedrate_mm_m_joint[manual_move_joint]), 
+                                            manual_move_axis == E_AXIS ? manual_move_e_index : active_extruder);
+        manual_move_joint = (int8_t)NO_AXIS;
+    }
+  }
+
   inline void manage_manual_move() {
 
     if (processing_manual_move) return;
 
-    if (manual_move_axis != (int8_t)NO_AXIS && ELAPSED(millis(), manual_move_start_time) && !planner.is_full()) {
+    if ((manual_move_axis != (int8_t)NO_AXIS || manual_move_joint != (int8_t)NO_AXIS) && ELAPSED(millis(), manual_move_start_time) && !planner.is_full()) {
 
       #if IS_KINEMATIC
 
@@ -2983,10 +3032,20 @@ void lcd_quick_feedback(const bool clear_buttons) {
         #endif
 
       #else
-
-        planner.buffer_line_kinematic(current_position, MMM_TO_MMS(manual_feedrate_mm_m[manual_move_axis]), manual_move_axis == E_AXIS ? manual_move_e_index : active_extruder);
+        static float old_E0_position = 0;
+        float max_feedrate_joint_init[Joint_All] = DEFAULT_MAX_FEEDRATE_JOINT;
+        planner.max_feedrate_mm_s_joint[Joint1_AXIS] = 50;
+        //planner.buffer_line_kinematic(current_position, current_position_Joint, MMM_TO_MMS(manual_feedrate_mm_m[manual_move_axis]), manual_move_axis == E_AXIS ? manual_move_e_index : active_extruder);
+        planner.buffer_line_kinematic( current_position, current_position_Joint, 
+                                      (current_position[E_AXIS] != old_E0_position) ? MMM_TO_MMS(manual_feedrate_mm_m[E_AXIS]):MMM_TO_MMS(manual_feedrate_mm_m_joint[manual_move_joint])
+                                      , manual_move_axis == E_AXIS ? manual_move_e_index : active_extruder);
+        planner.max_feedrate_mm_s_joint[Joint1_AXIS] = max_feedrate_joint_init[Joint1_AXIS];
+        //SERIAL_ECHOLNPAIR("E_AXIS",current_position[E_AXIS]);
+        //SERIAL_ECHOLNPAIR("current_position",current_position);
+        //SERIAL_ECHOLNPAIR("current_position_Joint : ",current_position_Joint);
+        old_E0_position = current_position[E_AXIS];
         manual_move_axis = (int8_t)NO_AXIS;
-
+        manual_move_joint = (int8_t)NO_AXIS;
       #endif
     }
   }
@@ -3008,6 +3067,11 @@ void lcd_quick_feedback(const bool clear_buttons) {
     #endif
     manual_move_start_time = millis() + (move_menu_scale < 0.99f ? 0UL : 250UL); // delay for bigger moves
     manual_move_axis = (int8_t)axis;
+  }
+
+  inline void manual_move_to_current_Joint(JointEnum axis) {
+    manual_move_start_time = millis();// + (move_menu_scale < 0.99f ? 0UL : 250UL); // delay for bigger moves
+    manual_move_joint = (int8_t)axis;
   }
 
   /**
@@ -3093,9 +3157,106 @@ void lcd_quick_feedback(const bool clear_buttons) {
       lcd_implementation_drawedit(name, move_menu_scale >= 0.1f ? ftostr41sign(pos) : ftostr43sign(pos));
     }
   }
+
+
+
+
+
+  void _lcd_move_joint(const char* name, JointEnum axis) {
+    if (use_click()) { return lcd_goto_previous_menu_no_defer(); }
+    ENCODER_DIRECTION_NORMAL();
+    if (encoderPosition && !processing_manual_move) {      
+      // Start with no limits to movement
+      float min = current_position[axis] - 100,
+            max = current_position[axis] + 100;
+
+      // Limit to software endstops, if enabled
+      #if ENABLED(MIN_SOFTWARE_ENDSTOPS) || ENABLED(MAX_SOFTWARE_ENDSTOPS)
+        if (soft_endstops_enabled) switch (axis) {
+          case Joint1_AXIS:
+            #if ENABLED(MIN_SOFTWARE_ENDSTOP_J)
+              min = soft_endstop_joint_min[Joint1_AXIS];
+            #endif
+            #if ENABLED(MAX_SOFTWARE_ENDSTOP_J)
+              max = soft_endstop_joint_max[Joint1_AXIS];
+            #endif
+            break;
+          case Joint2_AXIS:
+            #if ENABLED(MIN_SOFTWARE_ENDSTOP_A)
+              min = soft_endstop_joint_min[Joint2_AXIS];
+            #endif
+            #if ENABLED(MAX_SOFTWARE_ENDSTOP_A)
+              max = soft_endstop_joint_max[Joint2_AXIS];
+            #endif
+            break;
+          case Joint3_AXIS:
+            #if ENABLED(MIN_SOFTWARE_ENDSTOP_B)
+              min = soft_endstop_joint_min[Joint3_AXIS];
+            #endif
+            #if ENABLED(MAX_SOFTWARE_ENDSTOP_B)
+              max = soft_endstop_joint_max[Joint3_AXIS];
+            #endif
+            break;
+          case Joint4_AXIS:
+            #if ENABLED(MIN_SOFTWARE_ENDSTOP_C)
+              min = soft_endstop_joint_min[Joint4_AXIS];
+            #endif
+            #if ENABLED(MAX_SOFTWARE_ENDSTOP_C)
+              max = soft_endstop_joint_max[Joint4_AXIS];
+            #endif
+            break;
+          case Joint5_AXIS:
+            #if ENABLED(MIN_SOFTWARE_ENDSTOP_D)
+              min = soft_endstop_joint_min[Joint5_AXIS];
+            #endif
+            #if ENABLED(MAX_SOFTWARE_ENDSTOP_D)
+              max = soft_endstop_joint_max[Joint5_AXIS];
+            #endif
+            break;
+          default: break;
+        }
+      #endif // MIN_SOFTWARE_ENDSTOPS || MAX_SOFTWARE_ENDSTOPS
+      
+
+      // Get the new position
+      const float diff = float((int32_t)encoderPosition) * move_menu_scale;
+      
+      current_position_Joint[axis] += diff;
+      if ((int32_t)encoderPosition < 0)
+        NOLESS(current_position_Joint[axis], min);
+      else
+        NOMORE(current_position_Joint[axis], max);
+
+      manual_move_to_current_Joint(axis);
+      lcdDrawUpdate = LCDVIEW_REDRAW_NOW;
+    }
+    encoderPosition = 0;
+    if (lcdDrawUpdate) {
+      const float pos = NATIVE_TO_LOGICAL(processing_manual_move ? destination_Joint[axis] : current_position_Joint[axis]
+        #if IS_KINEMATIC
+          + manual_move_offset
+        #endif
+      , axis);
+      lcd_implementation_drawedit(name, ftostr6sign(pos));
+    }
+  }
+
+
+
+
+
+
   void lcd_move_x() { _lcd_move_xyz(PSTR(MSG_MOVE_X), X_AXIS); }
   void lcd_move_y() { _lcd_move_xyz(PSTR(MSG_MOVE_Y), Y_AXIS); }
   void lcd_move_z() { _lcd_move_xyz(PSTR(MSG_MOVE_Z), Z_AXIS); }
+
+  //joint
+  void lcd_move_J() { _lcd_move_joint(PSTR(MSG_MOVE_J), Joint1_AXIS); }
+  void lcd_move_A() { _lcd_move_joint(PSTR(MSG_MOVE_A), Joint2_AXIS); }
+  void lcd_move_B() { _lcd_move_joint(PSTR(MSG_MOVE_B), Joint3_AXIS); }
+  void lcd_move_C() { _lcd_move_joint(PSTR(MSG_MOVE_C), Joint4_AXIS); }
+  void lcd_move_D() { _lcd_move_joint(PSTR(MSG_MOVE_D), Joint5_AXIS); }
+ 
   void _lcd_move_e(
     #if E_MANUAL > 1
       const int8_t eindex=-1
@@ -3176,8 +3337,14 @@ void lcd_quick_feedback(const bool clear_buttons) {
     lcd_goto_screen(_manual_move_func_ptr);
   }
   void lcd_move_menu_10mm() { _goto_manual_move(10); }
-  void lcd_move_menu_1mm()  { _goto_manual_move( 1); }
-  void lcd_move_menu_01mm() { _goto_manual_move( 0.1f); }
+  void lcd_move_menu_1mm()  { _goto_manual_move(1); }
+  void lcd_move_menu_01mm() { _goto_manual_move(0.1f); }
+
+  void lcd_move_menu_1000step() { _goto_manual_move(1000); }
+  void lcd_move_menu_500step()  { _goto_manual_move(500); }
+  void lcd_move_menu_100step()  { _goto_manual_move(100); }
+  void lcd_move_menu_10step()   { _goto_manual_move(10); }
+  void lcd_move_menu_1step()    { _goto_manual_move(1); }
 
   void _lcd_move_distance_menu(const AxisEnum axis, const screenFunc_t func) {
     _manual_move_func_ptr = func;
@@ -3200,10 +3367,51 @@ void lcd_quick_feedback(const bool clear_buttons) {
     MENU_ITEM(submenu, MSG_MOVE_01MM, lcd_move_menu_01mm);
     END_MENU();
   }
+
+  void _lcd_move_distance_menu_Joint(const JointEnum axis, const screenFunc_t func) {
+    _manual_move_func_ptr = func;
+    START_MENU();
+    if (LCD_HEIGHT >= 4) {
+      switch (axis) {
+        case Joint1_AXIS:
+          STATIC_ITEM(MSG_MOVE_J, true, true); break;
+        case Joint2_AXIS:
+          STATIC_ITEM(MSG_MOVE_A, true, true); break;
+        case Joint3_AXIS:
+          STATIC_ITEM(MSG_MOVE_B, true, true); break;
+        case Joint4_AXIS:
+          STATIC_ITEM(MSG_MOVE_C, true, true); break;
+        case Joint5_AXIS:
+          STATIC_ITEM(MSG_MOVE_D, true, true); break;
+      }
+    }
+    MENU_BACK(MSG_MOVE_AXIS);
+    if(axis==Joint2_AXIS || axis==Joint3_AXIS || axis==Joint4_AXIS) {
+      MENU_ITEM(submenu, MSG_MOVE_1000step, lcd_move_menu_1000step);
+    }
+    else if(axis==Joint5_AXIS) {
+      MENU_ITEM(submenu, MSG_MOVE_500step, lcd_move_menu_500step);
+    }
+    else{
+      MENU_ITEM(submenu, MSG_MOVE_100step, lcd_move_menu_100step);
+    }
+      
+    MENU_ITEM(submenu, MSG_MOVE_10step, lcd_move_menu_10step);
+    MENU_ITEM(submenu, MSG_MOVE_1step, lcd_move_menu_1step);
+    END_MENU();
+  }
+
   void lcd_move_get_x_amount()        { _lcd_move_distance_menu(X_AXIS, lcd_move_x); }
   void lcd_move_get_y_amount()        { _lcd_move_distance_menu(Y_AXIS, lcd_move_y); }
   void lcd_move_get_z_amount()        { _lcd_move_distance_menu(Z_AXIS, lcd_move_z); }
   void lcd_move_get_e_amount()        { _lcd_move_distance_menu(E_AXIS, lcd_move_e); }
+
+  //joint
+  void lcd_move_get_J_amount()        { _lcd_move_distance_menu_Joint(Joint1_AXIS, lcd_move_J); }
+  void lcd_move_get_A_amount()        { _lcd_move_distance_menu_Joint(Joint2_AXIS, lcd_move_A); }
+  void lcd_move_get_B_amount()        { _lcd_move_distance_menu_Joint(Joint3_AXIS, lcd_move_B); }
+  void lcd_move_get_C_amount()        { _lcd_move_distance_menu_Joint(Joint4_AXIS, lcd_move_C); }
+  void lcd_move_get_D_amount()        { _lcd_move_distance_menu_Joint(Joint5_AXIS, lcd_move_D); }
   #if E_MANUAL > 1
     void lcd_move_get_e0_amount()     { _lcd_move_distance_menu(E_AXIS, lcd_move_e0); }
     void lcd_move_get_e1_amount()     { _lcd_move_distance_menu(E_AXIS, lcd_move_e1); }
@@ -3249,7 +3457,7 @@ void lcd_quick_feedback(const bool clear_buttons) {
     #endif
 
     if (_MOVE_XYZ_ALLOWED) {
-      if (_MOVE_XY_ALLOWED) {
+      /*if (_MOVE_XY_ALLOWED) {
         MENU_ITEM(submenu, MSG_MOVE_X, lcd_move_get_x_amount);
         MENU_ITEM(submenu, MSG_MOVE_Y, lcd_move_get_y_amount);
       }
@@ -3259,6 +3467,13 @@ void lcd_quick_feedback(const bool clear_buttons) {
       #endif
 
       MENU_ITEM(submenu, MSG_MOVE_Z, lcd_move_get_z_amount);
+      */
+      //joint
+      MENU_ITEM(submenu, MSG_MOVE_J, lcd_move_get_J_amount);
+      MENU_ITEM(submenu, MSG_MOVE_A, lcd_move_get_A_amount);
+      MENU_ITEM(submenu, MSG_MOVE_B, lcd_move_get_B_amount);
+      MENU_ITEM(submenu, MSG_MOVE_C, lcd_move_get_C_amount);
+      MENU_ITEM(submenu, MSG_MOVE_D, lcd_move_get_D_amount);
     }
     else
       MENU_ITEM(gcode, MSG_AUTO_HOME, PSTR("G28"));
@@ -3326,6 +3541,21 @@ void lcd_quick_feedback(const bool clear_buttons) {
 
     #endif
 
+    END_MENU();
+  }
+
+  void lcd_home_menu() {
+    START_MENU();
+    MENU_BACK(MSG_PREPARE); 
+
+    //joint
+    MENU_ITEM(gcode, MSG_HOME_J, PSTR("G28 J"));
+    MENU_ITEM(gcode, MSG_HOME_A, PSTR("G28 A"));
+    MENU_ITEM(gcode, MSG_HOME_B, PSTR("G28 B"));
+    MENU_ITEM(gcode, MSG_HOME_C, PSTR("G28 C"));
+    MENU_ITEM(gcode, MSG_HOME_D, PSTR("G28 D"));
+    MENU_ITEM(gcode, MSG_HOME_ALL, PSTR("G28"));
+          
     END_MENU();
   }
 
@@ -5154,8 +5384,8 @@ void lcd_update() {
     static millis_t return_to_status_ms = 0;
 
     // Handle any queued Move Axis motion
+    //manage_manual_move_joint();
     manage_manual_move();
-
     // Update button states for LCD_CLICKED, etc.
     // After state changes the next button update
     // may be delayed 300-500ms.

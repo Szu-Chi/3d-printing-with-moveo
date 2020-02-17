@@ -39,6 +39,23 @@
 #define Y_MAX_LENGTH (Y_MAX_POS - (Y_MIN_POS))
 #define Z_MAX_LENGTH (Z_MAX_POS - (Z_MIN_POS))
 
+//joint
+//*
+#define Joint1_MAX_LENGTH (Joint1_MAX_POS - (Joint1_MIN_POS))
+#define Joint2_MAX_LENGTH (Joint2_MAX_POS - (Joint2_MIN_POS))
+#define Joint3_MAX_LENGTH (Joint3_MAX_POS - (Joint3_MIN_POS))
+#define Joint4_MAX_LENGTH (Joint4_MAX_POS - (Joint4_MIN_POS))
+#define Joint5_MAX_LENGTH 38500//(Joint5_MAX_POS - (Joint5_MIN_POS))
+//*/
+
+/*
+#define Joint1_MAX_LENGTH 24800
+#define Joint2_MAX_LENGTH 84000
+#define Joint3_MAX_LENGTH 220000
+#define Joint4_MAX_LENGTH 147500
+#define Joint5_MAX_LENGTH 38500
+//*/
+
 // Defined only if the sanity-check is bypassed
 #ifndef X_BED_SIZE
   #define X_BED_SIZE X_MAX_LENGTH
@@ -163,6 +180,12 @@
 #else
   #define Z_HOME_POS (Z_HOME_DIR < 0 ? Z_MIN_POS : Z_MAX_POS)
 #endif
+
+#define Joint1_HOME_POS (Joint1_HOME_DIR < 0 ? Joint1_MIN_POS : Joint1_MAX_POS)
+#define Joint2_HOME_POS (Joint2_HOME_DIR < 0 ? Joint2_MIN_POS : Joint2_MAX_POS)
+#define Joint3_HOME_POS (Joint3_HOME_DIR < 0 ? Joint3_MIN_POS : Joint3_MAX_POS)
+#define Joint4_HOME_POS (Joint4_HOME_DIR < 0 ? Joint4_MIN_POS : Joint4_MAX_POS)
+#define Joint5_HOME_POS (Joint4_HOME_DIR < 0 ? Joint5_MIN_POS : Joint5_MAX_POS)
 
 /**
  * If DELTA_HEIGHT isn't defined use the old setting
@@ -667,6 +690,23 @@
   #if ENABLED(USE_ZMIN_PLUG)
     #define ENDSTOPPULLUP_ZMIN
   #endif
+
+  //joint
+  #if ENABLED(USE_Joint1MIN_PLUG)
+    #define ENDSTOPPULLUP_Joint1MIN
+  #endif
+  #if ENABLED(USE_Joint2MIN_PLUG)
+    #define ENDSTOPPULLUP_Joint2MIN
+  #endif
+  #if ENABLED(USE_Joint3MIN_PLUG)
+    #define ENDSTOPPULLUP_Joint3MIN
+  #endif
+  #if ENABLED(USE_Joint4MIN_PLUG)
+    #define ENDSTOPPULLUP_Joint4MIN
+  #endif
+  #if ENABLED(USE_Joint5MIN_PLUG)
+    #define ENDSTOPPULLUP_Joint5MIN
+  #endif  
 #endif
 
 /**
@@ -703,6 +743,27 @@
 #define HAS_Z2_DIR        (PIN_EXISTS(Z2_DIR))
 #define HAS_Z2_STEP       (PIN_EXISTS(Z2_STEP))
 #define HAS_Z2_MICROSTEPS (PIN_EXISTS(Z2_MS1))
+
+//Joint
+#define HAS_Joint1_ENABLE      (PIN_EXISTS(Joint1_ENABLE))
+#define HAS_Joint1_DIR         (PIN_EXISTS(Joint1_DIR))
+#define HAS_Joint1_STEP        (PIN_EXISTS(Joint1_STEP))
+
+#define HAS_Joint2_ENABLE      (PIN_EXISTS(Joint2_ENABLE))
+#define HAS_Joint2_DIR         (PIN_EXISTS(Joint2_DIR))
+#define HAS_Joint2_STEP        (PIN_EXISTS(Joint2_STEP))
+
+#define HAS_Joint3_ENABLE      (PIN_EXISTS(Joint3_ENABLE))
+#define HAS_Joint3_DIR         (PIN_EXISTS(Joint3_DIR))
+#define HAS_Joint3_STEP        (PIN_EXISTS(Joint3_STEP))
+
+#define HAS_Joint4_ENABLE      (PIN_EXISTS(Joint4_ENABLE))
+#define HAS_Joint4_DIR         (PIN_EXISTS(Joint4_DIR))
+#define HAS_Joint4_STEP        (PIN_EXISTS(Joint4_STEP))
+
+#define HAS_Joint5_ENABLE      (PIN_EXISTS(Joint5_ENABLE))
+#define HAS_Joint5_DIR         (PIN_EXISTS(Joint5_DIR))
+#define HAS_Joint5_STEP        (PIN_EXISTS(Joint5_STEP))
 
 // Extruder steppers and solenoids
 #define HAS_E0_ENABLE     (PIN_EXISTS(E0_ENABLE))
@@ -788,6 +849,12 @@
 #define HAS_Z2_MIN (PIN_EXISTS(Z2_MIN))
 #define HAS_Z2_MAX (PIN_EXISTS(Z2_MAX))
 #define HAS_Z_MIN_PROBE_PIN (PIN_EXISTS(Z_MIN_PROBE))
+
+#define HAS_Joint1_MIN (PIN_EXISTS(Joint1_MIN))
+#define HAS_Joint2_MIN (PIN_EXISTS(Joint2_MIN))
+#define HAS_Joint3_MIN (PIN_EXISTS(Joint3_MIN))
+#define HAS_Joint4_MIN (PIN_EXISTS(Joint4_MIN))
+#define HAS_Joint5_MIN (PIN_EXISTS(Joint5_MIN))
 
 // ADC Temp Sensors (Thermistor or Thermocouple with amplifier ADC interface)
 #define HAS_ADC_TEST(P) (PIN_EXISTS(TEMP_##P) && TEMP_SENSOR_##P != 0 && DISABLED(HEATER_##P##_USES_MAX6675))
@@ -1418,6 +1485,7 @@
 #else
   #define MOV_AXIS XYZ
   #define NUM_AXIS XYZE
+  #define NUM_JOINT Joint_All
 #endif
 
 #endif // CONDITIONALS_POST_H

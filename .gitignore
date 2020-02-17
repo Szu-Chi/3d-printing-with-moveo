@@ -7,3 +7,5 @@ Cura/libCharon/build
 Cura/CuraEngine/build
 Cura/Cura/resources/materials
 .vscode
+*.pyc
+*.qmlc

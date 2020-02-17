@@ -91,6 +91,44 @@ extern const char axis_codes[XYZE];
   #define disable_Z() NOOP
 #endif
 
+//Joint
+#if HAS_Joint1_ENABLE
+  #define  enable_Joint1() Joint1_ENABLE_WRITE( Joint1_ENABLE_ON)
+  #define disable_Joint1() do{ Joint1_ENABLE_WRITE(!Z_ENABLE_ON); CBI(axis_known_position, Joint1_AXIS); }while(0)
+#else
+  #define  enable_Joint1() NOOP
+  #define disable_Joint1() NOOP
+#endif
+#if HAS_Joint2_ENABLE
+  #define  enable_Joint2() Joint2_ENABLE_WRITE( Joint2_ENABLE_ON)
+  #define disable_Joint2() do{ Joint2_ENABLE_WRITE(!Z_ENABLE_ON); CBI(axis_known_position, Joint2_AXIS); }while(0)
+#else
+  #define  enable_Joint2() NOOP
+  #define disable_Joint2() NOOP
+#endif
+#if HAS_Joint3_ENABLE
+  #define  enable_Joint3() Joint3_ENABLE_WRITE( Joint3_ENABLE_ON)
+  #define disable_Joint3() do{ Joint3_ENABLE_WRITE(!Z_ENABLE_ON); CBI(axis_known_position, Joint3_AXIS); }while(0)
+#else
+  #define  enable_Joint3() NOOP
+  #define disable_Joint3() NOOP
+#endif
+#if HAS_Joint4_ENABLE
+  #define  enable_Joint4() Joint4_ENABLE_WRITE( Joint4_ENABLE_ON)
+  #define disable_Joint4() do{ Joint4_ENABLE_WRITE(!Z_ENABLE_ON); CBI(axis_known_position, Joint4_AXIS); }while(0)
+#else
+  #define  enable_Joint4() NOOP
+  #define disable_Joint4() NOOP
+#endif
+#if HAS_Joint5_ENABLE
+  #define  enable_Joint5() Joint5_ENABLE_WRITE( Joint5_ENABLE_ON)
+  #define disable_Joint5() do{ Joint5_ENABLE_WRITE(!Z_ENABLE_ON); CBI(axis_known_position, Joint5_AXIS); }while(0)
+#else
+  #define  enable_Joint5() NOOP
+  #define disable_Joint5() NOOP
+#endif
+
+
 #if ENABLED(MIXING_EXTRUDER)
 
   /**
@@ -279,8 +317,15 @@ extern volatile bool wait_for_heatup;
   extern bool suspend_auto_report;
 #endif
 
-extern float current_position[XYZE], destination[XYZE];
-
+extern float   current_position[XYZE], destination[XYZE];
+extern int32_t current_position_Joint[Joint_All], destination_Joint[Joint_All];
+// extern float   ZERO_position[XYZE], HOME_position[XYZE];
+// extern int32_t ZERO_position_Joint[Joint_All], HOME_position_Joint[Joint_All];
+// extern float   HOME_position_Z20[XYZE];
+// extern int32_t HOME_position_Z20_Joint[Joint_All];
+// extern float   HOME_position_Slope[Joint_All];
+extern float   a[5], b[5], c[5];
+extern float   a_m[25][5], b_m[25][5], c_m[25][5];
 /**
  * Workspace offsets
  */
@@ -319,6 +364,7 @@ extern float current_position[XYZE], destination[XYZE];
 
 // Software Endstops
 extern float soft_endstop_min[XYZ], soft_endstop_max[XYZ];
+extern long  soft_endstop_joint_min[Joint_All], soft_endstop_joint_max[Joint_All];
 
 #if HAS_SOFTWARE_ENDSTOPS
   extern bool soft_endstops_enabled;
@@ -484,10 +530,14 @@ void report_current_position();
   };
   float probe_pt(const float &rx, const float &ry, const ProbePtRaise raise_after=PROBE_PT_NONE, const uint8_t verbose_level=0, const bool probe_relative=true);
   #define DEPLOY_PROBE() set_probe_deployed(true)
+  #define DEPLOY_PROBE_ones() set_probe_deployed_ones(true)
   #define STOW_PROBE() set_probe_deployed(false)
+  #define STOW_PROBE_ones() set_probe_deployed_ones(false)
 #else
   #define DEPLOY_PROBE()
+  #define DEPLOY_PROBE_ones()
   #define STOW_PROBE()
+  #define STOW_PROBE_ones()
 #endif
 
 #if ENABLED(HOST_KEEPALIVE_FEATURE)
@@ -546,8 +596,15 @@ extern uint8_t active_extruder;
   extern float mixing_factor[MIXING_STEPPERS];
 #endif
 
-inline void set_current_from_destination() { COPY(current_position, destination); }
-inline void set_destination_from_current() { COPY(destination, current_position); }
+inline void set_current_from_destination() { 
+  COPY(current_position, destination); 
+  COPY(current_position_Joint, destination_Joint);
+}
+inline void set_destination_from_current() { 
+  COPY(destination, current_position); 
+  COPY(destination_Joint, current_position_Joint); 
+}
+
 void prepare_move_to_destination();
 
 /**

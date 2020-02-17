@@ -29,6 +29,7 @@
 #define ABCD  4
 #define ABCE  4
 #define ABCDE 5
+#define Joint_All 5
 
 /**
  * For use in macros that take a single axis letter
@@ -215,6 +216,7 @@
 #define MAX3(a, b, c)       MAX(MAX(a, b), c)
 #define MAX4(a, b, c, d)    MAX(MAX3(a, b, c), d)
 #define MAX5(a, b, c, d, e) MAX(MAX4(a, b, c, d), e)
+#define MAX6(a, b, c, d, e, f) MAX(MAX5(a, b, c, d, e), f)
 
 #define UNEAR_ZERO(x) ((x) < 0.000001f)
 #define NEAR_ZERO(x) WITHIN(x, -0.000001f, 0.000001f)
