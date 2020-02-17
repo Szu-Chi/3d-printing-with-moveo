@@ -423,15 +423,6 @@ class BuildVolume(SceneNode):
             mb.addArc(175, Vector.Unit_Y, center = (0, min_h - z_fight_distance, 0), sections = 320, color = self._volume_outline_color)
             
             a = [-5.84496390332700e-14, 3.56282507993945e-12, 1.96598578522008e-11, -4.08500656982012e-09, 1.32273243218637e-08, 1.84264287266674e-06, -1.04208238003648e-05, -0.000262072884367316, -0.0107090984034695, 0.197575980978460, 46.4820460203409]
-            #for x in range(-85,384):
-            #    z = float(x/10)
-            #    z_before = float((x-1)/10)
-            #    y = float(0)
-            #    y_before = float(0)
-            #    for i in range(10):
-            #        y = float(y + a[i]*(z**(10-i)))
-            #        y_before = float(y_before + a[i]*(z_before**(10-i)))
-            #    y = y + a[10]
             for x in range(-8,38):
                 z = float(x)
                 y = float(0)
@@ -439,37 +430,6 @@ class BuildVolume(SceneNode):
                     y = float(y + a[i]*(z**(10-i)))
                 y = y + a[10]
                 mb.addArc(float(y*10),Vector.Unit_Y, center = (0 , x*10 + min_h - z_fight_distance + 90, 0) ,sections = 320, color = self._volume_outline_color)
-                #mb.addLine(Vector(0, float((x-1)/10+85+min_h-z_fight_distance), -float((y_before*10))), Vector(0, float(x/10+85+min_h-z_fight_distance), -float(y*10)), color = self._volume_outline_color)
-                #mb.addLine(Vector(0, float((x-1)/10+85+min_h-z_fight_distance),  float((y_before*10))), Vector(0, float(x/10+85+min_h-z_fight_distance),  float(y*10)), color = self._volume_outline_color)
-                #mb.addLine(Vector(-float((y_before*10)), float((x-1)/10+85+min_h-z_fight_distance), 0), Vector(-float(y*10), float(x/10+85+min_h-z_fight_distance), 0), color = self._volume_outline_color)
-                #mb.addLine(Vector( float((y_before*10)), float((x-1)/10+85+min_h-z_fight_distance), 0), Vector( float(y*10), float(x/10+85+min_h-z_fight_distance), 0), color = self._volume_outline_color)
-            
-            #b = [1.16552254885792e-13, -1.08681160530253e-11, 1.69908039244408e-10, 1.10681405735891e-08, -3.20926518543364e-07, -2.53352441558143e-06, 0.000147470738969883, -0.000760430515979724, -0.0378400168942736, 0.498796758188418, 16.9182384419229]
-            #for x in range(3686,3840):
-            #    z = float(x/100)
-            #    z_before = float((x-1)/100)
-            #    y = float(0)
-            #    y_before = float(0)
-            #    for i in range(10):
-            #        y = float(y + b[i]*(z**(10-i)))
-            #        y_before = float(y_before + b[i]*(z_before**(10-i)))
-            #    y = y + b[10]
-            #    y_before = y_before + b[10]
-                #mb.addLine(Vector(0, float((x-1)/10+85+min_h-z_fight_distance), -float((y_before*10))), Vector(0, float(x/10+85+min_h-z_fight_distance), -float(y*10)), color = self._volume_outline_color)
-                #mb.addLine(Vector(0, float((x-1)/10+85+min_h-z_fight_distance),  float((y_before*10))), Vector(0, float(x/10+85+min_h-z_fight_distance),  float(y*10)), color = self._volume_outline_color)
-                #mb.addLine(Vector(-float((y_before*10)), float((x-1)/10+85+min_h-z_fight_distance), 0), Vector(-float(y*10), float(x/10+85+min_h-z_fight_distance), 0), color = self._volume_outline_color)
-                #mb.addLine(Vector( float((y_before*10)), float((x-1)/10+85+min_h-z_fight_distance), 0), Vector( float(y*10), float(x/10+85+min_h-z_fight_distance), 0), color = self._volume_outline_color)
-            
-            #mb.addLine(Vector(0, min_h-z_fight_distance, -175), Vector(0, 453.7+min_h-z_fight_distance, -175), color = self._volume_outline_color)
-            #mb.addLine(Vector(0, min_h-z_fight_distance,  175), Vector(0, 453.7+min_h-z_fight_distance,  175), color = self._volume_outline_color)
-            #mb.addLine(Vector(-175, min_h-z_fight_distance, 0), Vector(-175, 453.7+min_h-z_fight_distance, 0), color = self._volume_outline_color)
-            #mb.addLine(Vector( 175, min_h-z_fight_distance, 0), Vector( 175, 453.7+min_h-z_fight_distance, 0), color = self._volume_outline_color)
-            
-            #mb.addLine(Vector(0, 469+min_h-z_fight_distance, -228.2), Vector(0, 469+min_h-z_fight_distance, -263.9), color = self._volume_outline_color)
-            #mb.addLine(Vector(0, 469+min_h-z_fight_distance,  228.2), Vector(0, 469+min_h-z_fight_distance,  263.9), color = self._volume_outline_color)
-            #mb.addLine(Vector(-228.2, 469+min_h-z_fight_distance, 0), Vector(-263.9, 469+min_h-z_fight_distance, 0), color = self._volume_outline_color)
-            #mb.addLine(Vector( 228.2, 469+min_h-z_fight_distance, 0), Vector( 263.9, 469+min_h-z_fight_distance, 0), color = self._volume_outline_color)
-            
             return mb.build().getTransformed(scale_matrix)
 
         else:

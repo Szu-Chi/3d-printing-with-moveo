@@ -118,14 +118,13 @@ class CuraSceneNode(SceneNode):
                 for k in range(2):
                     threads.append(threading.Thread(target=self.parallelCheck, args=(convex_hull,k)))
                     threads[j*2+k].start()
-
             for thread in threads:
                 thread.join()
         if self._check:
             return False
         else:
             return True
-    
+
     def parallelCheck(self,convex_hull,num):
         while self._queue.qsize() > 0:
             area = self._queue.get()
