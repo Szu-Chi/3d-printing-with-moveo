@@ -1256,7 +1256,7 @@ class CuraApplication(QtApplication):
     def replaceMoveoObject(self,node):
         op = GroupedOperation()
         node.removeDecorator(ZOffsetDecorator.ZOffsetDecorator)
-        op.addOperation(SetTransformOperation(node, Vector(node.getWorldPosition().x, 0, -290.0)))
+        op.addOperation(SetTransformOperation(node, Vector(node.getWorldPosition().x, node.getWorldPosition().y, -290.0)))
         op.push()
 
     ## Reset all transformations on nodes with mesh data.
@@ -1734,9 +1734,6 @@ class CuraApplication(QtApplication):
                 if(original_node.getScale() != Vector(1.0, 1.0, 1.0)):
                     node.scale(original_node.getScale())
 
-            if self.getGlobalContainerStack().getProperty("machine_shape", "value") == "moveo":
-                self.replaceMoveoObject(node)
-
             node.setSelectable(True)
             node.setName(os.path.basename(file_name))
             self.getBuildVolume().checkBoundsAndUpdate(node)
@@ -1779,10 +1776,6 @@ class CuraApplication(QtApplication):
                         # Step is for skipping tests to make it a lot faster. it also makes the outcome somewhat rougher
                         arranger.findNodePlacement(node, offset_shape_arr, hull_shape_arr, step = 10)
 
-            ## Position is cleaned 
-            if self.getGlobalContainerStack().getProperty("machine_shape", "value") == "moveo":
-                self.replaceMoveoObject(node)
-
             # This node is deep copied from some other node which already has a BuildPlateDecorator, but the deepcopy
             # of BuildPlateDecorator produces one that's associated with build plate -1. So, here we need to check if
             # the BuildPlateDecorator exists or not and always set the correct build plate number.
@@ -1800,6 +1793,9 @@ class CuraApplication(QtApplication):
 
             if select_models_on_load:
                 Selection.add(node)
+
+            if self.getGlobalContainerStack().getProperty("machine_shape", "value") == "moveo":
+                self.replaceMoveoObject(node)
 
         self.fileCompleted.emit(file_name)
 

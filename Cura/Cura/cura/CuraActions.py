@@ -81,7 +81,10 @@ class CuraActions(QObject):
     @pyqtSlot(int)
     def multiplySelection(self, count: int) -> None:
         min_offset = cura.CuraApplication.CuraApplication.getInstance().getBuildVolume().getEdgeDisallowedSize() + 2  # Allow for some rounding errors
-        job = MultiplyObjectsJob(Selection.getAllSelectedObjects(), count, min_offset = max(min_offset, 8))
+        if cura.CuraApplication.CuraApplication.getInstance().getShape() == "moveo":
+            job = MultiplyObjectsJob(Selection.getAllSelectedObjects(), count, min_offset = max(min_offset, 8), shape_type = True)
+        else:
+            job = MultiplyObjectsJob(Selection.getAllSelectedObjects(), count, min_offset = max(min_offset, 8))
         job.start()
 
     ##  Delete all selected objects.

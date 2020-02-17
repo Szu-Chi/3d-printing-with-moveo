@@ -16,14 +16,17 @@ from cura.Arranging.ShapeArray import ShapeArray
 
 from UM.Application import Application
 from UM.Operations.AddSceneNodeOperation import AddSceneNodeOperation
+from UM.Operations.SetTransformOperation import SetTransformOperation
+from UM.Math.Vector import Vector
 
 
 class MultiplyObjectsJob(Job):
-    def __init__(self, objects, count, min_offset = 8):
+    def __init__(self, objects, count, min_offset = 8,shape_type = False):
         super().__init__()
         self._objects = objects
         self._count = count
         self._min_offset = min_offset
+        self._type = shape_type
 
     def run(self) -> None:
         status_message = Message(i18n_catalog.i18nc("@info:status", "Multiplying and placing objects"), lifetime=0,
@@ -101,6 +104,9 @@ class MultiplyObjectsJob(Job):
             op = GroupedOperation()
             for new_node in nodes:
                 op.addOperation(AddSceneNodeOperation(new_node, current_node.getParent()))
+            if self._type:
+                for move_node in nodes:
+                    op.addOperation(SetTransformOperation(move_node, Vector(move_node.getWorldPosition().x, move_node.getWorldPosition().y, -290.0)))
             op.push()
         status_message.hide()
 
