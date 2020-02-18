@@ -27,8 +27,21 @@ class MultiplyObjectsJob(Job):
         self._count = count
         self._min_offset = min_offset
         self._type = shape_type
+        self._moveo_move = None
+        self._save_x = 0
+        self._save_y = 0
+        self._save_z = 0
 
     def run(self) -> None:
+        if self._type:
+            for node in self._objects:
+                if self._moveo_move == None:
+                    self._save_x = node.getPosition().x
+                    self._save_y = node.getPosition().y
+                    self._save_z = node.getPosition().z
+                op = GroupedOperation()
+                op.addOperation(SetTransformOperation(node, Vector(node.getPosition().x - self._save_x, node.getWorldPosition().y, node.getPosition().z - self._save_z)))
+            op.push()
         status_message = Message(i18n_catalog.i18nc("@info:status", "Multiplying and placing objects"), lifetime=0,
                                  dismissable=False, progress=0, title = i18n_catalog.i18nc("@info:title", "Placing Objects"))
         status_message.show()
@@ -99,6 +112,11 @@ class MultiplyObjectsJob(Job):
                 Job.yieldThread()
 
             Job.yieldThread()
+        if self._type:
+            for node in self._objects:
+                op = GroupedOperation()
+                op.addOperation(SetTransformOperation(node, Vector(node.getPosition().x + self._save_x, node.getWorldPosition().y, node.getPosition().z + self._save_z)))
+            op.push()
 
         if nodes:
             op = GroupedOperation()
@@ -106,7 +124,7 @@ class MultiplyObjectsJob(Job):
                 op.addOperation(AddSceneNodeOperation(new_node, current_node.getParent()))
             if self._type:
                 for move_node in nodes:
-                    op.addOperation(SetTransformOperation(move_node, Vector(move_node.getWorldPosition().x, move_node.getWorldPosition().y, -290.0)))
+                    op.addOperation(SetTransformOperation(move_node, Vector(move_node.getPosition().x + self._save_x, move_node.getWorldPosition().y, move_node.getPosition().z + self._save_z)))
             op.push()
         status_message.hide()
 

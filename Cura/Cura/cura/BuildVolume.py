@@ -61,6 +61,7 @@ class BuildVolume(SceneNode):
         self._height = 0  # type: float
         self._depth = 0  # type: float
         self._shape = ""  # type: str
+        self._dont_use_check = False
 
         self._shader = None
 
@@ -184,6 +185,8 @@ class BuildVolume(SceneNode):
     def setShape(self, shape: str) -> None:
         if shape:
             self._shape = shape
+    def setCheck(self):
+        self._dont_use_check = True
 
     ##  Get the length of the 3D diagonal through the build volume.
     #
@@ -532,6 +535,9 @@ class BuildVolume(SceneNode):
 
     ##  Recalculates the build volume & disallowed areas.
     def rebuild(self) -> None:
+        if self._dont_use_check:
+            return
+
         if not self._width or not self._height or not self._depth:
             return
 
@@ -743,6 +749,9 @@ class BuildVolume(SceneNode):
 
         if rebuild_me:
             self.rebuild()
+
+        if self._dont_use_check:
+            self._dont_use_check = False
 
         # We just did a rebuild, reset the list.
         self._changed_settings_since_last_rebuild = []

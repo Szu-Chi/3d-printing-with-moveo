@@ -284,6 +284,8 @@ class CuraApplication(QtApplication):
     def getShape(self):
         return self.getGlobalContainerStack().getProperty("machine_shape", "value")
 
+    def setCheck(self):
+        self.getBuildVolume().setCheck()
     # Adds command line options to the command line parser. This should be called after the application is created and
     # before the pre-start.
     def addCommandLineOptions(self):

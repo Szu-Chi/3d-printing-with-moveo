@@ -92,6 +92,8 @@ class CuraActions(QObject):
     def deleteSelection(self) -> None:
         if not cura.CuraApplication.CuraApplication.getInstance().getController().getToolsEnabled():
             return
+        if cura.CuraApplication.CuraApplication.getInstance().getShape() == "moveo":
+            cura.CuraApplication.CuraApplication.getInstance().setCheck()
 
         removed_group_nodes = [] #type: List[SceneNode]
         op = GroupedOperation()
