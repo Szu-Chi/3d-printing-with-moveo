@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <launch>
-  <arg name="gcode_in" default="$(find gcode_translation)/gcode/gcode.txt"/>
+  <arg name="gcode_in" default="$(find gcode_translation)/gcode/gcode.gcode"/>
   <arg name="register_gcode_out" default="$(find gcode_translation)/gcode/split_register.gcode"/>
   <arg name="gcode_out" default="$(find gcode_translation)/gcode/test.gcode"/>
   <arg name="check_success" default="$(find gcode_translation)/check_success/check_success.txt"/>

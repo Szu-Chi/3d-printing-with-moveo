@@ -26,6 +26,11 @@ int decimal_point(double &A){
   }
 }
 
+bool send_judge = false;
+void close(const std_msgs::Float64MultiArray& receive){
+  send_judge = true;
+}
+
 ros::WallTime start_, end_;
 int main(int argc, char **argv){
   start_ = ros::WallTime::now();
@@ -35,6 +40,7 @@ int main(int argc, char **argv){
   spinner.start();
 
   ros::Publisher IK_pub = node_handle.advertise<std_msgs::Float64MultiArray>("start", 1000);
+  ros::Subscriber inverse_kinematics_respond_sub = node_handle.subscribe("/inverse_kinematics/respond", 100000, close);
   //----------------------------
   //Setup
   //----------------------------
@@ -113,7 +119,7 @@ int main(int argc, char **argv){
               output_file << std::fixed << std::setprecision(decimal_point(pre_x)) << " X" << pre_x << std::defaultfloat;
               output_file << std::fixed << std::setprecision(decimal_point(pre_y)) << " Y" << pre_y << std::defaultfloat;
               if(colon_pos_E < 100 && stod(line.substr(colon_pos_E+1)) != 0) output_file << std::fixed << std::setprecision(5) << " E" << pre_E << std::defaultfloat;
-              if(i == 1) output_file << " K0";
+              //if(i == 1) output_file << " K0";
               output_file << std::endl;
               output_file << line[0] << line[1];
             }
@@ -134,7 +140,7 @@ int main(int argc, char **argv){
               output_file << line[j];
             }    
           }
-          if(cut_part > 1) output_file << " K1";
+          //if(cut_part > 1) output_file << " K1";
           output_file << std::endl;
         }
         else output_file << line << std::endl;
@@ -155,14 +161,17 @@ int main(int argc, char **argv){
   ROS_INFO_STREAM("Exectution time (s): " << execution_time);
   input_file.close();
   output_file.close();
-  // Let inverse_kinematics start
+  // Set transfer information
   std_msgs::Float64MultiArray push;
   push.data.resize(1);
   push.data[0] = 1;
-  IK_pub.publish(push);
   // Wait for all steps finish
+  ros::Rate loop_rate(10);
   while(ros::ok()){
+    // Inverse_kinematics start
+    if(!send_judge) IK_pub.publish(push);
     ros::spinOnce();
+    loop_rate.sleep();
   }
   return 0;
 }

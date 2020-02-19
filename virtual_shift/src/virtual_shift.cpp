@@ -28,7 +28,7 @@ int main(int argc, char **argv)
   bool check = 0;
 
                                           // steps * micro_steps * belt * error
-  static const double joint_division[6] = {200          * 16  * 10       * 1,     //J 64000
+  static const double joint_division[5] = {200          * 64  * 5.545454 * 1,     //J 70981.8112
                                            200          * 128 * 5.5      * 1,     //A 140800
                                            19810.111813 * 4   * 4.357143 * 1,     //B 345261.960060921
                                            5370.24793   * 32  * 1        * 1,     //C 171847.93376
@@ -84,40 +84,20 @@ int main(int argc, char **argv)
           draw = 1;
           pre_Z = Z;
         }*/
-        if(save == 100){
-          draw = 1;
-          save = 0;
-        }
-        if(draw == 1){
-          draw = 0;
-          moveit::planning_interface::MoveGroupInterface::Plan joinedPlan;
-          robot_trajectory::RobotTrajectory rt(move_group.getCurrentState()->getRobotModel(), "arm");
-          rt.setRobotTrajectoryMsg(*move_group.getCurrentState(),trajectory);
-          trajectory_processing::IterativeParabolicTimeParameterization iptp;
-          iptp.computeTimeStamps(rt);
-          rt.getRobotTrajectoryMsg(trajectory);
-          //std::cout << trajectory;
-          joinedPlan.trajectory_ = trajectory;
-          if(!move_group.execute(joinedPlan)){
-            ROS_ERROR("Failed to execute plan");
-            return false;
-          }
-          trajectory.joint_trajectory.points.clear();
-        }
         move_group.setJointValueTarget(target_joints);
         if(first++ > 1){
           moveit::planning_interface::MoveGroupInterface::Plan my_plan;
           move_group.setPlanningTime(0.05);
           move_group.plan(my_plan);
-          //size_t colon_pos_E = line.find('E');
-          //if(colon_pos_E < 100){
-          //  if(stod(line.substr(colon_pos_E+1)) > 0){
-          //    visual_tools.publishTrajectoryLine(my_plan.trajectory_, joint_model_group);
-          //    visual_tools.trigger();
-          //  }
-          //}
-          visual_tools.publishTrajectoryLine(my_plan.trajectory_, joint_model_group);
-          visual_tools.trigger();
+          size_t colon_pos_E = line.find('E');
+          if(colon_pos_E < 100){
+            if(stod(line.substr(colon_pos_E+1)) > 0){
+              visual_tools.publishTrajectoryLine(my_plan.trajectory_, joint_model_group);
+              visual_tools.trigger();
+            }
+          }
+          //visual_tools.publishTrajectoryLine(my_plan.trajectory_, joint_model_group);
+          //visual_tools.trigger();
           trajectory.joint_trajectory.joint_names = my_plan.trajectory_.joint_trajectory.joint_names;
           joint_model_group = start_state->getJointModelGroup(move_group.getName());
           start_state->setJointGroupPositions(joint_model_group, target_joints);
@@ -132,6 +112,26 @@ int main(int argc, char **argv)
           move_group.plan(my_plan);
           move_group.move();
         }
+      }
+      if(save == 600 || !input_file){
+        draw = 1;
+        save = 0;
+      }
+      if(draw == 1){
+        draw = 0;
+        moveit::planning_interface::MoveGroupInterface::Plan joinedPlan;
+        robot_trajectory::RobotTrajectory rt(move_group.getCurrentState()->getRobotModel(), "arm");
+        rt.setRobotTrajectoryMsg(*move_group.getCurrentState(),trajectory);
+        trajectory_processing::IterativeParabolicTimeParameterization iptp;
+        iptp.computeTimeStamps(rt);
+        rt.getRobotTrajectoryMsg(trajectory);
+        //std::cout << trajectory;
+        joinedPlan.trajectory_ = trajectory;
+        if(!move_group.execute(joinedPlan)){
+          ROS_ERROR("Failed to execute plan");
+          return false;
+        }
+        trajectory.joint_trajectory.points.clear();
       }
     }
   }

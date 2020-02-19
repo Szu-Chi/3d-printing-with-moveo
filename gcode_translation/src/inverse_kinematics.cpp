@@ -68,7 +68,7 @@ bool check_trac_ik_valid(TRAC_IK::TRAC_IK &tracik_solver,KDL::Chain &chain, KDL:
 
 void motor_setep_convert(Eigen::VectorXd &data){
                                         // steps * micro_steps * belt * error
-  static const double joint_division[5] = {200          * 16  * 10       * 1,     //J 32000
+  static const double joint_division[5] = {200          * 64  * 5.545454 * 1,     //J 70981.8112
                                            200          * 128 * 5.5      * 1,     //A 140800
                                            19810.111813 * 4   * 4.357143 * 1,     //B 345261.960060921
                                            5370.24793   * 32  * 1        * 1,     //C 171847.93376
@@ -76,9 +76,6 @@ void motor_setep_convert(Eigen::VectorXd &data){
                                            };
   for(int i = 0; i < 5; i++){
     data(i) = data(i)/(M_PI)*180 * joint_division[i]/360;
-    if(i==1) data(i) = data(i) - 390;
-    else if(i==2) data(i) = data(i) - 959;
-    else if(i==4) data(i) = data(i) - 207;
   }
 }
 
@@ -134,6 +131,7 @@ int main(int argc, char **argv){
 
   ros::Publisher translation_pub = node_handle.advertise<std_msgs::Float64MultiArray>("progress", 1000); // push time needed to progressbar
   ros::Publisher start_pub = node_handle.advertise<std_msgs::Float64MultiArray>("progress_start", 1000); // push start to progressbar
+  ros::Publisher respond_split_pub = node_handle.advertise<std_msgs::Float64MultiArray>("respond", 1000);
   ros::Subscriber split_sub = node_handle.subscribe("/gcode_translation/start", 100000, start); // get start from gcode_point_split
 
   while(!start_judge){
@@ -144,6 +142,7 @@ int main(int argc, char **argv){
   std_msgs::Float64MultiArray push;
   push.data.resize(1);
   push.data[0] = 1;
+  respond_split_pub.publish(push);
   start_pub.publish(push);
 
   Load_Mesh();
