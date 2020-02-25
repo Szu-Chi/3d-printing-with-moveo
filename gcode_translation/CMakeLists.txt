@@ -77,7 +77,6 @@ link_directories(${catkin_LIBRARY_DIRS})
 ## Declare a C++ executable
 add_executable(gcode_point_split src/gcode_point_split.cpp)
 add_executable(inverse_kinematics src/inverse_kinematics.cpp)
-add_executable(test_inverse_kinematics src/test_inverse_kinematics.cpp)
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(gcode_point_split
@@ -86,9 +85,5 @@ target_link_libraries(gcode_point_split
 target_link_libraries(gcode_point_split  Qt5::Widgets )
 ## Specify libraries to link a library or executable target against
 target_link_libraries(inverse_kinematics
-  ${catkin_LIBRARIES}
-)
-## Specify libraries to link a library or executable target against
-target_link_libraries(test_inverse_kinematics
   ${catkin_LIBRARIES}
 )

@@ -50,6 +50,6 @@
         "machine_start_gcode": {
             "default_value": ";Sliced at: {day} {date} {time}\n;Prime the extruder\nG92 E0\nG1 F200 E3\nG92 E0"},
         "machine_end_gcode": {
-            "default_value": "M104 S0\n;Retract the filament\nG92 E1\nG1 E-1 F300\nG1 F2000 X0 Y300 Z300\nG28 ;home"}
+            "default_value": "M104 S0\n;Retract the filament\nG92 E1\nG1 E-1 F300\nG1 F2000 J0 A0 B0 C0 D0"}
     }
 }

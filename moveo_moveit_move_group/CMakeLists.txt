@@ -65,29 +65,21 @@ include_directories(${catkin_INCLUDE_DIRS})
 link_directories(${catkin_LIBRARY_DIRS})
 
 ## Declare a C++ executable
-add_executable(ik_test src/moveo_ik_test.cpp)
-add_executable(moveo_set_pose src/moveo_set_pose.cpp)
+add_executable(ik_test src/ik_test.cpp)
+add_executable(set_pose src/set_pose.cpp)
 add_executable(parallel_ik_test src/parallel_ik_test.cpp)
 add_executable(area_test src/area_test.cpp)
-add_executable(area_test_p_n src/area_test_p_n.cpp)
-add_executable(area_test_outermost src/area_test_outermost.cpp)
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(ik_test
   ${catkin_LIBRARIES}
 )
-target_link_libraries(moveo_set_pose
+target_link_libraries(set_pose
   ${catkin_LIBRARIES}
 )
 target_link_libraries(parallel_ik_test
   ${catkin_LIBRARIES}
 )
 target_link_libraries(area_test
-  ${catkin_LIBRARIES}
-)
-target_link_libraries(area_test_p_n
-  ${catkin_LIBRARIES}
-)
-target_link_libraries(area_test_outermost
   ${catkin_LIBRARIES}
 )

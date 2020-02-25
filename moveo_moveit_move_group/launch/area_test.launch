@@ -1,28 +1,40 @@
 <?xml version="1.0"?>
 <launch>
+  <!--=========Select one=========-->
+  <!--Warning : select = 1 not = 0-->
+  <arg name="xy_plane" default="0" />
+  <arg name="yz_plane" default="0" />
+  <arg name="xz_plane" default="1" />
+  <!--============================-->
+
   <arg name="chain_start" default="base_link" />
   <arg name="chain_end" default="moveo_nozzle_link" />
-  <arg name="timeout" default="0.2" />
-  <arg name="timeout_second" default="0.05" />
+  <arg name="timeout" default="0.15" />
+  <arg name="timeout_second" default="0.1" />
   <arg name="eps" default="1e-5"/>
-  <!--
-    arg name="num_threads" default="16"/
-    -->
-  <arg name="model" default="$(find moveo_urdf)/urdf/moveo_urdf.urdf"/>
+  <arg name="model" default="$(find moveo_urdf)/urdf/moveo_urdf1.urdf"/>
+  <arg name="model2" default="$(find moveo_urdf)/urdf/moveo_urdf2.urdf"/>
+  <arg name="outermost_point" default="$(find moveo_moveit_move_group)/area/area_outermost.csv"/>
+  <arg name="closest_point" default="$(find moveo_moveit_move_group)/area/area_closest.csv"/>
+  <arg name="all_points" default="$(find moveo_moveit_move_group)/area/area_all_points.csv"/>
+  <!-- arg name="num_threads" default="16"/ -->
+
   <param name="robot_description" textfile="$(arg model)" />
-  
-  <arg name="gcode_out" default="$(find moveo_moveit_move_group)/area/all_area.csv"/>
-  <arg name="node_start_delay" default="1.0" />  
+  <param name="robot_description2" textfile="$(arg model2)" />
   <node name="area_test" pkg="moveo_moveit_move_group" type="area_test" output="screen">
+    <param name="xy_plane" value="$(arg xy_plane)" type = "int"/>
+    <param name="yz_plane" value="$(arg yz_plane)" type = "int"/>
+    <param name="xz_plane" value="$(arg xz_plane)" type = "int"/>
     <param name="chain_start" value="$(arg chain_start)"/>
     <param name="chain_end" value="$(arg chain_end)"/>
-    <param name="timeout" value="$(arg timeout)"/>
-    <param name="timeout_second" value="$(arg timeout_second)"/>
+    <param name="timeout" value="$(arg timeout)" type = "double"/>
+    <param name="timeout_second" value="$(arg timeout_second)" type = "double"/>
     <param name="eps" value="$(arg eps)" type = "double"/>
-    <!--
-      param name="num_threads" value="$(arg num_threads)" type = "int"/
-      -->
     <param name="urdf_param" value="/robot_description"/>
-    <param name="gcode_out" value="$(arg gcode_out)"/>
+    <param name="urdf_param2" value="/robot_description2"/>
+    <param name="outermost_point" value="$(arg outermost_point)"/>
+    <param name="closest_point" value="$(arg closest_point)"/>
+    <param name="all_points" value="$(arg all_points)"/>
+    <!-- param name="num_threads" value="$(arg num_threads)" type = "int"/ -->
   </node>
 </launch>

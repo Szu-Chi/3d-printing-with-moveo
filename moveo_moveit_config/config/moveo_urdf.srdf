@@ -52,6 +52,5 @@
     <disable_collisions link1="moveo_link3" link2="moveo_link5" reason="Never" />
     <disable_collisions link1="moveo_link3" link2="moveo_nozzle_link" reason="Never" />
     <disable_collisions link1="moveo_link4" link2="moveo_link5" reason="Adjacent" />
-    <disable_collisions link1="moveo_link4" link2="moveo_nozzle_link" reason="Never" />
     <disable_collisions link1="moveo_link5" link2="moveo_nozzle_link" reason="Adjacent" />
 </robot>
