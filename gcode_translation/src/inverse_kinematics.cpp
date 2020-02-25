@@ -66,7 +66,7 @@ bool check_trac_ik_valid(TRAC_IK::TRAC_IK &tracik_solver,KDL::Chain &chain, KDL:
   return true;
 }
 
-void motor_steps_convert(Eigen::VectorXd &data){
+void motor_steps_convert(Eigen::VectorXd &data, bool &judge){
                                         // steps * micro_steps * belt * error
   static const double joint_division[5] = {200          * 64  * 5.545454 * 1,     //J 70981.8112
                                            200          * 128 * 5.5      * 1,     //A 140800
@@ -74,13 +74,21 @@ void motor_steps_convert(Eigen::VectorXd &data){
                                            5370.24793   * 32  * 1        * 1,     //C 171847.93376
                                            1036.36364   * 16  * 4.5      * 1      //D 74618.18208
                                            };
-  for(int i = 0; i < 5; i++){
-    data(i) = data(i)/(M_PI)*180 * joint_division[i]/360;
+  if(!judge){
+    for(int i = 0; i < 5; i++){
+      data(i) = data(i)/(M_PI)*180*joint_division[i]/360;
+    }
+  }
+  else{
+    for(int i = 0; i < 5; i++){
+      data(i) = data(i)*(M_PI)/180/joint_division[i]*360;
+    }
   }
 }
 
 void write_file_joint_value(std::ofstream &output_file, KDL::JntArray &result, KDL::Chain &chain){
-  motor_steps_convert(result.data);
+  bool judge = false;
+  motor_steps_convert(result.data, judge);
   for(int i = 0;i < chain.getNrOfJoints(); i++){
     static const char joint_code[6] = {'J', 'A', 'B', 'C', 'D'};
     output_file << " " << joint_code[i] << int(result.data(i));
@@ -96,8 +104,17 @@ void write_file_origin_line(std::ofstream &output_file, std::string &line){
 void write_file_new_point(std::ofstream &output_file, KDL::Vector &output_end_effector_target_vol, double &X_offset, double &Y_offset){
   double decimal_x = (output_end_effector_target_vol.data[0]-X_offset)*1e3;
   double decimal_y = (output_end_effector_target_vol.data[1]-Y_offset)*1e3;
-  output_file << std::fixed << std::setprecision(decimal_point(decimal_x)) << " X" << (output_end_effector_target_vol.data[0]-X_offset)*1e3 << std::defaultfloat;
-  output_file << std::fixed << std::setprecision(decimal_point(decimal_y)) << " Y" << (output_end_effector_target_vol.data[1]-Y_offset)*1e3 << std::defaultfloat;
+  output_file << std::fixed << std::setprecision(decimal_point(decimal_x)) << " X" << decimal_x << std::defaultfloat;
+  output_file << std::fixed << std::setprecision(decimal_point(decimal_y)) << " Y" << decimal_y << std::defaultfloat;
+}
+
+void customize_joint(std::ofstream &output_file, KDL::Frame &end_effector_pose){
+  double decimal_x = end_effector_pose.p.x()*1000;
+  double decimal_y = end_effector_pose.p.y()*1000;
+  double decimal_z = end_effector_pose.p.z()*1000;
+  output_file << std::fixed << std::setprecision(decimal_point(decimal_x)) << " X" << decimal_x << std::defaultfloat;
+  output_file << std::fixed << std::setprecision(decimal_point(decimal_y)) << " Y" << decimal_y << std::defaultfloat;
+  output_file << std::fixed << std::setprecision(decimal_point(decimal_z)) << " Z" << decimal_z << std::defaultfloat << " ";
 }
 
 void show_error_point_and_joint(KDL::Vector &end_effector_target_vol, KDL::Chain &chain, KDL::JntArray &result, tf::Quaternion &q, int &p_n){
@@ -106,7 +123,8 @@ void show_error_point_and_joint(KDL::Vector &end_effector_target_vol, KDL::Chain
   ROS_ERROR_STREAM("Y : " << end_effector_target_vol.data[1]);
   ROS_ERROR_STREAM("Z : " << end_effector_target_vol.data[2]);
   ROS_ERROR_STREAM("=============Joint Values=============");
-  //motor_steps_convert(result.data);
+  bool judge = false;
+  //motor_steps_convert(result.data, judge);
   for(int i = 0;i < chain.getNrOfJoints(); i++){
     static const char joint_code[6] = {'J', 'A', 'B', 'C', 'D'};
     ROS_ERROR_STREAM(joint_code[i] << " : " << result.data(i));
@@ -183,7 +201,7 @@ int main(int argc, char **argv){
 
   KDL::Chain chain;
   KDL::JntArray ll, ul; //lower joint limits, upper joint limits
-
+  
   // Joint4 doesn't need to turn
   TRAC_IK::TRAC_IK** tracik_solver = new TRAC_IK::TRAC_IK*[num_threads];
   for(int i = 0; i < num_threads; i++){
@@ -213,6 +231,8 @@ int main(int argc, char **argv){
   for (uint j = 0; j < nominal.data.size(); j++){
     nominal(j) = (ll(j) + ul(j)) / 2.0;
   }
+
+  KDL::ChainFkSolverPos_recursive fk_solver(chain);
 
   // Setting robot collision
   robot_model_loader::RobotModelLoader robot_model_loader("robot_description");
@@ -285,13 +305,10 @@ int main(int argc, char **argv){
         save_p_or_n.reserve(1000);
         for(int i = 0;i < read_line_count ;i++){
           line = save.at(i);
-          if(!line.compare(0,2,"G0") || !line.compare(0,2,"G1")){
-            size_t colon_pos_X = line.find('X');
-            if(colon_pos_X < 100) end_effector_target_vol.data[0] = (stod(line.substr(colon_pos_X+1))*1e-3)+X_offset;
-            size_t colon_pos_Y = line.find('Y');
-            if(colon_pos_Y < 100) end_effector_target_vol.data[1] = (stod(line.substr(colon_pos_Y+1))*1e-3)+Y_offset;
-            size_t colon_pos_Z = line.find('Z');
-            if(colon_pos_Z < 100) z_init = (stod(line.substr(colon_pos_Z+1))*1e-3)+Z_offset;
+          if((!line.compare(0,2,"G0") || !line.compare(0,2,"G1")) && (line.find('J') == std::string::npos)){
+            if(line.find('X') != std::string::npos) end_effector_target_vol.data[0] = (stod(line.substr(line.find('X')+1))*1e-3)+X_offset;
+            if(line.find('Y') != std::string::npos) end_effector_target_vol.data[1] = (stod(line.substr(line.find('Y')+1))*1e-3)+Y_offset;
+            if(line.find('Z') != std::string::npos) z_init = (stod(line.substr(line.find('Z')+1))*1e-3)+Z_offset;
             
             double z_pos = calc_z((end_effector_target_vol.data[0]+0.09)*1000, (end_effector_target_vol.data[1]-0.2)*1000)/1000;
             // 9.18 nozzle high
@@ -363,88 +380,106 @@ int main(int argc, char **argv){
         // Write gcode
         for(int m = 0;m < read_line_count ;m++){
           line = save.at(m);
-          if(pop_out < save_place.size()){    // Because pop_out will out of range of save_place
-            if(save_place.at(pop_out) == m){  // then .at() will error
-              output_file << line[0] << line[1];
-              std::vector<double> joint_values(chain.getNrOfJoints());
-              for(int i = 0;i < chain.getNrOfJoints(); i++){
-                joint_values.at(i) = save_result.at(pop_out).data(i);
+          if(save_place.at(pop_out) == m){
+            output_file << line[0] << line[1];
+            std::vector<double> joint_values(chain.getNrOfJoints());
+            for(int i = 0;i < chain.getNrOfJoints(); i++){
+              joint_values.at(i) = save_result.at(pop_out).data(i);
+            }
+            // Judge collision
+            const robot_model::JointModelGroup* joint_model_group = current_state.getJointModelGroup("arm");
+            current_state.setJointGroupPositions(joint_model_group, joint_values);
+            collision_request.contacts = true;
+            collision_request.max_contacts = 1000;
+            collision_result.clear();
+            planning_scene.checkSelfCollision(collision_request, collision_result);
+            if(collision_result.collision == 0){
+              if(pop_out > 0){
+                previous_save_p_or_n = save_p_or_n.at(pop_out-1);
+                previous_end_effector_target_vol = find_end_effector_target_vol.at(pop_out-1);
+                previous_angle = find_angle.at(pop_out-1);
               }
-              // Judge collision
-              const robot_model::JointModelGroup* joint_model_group = current_state.getJointModelGroup("arm");
-              current_state.setJointGroupPositions(joint_model_group, joint_values);
-              collision_request.contacts = true;
-              collision_request.max_contacts = 1000;
-              collision_result.clear();
-              planning_scene.checkSelfCollision(collision_request, collision_result);
-              if(collision_result.collision == 0){
-                if(pop_out > 0){
-                  previous_save_p_or_n = save_p_or_n.at(pop_out-1);
-                  previous_end_effector_target_vol = find_end_effector_target_vol.at(pop_out-1);
-                  previous_angle = find_angle.at(pop_out-1);
-                }
-                // If joint4 turns back, we need to add a point
-                if(first_point == false && (previous_save_p_or_n != save_p_or_n.at(pop_out))){
-                  int rc = -1;
-                  KDL::JntArray result;
-                  KDL::Rotation end_effector_target_rot;
-                  KDL::Vector output_end_effector_target_vol;
-                  tf::Quaternion q;
-                  // chose one point to let joint4 turn back
-                  if(save_p_or_n.at(pop_out) == 0){
-                    output_end_effector_target_vol = previous_end_effector_target_vol;
-                    q = euler_to_quaternion(0.0,0.0,(previous_angle+M_PI));
-                  }
-                  else{
-                    output_end_effector_target_vol = find_end_effector_target_vol.at(pop_out);
-                    q = euler_to_quaternion(0.0,0.0,(find_angle.at(pop_out)+M_PI));
-                  }
-                  end_effector_target_rot = KDL::Rotation::Quaternion(q[0],q[1],q[2],q[3]);
-                  KDL::Frame end_effector_pose(end_effector_target_rot, output_end_effector_target_vol);
-                  rc = tracik_solver_p_n.CartToJnt(nominal, end_effector_pose, result, target_bounds);
-                  if(rc < 0){
-                    ROS_ERROR_STREAM("Turn back can't find joint values");
-                    show_error_point_and_joint(output_end_effector_target_vol, chain, result, q, save_p_or_n.at(pop_out));
-                    return -1;
-                  }
-                  else{
-                    write_file_joint_value(output_file, result, chain);
-                    if(save_p_or_n.at(pop_out) == 0){
-                      write_file_new_point(output_file, output_end_effector_target_vol, X_offset, Y_offset);
-                      output_file << std::endl;
-                      output_file << line[0] << line[1];
-                      write_file_joint_value(output_file, save_result.at(pop_out), chain);
-                      write_file_origin_line(output_file, line);
-                    }
-                    else{
-                      write_file_origin_line(output_file, line);
-                      output_file << std::endl;
-                      output_file << line[0] << line[1];
-                      write_file_joint_value(output_file, save_result.at(pop_out), chain);
-                      write_file_new_point(output_file, output_end_effector_target_vol, X_offset, Y_offset);
-                    }
-                    output_file << std::endl;
-                  }
+              // If joint4 turns back, we need to add a point
+              if(first_point == false && (previous_save_p_or_n != save_p_or_n.at(pop_out))){
+                int rc = -1;
+                KDL::JntArray result;
+                KDL::Rotation end_effector_target_rot;
+                KDL::Vector output_end_effector_target_vol;
+                tf::Quaternion q;
+                // chose one point to let joint4 turn back
+                if(save_p_or_n.at(pop_out) == 0){
+                  output_end_effector_target_vol = previous_end_effector_target_vol;
+                  q = euler_to_quaternion(0.0,0.0,(previous_angle+M_PI));
                 }
                 else{
-                  write_file_joint_value(output_file, save_result.at(pop_out), chain);
-                  write_file_origin_line(output_file, line);
+                  output_end_effector_target_vol = find_end_effector_target_vol.at(pop_out);
+                  q = euler_to_quaternion(0.0,0.0,(find_angle.at(pop_out)+M_PI));
+                }
+                end_effector_target_rot = KDL::Rotation::Quaternion(q[0],q[1],q[2],q[3]);
+                KDL::Frame end_effector_pose(end_effector_target_rot, output_end_effector_target_vol);
+                rc = tracik_solver_p_n.CartToJnt(nominal, end_effector_pose, result, target_bounds);
+                if(rc < 0){
+                  ROS_ERROR_STREAM("Turn back can't find joint values");
+                  show_error_point_and_joint(output_end_effector_target_vol, chain, result, q, save_p_or_n.at(pop_out));
+                  return -1;
+                }
+                else{
+                  write_file_joint_value(output_file, result, chain);
+                  if(save_p_or_n.at(pop_out) == 0){
+                    write_file_new_point(output_file, output_end_effector_target_vol, X_offset, Y_offset);
+                    output_file << std::endl;
+                    output_file << line[0] << line[1];
+                    write_file_joint_value(output_file, save_result.at(pop_out), chain);
+                    write_file_origin_line(output_file, line);
+                  }
+                  else{
+                    write_file_origin_line(output_file, line);
+                    output_file << std::endl;
+                    output_file << line[0] << line[1];
+                    write_file_joint_value(output_file, save_result.at(pop_out), chain);
+                    write_file_new_point(output_file, output_end_effector_target_vol, X_offset, Y_offset);
+                  }
                   output_file << std::endl;
                 }
+              }
+              else{
+                write_file_joint_value(output_file, save_result.at(pop_out), chain);
+                write_file_origin_line(output_file, line);
+                output_file << std::endl;
+              }
+              if(pop_out < save_place.size() - 1){
                 pop_out++;
                 first_point = false;
               }
-              else{
-                collision_detection::CollisionResult::ContactMap::const_iterator it;
-                for (it = collision_result.contacts.begin(); it != collision_result.contacts.end(); ++it){
-                  ROS_ERROR_STREAM("Contact between : " << it->first.first.c_str() << " and " << it->first.second.c_str());
-                }
-                tf::Quaternion q = euler_to_quaternion(0.0,0.0,find_angle.at(pop_out));
-                show_error_point_and_joint(find_end_effector_target_vol.at(pop_out), chain, save_result.at(pop_out), q, save_p_or_n.at(pop_out));
-                return -1;
-              }
             }
-            else output_file << line << std::endl;
+            else{
+              collision_detection::CollisionResult::ContactMap::const_iterator it;
+              for (it = collision_result.contacts.begin(); it != collision_result.contacts.end(); ++it){
+                ROS_ERROR_STREAM("Contact between : " << it->first.first.c_str() << " and " << it->first.second.c_str());
+              }
+              tf::Quaternion q = euler_to_quaternion(0.0,0.0,find_angle.at(pop_out));
+              show_error_point_and_joint(find_end_effector_target_vol.at(pop_out), chain, save_result.at(pop_out), q, save_p_or_n.at(pop_out));
+              return -1;
+            }
+          }
+          else if((!line.compare(0,2,"G0") || !line.compare(0,2,"G1")) && (line.find('J') != std::string::npos)){
+            KDL::JntArray Joint(chain.getNrOfJoints());
+            KDL::Frame end_effector_pose;
+            output_file << line[0] << line[1];
+            if(line.find('F') != std::string::npos && stoi(line.substr(line.find('F')+1)) != 0) output_file << " F" << stoi(line.substr(line.find('F')+1));
+            static const char joint_code[6] = {'J', 'A', 'B', 'C', 'D'};
+            for(int i = 0;i < chain.getNrOfJoints();i++){
+              Joint(i) = stod(line.substr(line.find(joint_code[i])+1));
+              output_file << " " << joint_code[i] << Joint(i);
+            }
+            bool judge = true;
+            motor_steps_convert(Joint.data, judge);
+            fk_solver.JntToCart(Joint, end_effector_pose);
+            customize_joint(output_file, end_effector_pose);
+            if(line.find(';') != std::string::npos){
+              for(int i = line.find(';');i < line.length();i++) output_file << line[i];
+              output_file << std::endl;
+            }
           }
           else output_file << line << std::endl;
         }

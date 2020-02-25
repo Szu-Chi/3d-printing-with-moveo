@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(virtual_shift)
+project(simulation)
 
 add_compile_options(-std=c++11)
 
@@ -58,9 +58,9 @@ include_directories(${catkin_INCLUDE_DIRS})
 link_directories(${catkin_LIBRARY_DIRS})
 
 ## Declare a C++ executable
-add_executable(virtual_shift src/virtual_shift.cpp)
+add_executable(simulation src/simulation.cpp)
 
 ## Specify libraries to link a library or executable target against
-target_link_libraries(virtual_shift
+target_link_libraries(simulation
   ${catkin_LIBRARIES}
 )

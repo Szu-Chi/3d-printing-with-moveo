@@ -4,7 +4,7 @@
   <param name="robot_description" textfile="$(arg model)" />  
   <arg name="gcode_in" default="$(find gcode_translation)/gcode/test.gcode"/>
   
-  <node name="virtual_shift" pkg="virtual_shift" type="virtual_shift" output="screen">
+  <node name="simulation" pkg="simulation" type="simulation" output="screen">
     <param name="urdf_param" value="/robot_description"/>
     <param name="gcode_in" value="$(arg gcode_in)"/>
   </node>
