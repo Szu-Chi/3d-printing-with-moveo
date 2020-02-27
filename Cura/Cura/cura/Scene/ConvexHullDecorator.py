@@ -42,7 +42,7 @@ class ConvexHullDecorator(SceneNodeDecorator):
         self._seve_world_position_x = None
         self._seve_world_position_y = None
         self._seve_world_position_z = None
-        self._rotate_mesh = None
+        self._rotate_mesh_convexhull = None
         self._rotate_world_transform = None
         self._convex_hull_node = None  # type: Optional["SceneNode"]
         self._init2DConvexHullCache()
@@ -125,31 +125,50 @@ class ConvexHullDecorator(SceneNodeDecorator):
 
         if self._now_node_quaternion != self._node.getOrientation() or self._seve_world_position_x != self._node.getWorldPosition().x or self._seve_world_position_y != self._node.getWorldPosition().y or self._seve_world_position_z != self._node.getWorldPosition().z:
             ## Save data
-            self._now_node_quaternion = self._node.getOrientation()
-            self._save_world_position = self._node.getWorldPosition
+            self._now_node_quaternion   = self._node.getOrientation()
             self._seve_world_position_x = self._node.getWorldPosition().x
             self._seve_world_position_y = self._node.getWorldPosition().y
             self._seve_world_position_z = self._node.getWorldPosition().z
-            
             self._save_quaternion = self._node.getOrientation()
             self._save_quaternion.normalize()
-            world_euler_angle = self.quaternionToEuler(self._save_quaternion.x,self._save_quaternion.y,self._save_quaternion.z,self._save_quaternion.w)
+
             hypotenuse = (self._node.getWorldPosition().x**2+self._node.getWorldPosition().z**2)**0.5
-            angle = math.asin(self._node.getWorldPosition().x/hypotenuse)
+            angle = -math.asin(self._node.getWorldPosition().x/hypotenuse)
             if self._node.getWorldPosition().x == 0.0 or self._node.getWorldPosition().z == 0:
                 angle = 0.0
             else:    
                 angle = angle if self._node.getWorldPosition().z < 0 else angle*(math.pi/abs(angle)-1)
-            node_quaternion = self.eulerToQuaternion(world_euler_angle[0],world_euler_angle[1]+angle,world_euler_angle[2])
-            op = GroupedOperation()
-            op.addOperation(SetTransformOperation(self._node, Vector(0.0, self._node.getWorldPosition().y, -hypotenuse), Quaternion(node_quaternion[0],node_quaternion[1],node_quaternion[2],node_quaternion[3])))
-            op.push()
-            self._rotate_mesh = self._node.getMeshData()
-            self._rotate_world_transform = self._node.getWorldTransformation()
-            ## Push back
-            op = GroupedOperation()
-            op.addOperation(SetTransformOperation(self._node, Vector(self._seve_world_position_x, self._node.getWorldPosition().y, self._seve_world_position_z),self._save_quaternion))
-            op.push()
+            world_transform = self._node.getWorldTransformation()
+            rotate_mesh = self._node.getMeshData()
+            self._rotate_mesh_convexhull = rotate_mesh.getConvexHullTransformedVertices(world_transform)
+
+            shift_to_origin = numpy.array([[1, 0, 0, (-1)*self._seve_world_position_x],
+                                           [0, 1, 0,                                0],
+                                           [0, 0, 1, (-1)*self._seve_world_position_z],
+                                           [0, 0, 0,                                1]])
+
+            shift_to_Y_axis = numpy.array([[1, 0, 0,               0],
+                                           [0, 1, 0,               0],
+                                           [0, 0, 1, (-1)*hypotenuse],
+                                           [0, 0, 0,               1]])
+
+            rotate_matrix = numpy.array([[ math.cos(angle), 0, math.sin(angle), 0],
+                                         [               0, 1,               0, 0],
+                                         [-math.sin(angle), 0, math.cos(angle), 0],
+                                         [               0, 0,               0, 1]])
+
+            one_column = numpy.ones([1,numpy.size(self._rotate_mesh_convexhull,0)])
+            add_one_column = numpy.column_stack((self._rotate_mesh_convexhull,one_column.T))
+            shift_to_o = numpy.dot(shift_to_origin,add_one_column[0])
+            rotate_convexhull = numpy.dot(rotate_matrix,shift_to_o)
+            save = numpy.dot(shift_to_Y_axis,rotate_convexhull)
+            for i in range(1,numpy.size(self._rotate_mesh_convexhull,0)):
+                shift_to_o = numpy.dot(shift_to_origin,add_one_column[i])
+                rotate_convexhull = numpy.dot(rotate_matrix,shift_to_o)
+                shift_to_Y = numpy.dot(shift_to_Y_axis,rotate_convexhull)
+                save = numpy.row_stack((save,shift_to_Y))
+            self._rotate_mesh_convexhull = numpy.delete(save,-1,axis=1)
+
         q = Queue()
         threads = []
 
@@ -393,13 +412,7 @@ class ConvexHullDecorator(SceneNodeDecorator):
             if mesh is None:
                 q.put(Polygon([]))
 
-            world_transform = self._node.getWorldTransformation()
-
-            # Check the cache
-            mesh = self._rotate_mesh
-            world_transform = self._rotate_world_transform
-
-            vertex_data = mesh.getConvexHullTransformedVertices(world_transform)
+            vertex_data = self._rotate_mesh_convexhull
             # Don't use data below 0.
             # TODO; We need a better check for this as this gives poor results for meshes with long edges.
             # Do not throw away vertices: the convex hull may be too small and objects can collide.

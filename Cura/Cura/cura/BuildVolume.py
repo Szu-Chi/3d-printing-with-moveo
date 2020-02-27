@@ -50,6 +50,7 @@ class BuildVolume(SceneNode):
         self._application = application
         self._machine_manager = self._application.getMachineManager()
 
+        self._moveo_workspace_color = None  # type: Optional[Color]
         self._volume_outline_color = None  # type: Optional[Color]
         self._x_axis_color = None  # type: Optional[Color]
         self._y_axis_color = None  # type: Optional[Color]
@@ -69,6 +70,8 @@ class BuildVolume(SceneNode):
         self._origin_line_length = 20
         self._origin_line_width = 1.5
         self._enabled = False
+
+        self._moveo_mesh = None  # type: Optional[MeshData]
 
         self._grid_mesh = None   # type: Optional[MeshData]
         self._grid_shader = None
@@ -227,7 +230,9 @@ class BuildVolume(SceneNode):
         if self._error_mesh:
             renderer.queueNode(self, mesh=self._error_mesh, shader=self._shader, transparent=True,
                                backface_cull=True, sort=-8)
-
+        if self._shape == "moveo":
+            if self._moveo_mesh:
+                renderer.queueNode(self, mesh=self._moveo_mesh, shader=self._shader, transparent=True, backface_cull=True, sort = -10)
         return True
 
     ##  For every sliceable node, update node._outside_buildarea
@@ -358,7 +363,7 @@ class BuildVolume(SceneNode):
             if self._width != 0:
                 scale_matrix.compose(scale=Vector(1, 1, aspect))
             mb.addVertex(0, min_h - z_fight_distance, 0)
-            mb.addMoveoWorkSpace(175, 440.713, 0.01, center=Vector(0, min_h - z_fight_distance, 0))
+            mb.addMoveoWorkSpace(175, 432.6, 0.01, center=Vector(0, min_h - z_fight_distance, 0))
             sections = mb.getVertexCount() - 1  # Center point is not an arc section
             indices = []
             #draw grid
@@ -422,17 +427,8 @@ class BuildVolume(SceneNode):
                 aspect = 1.0
                 scale_matrix.compose(scale = Vector(1, 1, aspect))
             mb = MeshBuilder()
-            mb.addArc(440.713, Vector.Unit_Y, center = (0, min_h - z_fight_distance, 0), sections = 320, color = self._volume_outline_color)
-            mb.addArc(175, Vector.Unit_Y, center = (0, min_h - z_fight_distance, 0), sections = 320, color = self._volume_outline_color)
-            
-            a = [-5.84496390332700e-14, 3.56282507993945e-12, 1.96598578522008e-11, -4.08500656982012e-09, 1.32273243218637e-08, 1.84264287266674e-06, -1.04208238003648e-05, -0.000262072884367316, -0.0107090984034695, 0.197575980978460, 46.4820460203409]
-            for x in range(-8,38):
-                z = float(x)
-                y = float(0)
-                for i in range(10):
-                    y = float(y + a[i]*(z**(10-i)))
-                y = y + a[10]
-                mb.addArc(float(y*10),Vector.Unit_Y, center = (0 , x*10 + min_h - z_fight_distance + 90, 0) ,sections = 320, color = self._volume_outline_color)
+            mb.addArc(175, Vector.Unit_Y, center = (0, min_h - z_fight_distance, 0), sections = 32, color = self._volume_outline_color)
+            mb.addArc(350, Vector.Unit_Y, center = (0, min_h - z_fight_distance, 0), sections = 32, color = self._x_axis_color)
             return mb.build().getTransformed(scale_matrix)
 
         else:
@@ -476,6 +472,7 @@ class BuildVolume(SceneNode):
         theme = self._application.getTheme()
         if theme is None:
             return
+        self._moveo_workspace_color = Color(*theme.getColor("moveo_workspace").getRgb())
         self._volume_outline_color = Color(*theme.getColor("volume_outline").getRgb())
         self._x_axis_color = Color(*theme.getColor("x_axis").getRgb())
         self._y_axis_color = Color(*theme.getColor("y_axis").getRgb())
@@ -533,6 +530,45 @@ class BuildVolume(SceneNode):
             self._disallowed_area_size = max(size, self._disallowed_area_size)
         return mb.build()
 
+    def _buildMoveoMesh(self, min_h: float, z_fight_distance: float) -> Optional[MeshData]:
+        mb = MeshBuilder()
+        color = self._moveo_workspace_color
+        original_base_point = numpy.array([0,432,0])
+        for i in range (1,361):
+            angle_first  = math.pi * (i-1) /180
+            angle_second = math.pi * i / 180
+            arr = []
+            rotate_matrix_first = numpy.array([[math.cos(angle_first),-math.sin(angle_first),0],
+                                               [math.sin(angle_first), math.cos(angle_first),0],
+                                               [0                    , 0                    ,1]])
+            rotate_matrix_second = numpy.array([[math.cos(angle_second),-math.sin(angle_second),0],
+                                                [math.sin(angle_second), math.cos(angle_second),0],
+                                                [0                     , 0                     ,1]])
+            arr.append(rotate_matrix_first)
+            arr.append(rotate_matrix_second)
+            original_side = numpy.dot(arr[0], original_base_point)
+            next_side = numpy.dot(arr[1], original_base_point)
+            first_point = Vector(original_side[0], original_side[2], original_side[1])
+            second_point = Vector(next_side[0], next_side[2], next_side[1])
+            a = [-1.07711321062091e-12, 1.91470987200068e-10, -1.39464223435275e-08, 5.34495687639924e-07, -1.14534381938002e-05, 0.000132367247994384, -0.000677232869265235, -0.000124866917208977, -0.000495102489119011, 0.422003233169355, 43.2571410174796]
+            for i in range(1,44):
+                z = float(i)
+                y = float(0)
+                for j in range(10):
+                    y = float(y + a[j]*(z**(10-j)))
+                y = y + a[10]
+                caculate_point = numpy.array([0, y*10, i*10 + min_h - z_fight_distance])
+                for k in range(2):
+                    rotate_point = numpy.dot(arr[k], caculate_point)
+                    new_point = Vector(rotate_point[0], rotate_point[2], rotate_point[1])
+                    if k:
+                        mb.addFace(first_point, second_point, new_point, color=color)
+                    else:
+                        mb.addFace(second_point, first_point, new_point, color=color)
+                    first_point = second_point
+                    second_point = new_point
+        return mb.build()
+
     ##  Recalculates the build volume & disallowed areas.
     def rebuild(self) -> None:
         if self._dont_use_check:
@@ -554,7 +590,7 @@ class BuildVolume(SceneNode):
             min_w = -482.0
             max_w =  482.0
             min_h =  0.0
-            max_h =  469.0
+            max_h =  442.0
             min_d = -482.0
             max_d =  482.0
         else:
@@ -581,6 +617,8 @@ class BuildVolume(SceneNode):
         disallowed_area_height = 0.1
         self._disallowed_area_size = 0.
         self._disallowed_area_mesh = self._buildDisallowedAreaMesh(min_w, max_w, min_h, max_h, min_d, max_d, disallowed_area_height)
+        if self._shape == "moveo":
+           self._moveo_mesh = self._buildMoveoMesh(min_h, z_fight_distance)
 
         self._error_mesh = self._buildErrorMesh(min_w, max_w, min_h, max_h, min_d, max_d, disallowed_area_height)
 
@@ -1181,9 +1219,8 @@ class BuildVolume(SceneNode):
             half_machine_depth = 482
             arc_vertex = [half_machine_width, -half_machine_depth]
 
-            for x in range(-28,128):
-                a = [-5.84496390332700e-14, 3.56282507993945e-12, 1.96598578522008e-11, -4.08500656982012e-09, 1.32273243218637e-08, 1.84264287266674e-06, -1.04208238003648e-05, -0.000262072884367316, -0.0107090984034695, 0.197575980978460, 46.4820460203409]
-                
+            for x in range(0,148):
+                a = [-1.07711321062091e-12, 1.91470987200068e-10, -1.39464223435275e-08, 5.34495687639924e-07, -1.14534381938002e-05, 0.000132367247994384, -0.000677232869265235, -0.000124866917208977, -0.000495102489119011, 0.422003233169355, 43.2571410174796]
                 z = float(x*3/10)
                 y = float(0)
                 for i in range(10):
@@ -1196,18 +1233,17 @@ class BuildVolume(SceneNode):
                 else:
                     vertices.append([half_machine_width, half_machine_depth])
                 vertices.append(arc_vertex)
-                arc_vertex = [y*10, z*10+85]
+                arc_vertex = [y*10, z*10]
                 vertices.append(arc_vertex)
 
                 result[extruder_id].append(Polygon(numpy.array(vertices, numpy.float32)))
                 
             arc_vertex = [-half_machine_width, -half_machine_depth]
 
-            for x in range(-28,128):
+            for x in range(0,148):
                 vertices = []
                 vertices.append(arc_vertex)
-                a = [-5.84496390332700e-14, 3.56282507993945e-12, 1.96598578522008e-11, -4.08500656982012e-09, 1.32273243218637e-08, 1.84264287266674e-06, -1.04208238003648e-05, -0.000262072884367316, -0.0107090984034695, 0.197575980978460, 46.4820460203409]
-                
+                a = [-1.07711321062091e-12, 1.91470987200068e-10, -1.39464223435275e-08, 5.34495687639924e-07, -1.14534381938002e-05, 0.000132367247994384, -0.000677232869265235, -0.000124866917208977, -0.000495102489119011, 0.422003233169355, 43.2571410174796]
                 z = float(x*3/10)
                 y = float(0)
                 for i in range(10):
@@ -1218,7 +1254,7 @@ class BuildVolume(SceneNode):
                     vertices.append([-half_machine_width, -half_machine_depth])
                 else:
                     vertices.append([-half_machine_width, half_machine_depth])
-                arc_vertex = [-y*10, z*10+85]
+                arc_vertex = [-y*10, z*10]
                 vertices.append(arc_vertex)
 
                 result[extruder_id].append(Polygon(numpy.array(vertices, numpy.float32)))
