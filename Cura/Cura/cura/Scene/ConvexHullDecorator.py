@@ -37,8 +37,6 @@ class ConvexHullDecorator(SceneNodeDecorator):
     def __init__(self) -> None:
         super().__init__()
 
-        self._now_node_quaternion = Quaternion()
-        self._save_quaternion = Quaternion()
         self._seve_world_position_x = None
         self._seve_world_position_y = None
         self._seve_world_position_z = None
@@ -122,50 +120,38 @@ class ConvexHullDecorator(SceneNodeDecorator):
             return None
         if self._node.callDecoration("isNonPrintingMesh"):
             return None
-
-        if self._now_node_quaternion != self._node.getOrientation() or self._seve_world_position_x != self._node.getWorldPosition().x or self._seve_world_position_y != self._node.getWorldPosition().y or self._seve_world_position_z != self._node.getWorldPosition().z:
+        world_transform = self._node.getWorldTransformation()
+        rotate_mesh = self._node.getMeshData()
+        rotate_mesh_convexhull = rotate_mesh.getConvexHullTransformedVertices(world_transform)
+        if numpy.array_equal(self._rotate_mesh_convexhull,rotate_mesh_convexhull) or self._seve_world_position_x != self._node.getWorldPosition().x or self._seve_world_position_y != self._node.getWorldPosition().y or self._seve_world_position_z != self._node.getWorldPosition().z:
             ## Save data
-            self._now_node_quaternion   = self._node.getOrientation()
             self._seve_world_position_x = self._node.getWorldPosition().x
             self._seve_world_position_y = self._node.getWorldPosition().y
             self._seve_world_position_z = self._node.getWorldPosition().z
-            self._save_quaternion = self._node.getOrientation()
-            self._save_quaternion.normalize()
-
-            hypotenuse = (self._node.getWorldPosition().x**2+self._node.getWorldPosition().z**2)**0.5
-            angle = -math.asin(self._node.getWorldPosition().x/hypotenuse)
-            if self._node.getWorldPosition().x == 0.0 or self._node.getWorldPosition().z == 0:
-                angle = 0.0
-            else:    
-                angle = angle if self._node.getWorldPosition().z < 0 else angle*(math.pi/abs(angle)-1)
-            world_transform = self._node.getWorldTransformation()
-            rotate_mesh = self._node.getMeshData()
             self._rotate_mesh_convexhull = rotate_mesh.getConvexHullTransformedVertices(world_transform)
 
-            shift_to_origin = numpy.array([[1, 0, 0, (-1)*self._seve_world_position_x],
-                                           [0, 1, 0,                                0],
-                                           [0, 0, 1, (-1)*self._seve_world_position_z],
-                                           [0, 0, 0,                                1]])
-
-            shift_to_Y_axis = numpy.array([[1, 0, 0,               0],
-                                           [0, 1, 0,               0],
-                                           [0, 0, 1, (-1)*hypotenuse],
-                                           [0, 0, 0,               1]])
-
-            rotate_matrix = numpy.array([[ math.cos(angle), 0, math.sin(angle), 0],
-                                         [               0, 1,               0, 0],
-                                         [-math.sin(angle), 0, math.cos(angle), 0],
-                                         [               0, 0,               0, 1]])
+            num = -1
+            hypotenuse = 0
+            for i in range(1,numpy.size(self._rotate_mesh_convexhull,0)):
+                if hypotenuse < ((self._rotate_mesh_convexhull[i][0]**2 + self._rotate_mesh_convexhull[i][2]**2)**0.5):
+                    hypotenuse = (self._rotate_mesh_convexhull[i][0]**2 + self._rotate_mesh_convexhull[i][2]**2)**0.5
+                    num = i
+            angle = math.asin(self._rotate_mesh_convexhull[num][0]/hypotenuse)
+            if self._node.getWorldPosition().x == 0.0 and self._node.getWorldPosition().z > 0:
+                angle = math.pi
+            else:    
+                angle = angle if self._node.getWorldPosition().z < 0 else angle*(math.pi/abs(angle)-1)
+    
+            rotate_and_shift_to_Y_matrix = numpy.array([[ math.cos(angle), 0, math.sin(angle), 0],
+                                                        [               0, 1,               0, 0],
+                                                        [-math.sin(angle), 0, math.cos(angle), 0],
+                                                        [               0, 0,               0, 1]])
 
             one_column = numpy.ones([1,numpy.size(self._rotate_mesh_convexhull,0)])
-            add_one_column = numpy.column_stack((self._rotate_mesh_convexhull,one_column.T))
-            shift_to_o = numpy.dot(shift_to_origin,add_one_column[0])
-            rotate_convexhull = numpy.dot(rotate_matrix,shift_to_o)
-            save = numpy.dot(shift_to_Y_axis,rotate_convexhull)
-            for i in range(1,numpy.size(self._rotate_mesh_convexhull,0)):
-                shift_to_o = numpy.dot(shift_to_origin,add_one_column[i])
-                rotate_convexhull = numpy.dot(rotate_matrix,shift_to_o)
-                shift_to_Y = numpy.dot(shift_to_Y_axis,rotate_convexhull)
+            shift_to_o = numpy.column_stack((self._rotate_mesh_convexhull,one_column.T))
+            save = numpy.dot(rotate_and_shift_to_Y_matrix,shift_to_o[0])
+            for j in range(1,numpy.size(self._rotate_mesh_convexhull,0)):
+                shift_to_Y = numpy.dot(rotate_and_shift_to_Y_matrix,shift_to_o[j])
                 save = numpy.row_stack((save,shift_to_Y))
             self._rotate_mesh_convexhull = numpy.delete(save,-1,axis=1)
 

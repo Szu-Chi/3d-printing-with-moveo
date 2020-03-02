@@ -106,18 +106,26 @@ int main(int argc, char **argv){
           double E_diff = (E - pre_E);
           int cut_part = ceil(sqrt(pow(X_diff,2)+pow(Y_diff,2))/15);
           if(cut_part > 1){
+            std::ostringstream store;
+            bool check_inside = false;
             if(line.find('F') != std::string::npos && stoi(line.substr(line.find('F')+1)) != 0) output_file << " F" << stoi(line.substr(line.find('F')+1));
             for(int i = 1; i < cut_part; i++){
               pre_x += X_diff/cut_part;
               pre_y += Y_diff/cut_part;
               pre_E += E_diff/cut_part;
-              output_file << std::fixed << std::setprecision(decimal_point(pre_x)) << " X" << pre_x << std::defaultfloat;
-              output_file << std::fixed << std::setprecision(decimal_point(pre_y)) << " Y" << pre_y << std::defaultfloat;
-              if(line.find('E') != std::string::npos && stod(line.substr(line.find('E')+1)) != 0) output_file << std::fixed << std::setprecision(5) << " E" << pre_E << std::defaultfloat;
+              if(sqrt(pow(pre_x,2)+pow(pre_y,2)) < 175){
+                check_inside = true;
+                break;
+              }
+              store << std::fixed << std::setprecision(decimal_point(pre_x)) << " X" << pre_x << std::defaultfloat;
+              store << std::fixed << std::setprecision(decimal_point(pre_y)) << " Y" << pre_y << std::defaultfloat;
+              if(line.find('E') != std::string::npos && stod(line.substr(line.find('E')+1)) != 0) store << std::fixed << std::setprecision(5) << " E" << pre_E << std::defaultfloat;
               //if(i == 1) output_file << " K0";
-              output_file << std::endl;
-              output_file << line[0] << line[1];
+              store << std::endl;
+              store << line[0] << line[1];
             }
+            if(!check_inside) output_file << store.str();
+            store.clear();
             if(line.find('F') != std::string::npos){
               if(line.find('X') != std::string::npos) output_file << std::fixed << std::setprecision(decimal_point(x)) << " X" << x << std::defaultfloat;
               if(line.find('Y') != std::string::npos) output_file << std::fixed << std::setprecision(decimal_point(y)) << " Y" << y << std::defaultfloat;

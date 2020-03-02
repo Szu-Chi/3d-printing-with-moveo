@@ -68,7 +68,7 @@ bool check_trac_ik_valid(TRAC_IK::TRAC_IK &tracik_solver,KDL::Chain &chain, KDL:
 
 void motor_steps_convert(Eigen::VectorXd &data, bool &judge){
                                         // steps * micro_steps * belt * error
-  static const double joint_division[5] = {200          * 64  * 5.545454 * 1,     //J 70981.8112
+  static const double joint_division[5] = {200          * 64  * 10       * 1,     //J 128000
                                            200          * 128 * 5.5      * 1,     //A 140800
                                            19810.111813 * 4   * 4.357143 * 1,     //B 345261.960060921
                                            5370.24793   * 32  * 1        * 1,     //C 171847.93376
@@ -152,7 +152,6 @@ void start(const std_msgs::Float64MultiArray& receive){
 ros::WallTime start_, end_;
 ros::WallTime start_first_, end_first_;
 int main(int argc, char **argv){
-  start_first_ = ros::WallTime::now();
   ros::init(argc, argv, "inverse_kinematicks");
   ros::NodeHandle node_handle("~");
   ros::AsyncSpinner spinner(1);
@@ -167,6 +166,7 @@ int main(int argc, char **argv){
     if(ros::ok()) ros::spinOnce();
     else return -1;
   }
+  start_first_ = ros::WallTime::now();
 
   std_msgs::Float64MultiArray push;
   push.data.resize(1);
@@ -245,16 +245,26 @@ int main(int argc, char **argv){
   robot_state::RobotState& current_state = planning_scene.getCurrentStateNonConst();
   collision_request.group_name = "arm";
   
-  std::string line;// getline used
-
+  std::string line;                     // getline used
+  KDL::Vector end_effector_target_vol;  // Read gcode xyz
   // Read all lines of gcode
   std::string gcode_in;
   node_handle.param("gcode_in", gcode_in, std::string("/gcode_in"));
   std::ifstream input_file(gcode_in);
   if(!input_file.is_open()) ROS_ERROR_STREAM("Can't open " << gcode_in);
   int save_all_line = 0;
+  bool check_first_point = false;
   while(input_file){
     std::getline(input_file, line);
+    if(!check_first_point){
+      if((!line.compare(0,2,"G0") || !line.compare(0,2,"G1")) && line.find('X') != std::string::npos && line.find('Y') != std::string::npos && line.find('Z') != std::string::npos){
+        check_first_point = true;
+        end_effector_target_vol.data[0] = stod(line.substr(line.find('X')+1));
+        end_effector_target_vol.data[1] = stod(line.substr(line.find('Y')+1));
+        end_effector_target_vol.data[2] = stod(line.substr(line.find('Z')+1))+15;
+        save_all_line++;
+      }
+    }
     save_all_line++;
   }
   input_file.close();
@@ -274,7 +284,6 @@ int main(int argc, char **argv){
   KDL::Vector previous_end_effector_target_vol;
   int previous_save_p_or_n;
   float previous_angle;
-  KDL::Vector end_effector_target_vol;                    // Read gcode xyz
 
   KDL::Vector target_bounds_rot(0, 0, M_PI*2);
   KDL::Vector target_bounds_vel(0,0,0);
@@ -291,6 +300,14 @@ int main(int argc, char **argv){
   while(input_file){
     if(ros::ok()){
       std::getline(input_file, line);
+      if(!line.compare(0,4,"M400") && check_first_point){
+        check_first_point = false;
+        std::ostringstream store;
+        store << "G1 F2000 X" << end_effector_target_vol.data[0] << " Y" << end_effector_target_vol.data[1] << " Z" << end_effector_target_vol.data[2];
+        save.push_back(store.str());
+        store.clear();
+        read_line_count++;
+      }
       save.push_back(line);
       read_line_count++;
       if(read_line_count % 1000 == 0 || !input_file){ // Read 1000 lines or end of file
@@ -308,11 +325,11 @@ int main(int argc, char **argv){
           if((!line.compare(0,2,"G0") || !line.compare(0,2,"G1")) && (line.find('J') == std::string::npos)){
             if(line.find('X') != std::string::npos) end_effector_target_vol.data[0] = (stod(line.substr(line.find('X')+1))*1e-3)+X_offset;
             if(line.find('Y') != std::string::npos) end_effector_target_vol.data[1] = (stod(line.substr(line.find('Y')+1))*1e-3)+Y_offset;
-            if(line.find('Z') != std::string::npos) z_init = (stod(line.substr(line.find('Z')+1))*1e-3)+Z_offset;
+            if(line.find('Z') != std::string::npos) end_effector_target_vol.data[2] = (stod(line.substr(line.find('Z')+1))*1e-3)+Z_offset;
             
             double z_pos = calc_z((end_effector_target_vol.data[0]+0.09)*1000, (end_effector_target_vol.data[1]-0.2)*1000)/1000;
             // 9.18 nozzle high
-            end_effector_target_vol.data[2] = z_init;// + 0.00462; //z_pos;
+            //end_effector_target_vol.data[2] = end_effector_target_vol.data[2] + z_pos;
             find_end_effector_target_vol.push_back(end_effector_target_vol);
             save_place.push_back(i);
             // Calculate position angle

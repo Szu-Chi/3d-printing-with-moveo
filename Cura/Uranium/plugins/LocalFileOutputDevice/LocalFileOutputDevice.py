@@ -247,5 +247,7 @@ class LocalFileOutputDevice(OutputDevice):
         file_in = " gcode_in:="
         file_out = " gcode_out:="
         os.system("roslaunch gcode_translation  gcode_translation.launch"+ file_in + self._save_name + file_out + self._save_name)
+        os.system("cp " + self._save_name + " " + now_place[:-10]+'/gcode_translation/gcode/test.gcode')
+        os.system("rm -f "+ now_place[:-10]+'/gcode_translation/gcode/split_register.gcode')
         read_file = open(now_place[:-10]+'/gcode_translation/check_success/check_success.txt','r')
         return read_file.read().strip()

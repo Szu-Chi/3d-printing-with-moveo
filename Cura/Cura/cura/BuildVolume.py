@@ -534,6 +534,7 @@ class BuildVolume(SceneNode):
         mb = MeshBuilder()
         color = self._moveo_workspace_color
         original_base_point = numpy.array([0,432,0])
+        original_inside_point = numpy.array([0,175,0])
         for i in range (1,361):
             angle_first  = math.pi * (i-1) /180
             angle_second = math.pi * i / 180
@@ -551,7 +552,7 @@ class BuildVolume(SceneNode):
             first_point = Vector(original_side[0], original_side[2], original_side[1])
             second_point = Vector(next_side[0], next_side[2], next_side[1])
             a = [-1.07711321062091e-12, 1.91470987200068e-10, -1.39464223435275e-08, 5.34495687639924e-07, -1.14534381938002e-05, 0.000132367247994384, -0.000677232869265235, -0.000124866917208977, -0.000495102489119011, 0.422003233169355, 43.2571410174796]
-            for i in range(1,44):
+            for i in range(1,45):
                 z = float(i)
                 y = float(0)
                 for j in range(10):
@@ -559,14 +560,28 @@ class BuildVolume(SceneNode):
                 y = y + a[10]
                 caculate_point = numpy.array([0, y*10, i*10 + min_h - z_fight_distance])
                 for k in range(2):
-                    rotate_point = numpy.dot(arr[k], caculate_point)
-                    new_point = Vector(rotate_point[0], rotate_point[2], rotate_point[1])
+                    if i == 44:
+                        side = numpy.dot(arr[k], original_inside_point)
+                        new_point = Vector(side[0], 442, side[1])
+                    else:
+                        rotate_point = numpy.dot(arr[k], caculate_point)
+                        new_point = Vector(rotate_point[0], rotate_point[2], rotate_point[1])
                     if k:
                         mb.addFace(first_point, second_point, new_point, color=color)
                     else:
                         mb.addFace(second_point, first_point, new_point, color=color)
                     first_point = second_point
                     second_point = new_point
+            original_side = numpy.dot(arr[0], original_inside_point)
+            next_side = numpy.dot(arr[1], original_inside_point)
+            mb.addFace(Vector(next_side[0], 0, next_side[1]),
+                       Vector(next_side[0], 442, next_side[1]),
+                       Vector(original_side[0], 442,original_side[1]),
+                       color=color)
+            mb.addFace(Vector(next_side[0], 0, next_side[1]),
+                       Vector(original_side[0], 442, original_side[1]),
+                       Vector(original_side[0], 0,original_side[1]), 
+                       color=color)
         return mb.build()
 
     ##  Recalculates the build volume & disallowed areas.
@@ -1216,28 +1231,7 @@ class BuildVolume(SceneNode):
                 result[extruder_id].append(polygon.translate(offset_x, offset_y))  # Compensate for the nozzle offset of this extruder.
 
             half_machine_width = 482
-            half_machine_depth = 482
-            arc_vertex = [half_machine_width, -half_machine_depth]
-
-            for x in range(0,148):
-                a = [-1.07711321062091e-12, 1.91470987200068e-10, -1.39464223435275e-08, 5.34495687639924e-07, -1.14534381938002e-05, 0.000132367247994384, -0.000677232869265235, -0.000124866917208977, -0.000495102489119011, 0.422003233169355, 43.2571410174796]
-                z = float(x*3/10)
-                y = float(0)
-                for i in range(10):
-                    y = float(y + a[i]*(z**(10-i)))
-                y = y + a[10]                
-
-                vertices = []
-                if z < 0:
-                    vertices.append([half_machine_width, -half_machine_depth])
-                else:
-                    vertices.append([half_machine_width, half_machine_depth])
-                vertices.append(arc_vertex)
-                arc_vertex = [y*10, z*10]
-                vertices.append(arc_vertex)
-
-                result[extruder_id].append(Polygon(numpy.array(vertices, numpy.float32)))
-                
+            half_machine_depth = 482   
             arc_vertex = [-half_machine_width, -half_machine_depth]
 
             for x in range(0,148):
@@ -1250,7 +1244,7 @@ class BuildVolume(SceneNode):
                     y = float(y + a[i]*(z**(10-i)))
                 y = y + a[10]                
 
-                if z < 0:
+                if z < 16.2:
                     vertices.append([-half_machine_width, -half_machine_depth])
                 else:
                     vertices.append([-half_machine_width, half_machine_depth])

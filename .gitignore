@@ -6,6 +6,7 @@ Cura/libSavitar/build
 Cura/libCharon/build
 Cura/CuraEngine/build
 Cura/Cura/resources/materials
+Cura/sip-4.19.20/
 .vscode
 *.pyc
 *.qmlc
