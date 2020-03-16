@@ -3,9 +3,11 @@
   <arg name="model" default="$(find moveo_urdf)/urdf/moveo_urdf.urdf"/>
   <param name="robot_description" textfile="$(arg model)" />  
   <arg name="gcode_in" default="$(find gcode_translation)/gcode/test.gcode"/>
+  <arg name="joint_division" default="$(find gcode_translation)/include/Joint_division/Joint_division.csv"/>
   
   <node name="simulation" pkg="simulation" type="simulation" output="screen">
     <param name="urdf_param" value="/robot_description"/>
     <param name="gcode_in" value="$(arg gcode_in)"/>
+    <param name="joint_division" value="$(arg joint_division)"/>
   </node>
 </launch>

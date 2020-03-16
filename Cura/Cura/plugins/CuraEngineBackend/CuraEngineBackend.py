@@ -240,10 +240,8 @@ class CuraEngineBackend(QObject, Backend):
         # see if we really have to slice
         active_build_plate = self._application.getMultiBuildPlateModel().activeBuildPlate
         build_plate_to_be_sliced = self._build_plates_to_be_sliced.pop(0)
-        print(build_plate_to_be_sliced)
         Logger.log("d", "Going to slice build plate [%s]!" % build_plate_to_be_sliced)
         num_objects = self._numObjectsPerBuildPlate()
-        print(num_objects)
         self._stored_layer_data = []
 
 

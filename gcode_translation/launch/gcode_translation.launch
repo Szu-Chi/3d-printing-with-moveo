@@ -4,11 +4,13 @@
   <arg name="register_gcode_out" default="$(find gcode_translation)/gcode/split_register.gcode"/>
   <arg name="gcode_out" default="$(find gcode_translation)/gcode/test.gcode"/>
   <arg name="check_success" default="$(find gcode_translation)/check_success/check_success.txt"/>
+  <arg name="split" default="true"/>
 
   <node name="gcode_translation" pkg="gcode_translation" type="gcode_point_split" output="screen" required="true" >
     <param name="gcode_in" value="$(arg gcode_in)"/>
     <param name="register_gcode_out" value="$(arg register_gcode_out)"/>
     <param name="check_success" value="$(arg check_success)"/>
+    <param name="split" value="$(arg split)" type = "bool"/>
   </node>
   <include file="$(find gcode_translation)/launch/inverse_kinematics.launch">
     <arg name="gcode_out" value="$(arg gcode_out)"/>

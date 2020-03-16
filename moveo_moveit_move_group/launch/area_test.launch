@@ -3,8 +3,8 @@
   <!--=========Select one=========-->
   <!--Warning : select = 1 not = 0-->
   <arg name="xy_plane" default="0" />
-  <arg name="yz_plane" default="0" />
-  <arg name="xz_plane" default="1" />
+  <arg name="yz_plane" default="1" />
+  <arg name="xz_plane" default="0" />
   <!--============================-->
 
   <arg name="chain_start" default="base_link" />
@@ -14,9 +14,10 @@
   <arg name="eps" default="1e-5"/>
   <arg name="model" default="$(find moveo_urdf)/urdf/moveo_urdf1.urdf"/>
   <arg name="model2" default="$(find moveo_urdf)/urdf/moveo_urdf2.urdf"/>
-  <arg name="outermost_point" default="$(find moveo_moveit_move_group)/area/area_outermost.csv"/>
-  <arg name="closest_point" default="$(find moveo_moveit_move_group)/area/area_closest.csv"/>
-  <arg name="all_points" default="$(find moveo_moveit_move_group)/area/area_all_points.csv"/>
+  <arg name="outermost_point" default="$(find moveo_moveit_move_group)/area/area_outermost1.csv"/>
+  <arg name="closest_point" default="$(find moveo_moveit_move_group)/area/area_closest1.csv"/>
+  <arg name="all_points" default="$(find moveo_moveit_move_group)/area/area_all_points1.csv"/>
+  <arg name="joint_division" default="$(find gcode_translation)/include/Joint_division/Joint_division.csv"/>
   <!-- arg name="num_threads" default="16"/ -->
 
   <param name="robot_description" textfile="$(arg model)" />
@@ -35,6 +36,7 @@
     <param name="outermost_point" value="$(arg outermost_point)"/>
     <param name="closest_point" value="$(arg closest_point)"/>
     <param name="all_points" value="$(arg all_points)"/>
+    <param name="joint_division" value="$(arg joint_division)"/>
     <!-- param name="num_threads" value="$(arg num_threads)" type = "int"/ -->
   </node>
 </launch>

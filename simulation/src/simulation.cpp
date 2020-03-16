@@ -5,7 +5,29 @@
 #include <sstream>
 #include <fstream>
 #include <math.h>
+
 ros::WallTime start_, end_;
+std::vector<double> joint_division(5);
+void read_joint_division(std::string &input_file_name){
+  std::string line;
+  std::ifstream input_file(input_file_name);
+  if(!input_file.is_open()) ROS_ERROR_STREAM("Can't open " << input_file_name);
+  int count = 0;
+  while(input_file){
+    if(count == 5) break;
+    std::getline(input_file, line);
+    if(!line.compare(0,2,"//")) continue;
+    std::istringstream templine(line);
+	  std::string data;
+    double result = 1.0;
+	  while (getline(templine, data, ',')) result = result * stod(data);
+    joint_division.at(count) = result;
+    //ROS_INFO_STREAM(result); //check joint value
+    count++;
+  }
+  input_file.close();
+}
+
 int main(int argc, char **argv)
 {
   start_ = ros::WallTime::now();
@@ -26,13 +48,9 @@ int main(int argc, char **argv)
   moveit::core::RobotStatePtr start_state(move_group.getCurrentState());
   const robot_state::JointModelGroup *joint_model_group = start_state->getJointModelGroup(move_group.getName());
 
-                                          // steps * micro_steps * belt * error
-  static const double joint_division[5] = {200          * 64  * 10       * 1,     //J 128000
-                                           200          * 128 * 5.5      * 1,     //A 140800
-                                           19810.111813 * 4   * 4.357143 * 1,     //B 345261.960060921
-                                           5370.24793   * 32  * 1        * 1,     //C 171847.93376
-                                           1036.36364   * 16  * 4.5      * 1      //D 74618.18208
-                                           };
+  std::string joint_division_name;
+  node_handle.param("joint_division", joint_division_name, std::string("/joint_division"));
+  read_joint_division(joint_division_name);
 
   std::string gcode_in;
   node_handle.param("gcode_in", gcode_in, std::string("/gcode_in"));
@@ -113,6 +131,7 @@ int main(int argc, char **argv)
   end_ = ros::WallTime::now();
   double execution_time = (end_ - start_).toNSec() * 1e-9;
   ROS_INFO_STREAM("Exectution time (s): " << execution_time);
+  joint_division.clear();
   ros::shutdown();
   return 0;
 }

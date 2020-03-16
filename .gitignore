@@ -1,4 +1,5 @@
 gcode_translation/gcode/*.gcode
+gcode_translation/check_success/*.txt
 moveo_moveit_move_group/area/*.csv
 Cura/protobuf/build-dir
 Cura/libArcus/build

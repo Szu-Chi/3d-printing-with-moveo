@@ -44,10 +44,11 @@ int main(int argc, char **argv){
   //----------------------------
   //Setup
   //----------------------------
-
+  bool split;
   std::string gcode_in, register_gcode_out;
   node_handle.param("gcode_in", gcode_in, std::string("/gcode_in"));
   node_handle.param("register_gcode_out", register_gcode_out, std::string("/register_gcode_out"));
+  node_handle.param("split", split, true);
 
   int all_lines = 0;
   std::string line;
@@ -104,8 +105,8 @@ int main(int argc, char **argv){
           double X_diff = (x - pre_x);
           double Y_diff = (y - pre_y);
           double E_diff = (E - pre_E);
-          int cut_part = ceil(sqrt(pow(X_diff,2)+pow(Y_diff,2))/15);
-          if(cut_part > 1){
+          int cut_part = ceil(sqrt(pow(X_diff,2)+pow(Y_diff,2))/10);
+          if(cut_part > 1 && split){
             std::ostringstream store;
             bool check_inside = false;
             if(line.find('F') != std::string::npos && stoi(line.substr(line.find('F')+1)) != 0) output_file << " F" << stoi(line.substr(line.find('F')+1));
@@ -120,7 +121,7 @@ int main(int argc, char **argv){
               store << std::fixed << std::setprecision(decimal_point(pre_x)) << " X" << pre_x << std::defaultfloat;
               store << std::fixed << std::setprecision(decimal_point(pre_y)) << " Y" << pre_y << std::defaultfloat;
               if(line.find('E') != std::string::npos && stod(line.substr(line.find('E')+1)) != 0) store << std::fixed << std::setprecision(5) << " E" << pre_E << std::defaultfloat;
-              //if(i == 1) output_file << " K0";
+              //if(i == 1) store << " K0";
               store << std::endl;
               store << line[0] << line[1];
             }
