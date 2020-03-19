@@ -56,13 +56,18 @@ int main(int argc, char **argv)
   node_handle.param("gcode_in", gcode_in, std::string("/gcode_in"));
   std::ifstream input_file(gcode_in);
   if(!input_file.is_open())ROS_ERROR_STREAM("Can't open " <<gcode_in);
+
+  int num_draw_point;
+  node_handle.param("num_draw_point", num_draw_point, 100);
+  int one_layer_draw;
+  node_handle.param("one_layer_draw", one_layer_draw, 1);
+
   moveit_msgs::RobotTrajectory trajectory;
   moveit_msgs::RobotTrajectory trajectory_path;
   std::string line;
   int first = 0;
-  //double Z = 0;
-  //double pre_Z = 0;
-  bool draw = false;
+  double Z = 0;
+  double pre_Z = 0;
   int save = 0;
   while(input_file){
     save++;
@@ -73,14 +78,7 @@ int main(int argc, char **argv)
       if(line.find('B') != std::string::npos) target_joints.at(2) = double(stod(line.substr(line.find('B')+1))*(2*M_PI)/joint_division[2]);
       if(line.find('C') != std::string::npos) target_joints.at(3) = double(stod(line.substr(line.find('C')+1))*(2*M_PI)/joint_division[3]);
       if(line.find('D') != std::string::npos) target_joints.at(4) = double(stod(line.substr(line.find('D')+1))*(2*M_PI)/joint_division[4]);
-      /*
       if(line.find('Z') != std::string::npos) Z = stod(line.substr(line.find('Z')+1));
-      }
-      if(Z != pre_Z){
-        draw = true;
-        pre_Z = Z;
-      }
-      */
       move_group.setJointValueTarget(target_joints);
       if(first++ > 1){
         moveit::planning_interface::MoveGroupInterface::Plan my_plan;
@@ -107,12 +105,7 @@ int main(int argc, char **argv)
         move_group.move();
       }
     }
-    if(save == 600 || !input_file){
-      draw = true;
-      save = 0;
-    }
-    if(draw == true){
-      draw = false;
+    if((one_layer_draw && (Z != pre_Z)) || (!one_layer_draw && (save == num_draw_point)) || !input_file){
       moveit::planning_interface::MoveGroupInterface::Plan joinedPlan;
       robot_trajectory::RobotTrajectory rt(move_group.getCurrentState()->getRobotModel(), "arm");
       rt.setRobotTrajectoryMsg(*move_group.getCurrentState(),trajectory);
@@ -126,6 +119,8 @@ int main(int argc, char **argv)
         return false;
       }
       trajectory.joint_trajectory.points.clear();
+      save = 0;
+      pre_Z = Z;
     }
   }
   end_ = ros::WallTime::now();

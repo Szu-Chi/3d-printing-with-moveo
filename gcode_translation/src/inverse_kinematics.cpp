@@ -81,7 +81,7 @@ void read_joint_division(std::string &input_file_name, KDL::Chain &chain){
     double result = 1.0;
 	  while (getline(templine, data, ',')) result = result * stod(data);
     joint_division.at(count) = result;
-    ROS_INFO_STREAM(result);
+    //ROS_INFO_STREAM(result); //check joint value
     count++;
   }
   input_file.close();

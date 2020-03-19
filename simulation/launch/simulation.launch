@@ -1,5 +1,11 @@
 <?xml version="1.0"?>
 <launch>
+  <!--=======When Z up then draw=======-->
+  <!--    Warning : use = 1 not = 0    -->
+  <arg name="one_layer_draw" default="1"/>
+  <!--=================================-->
+
+  <arg name="num_draw_point" default="100"/>
   <arg name="model" default="$(find moveo_urdf)/urdf/moveo_urdf.urdf"/>
   <param name="robot_description" textfile="$(arg model)" />  
   <arg name="gcode_in" default="$(find gcode_translation)/gcode/test.gcode"/>
@@ -8,6 +14,8 @@
   <node name="simulation" pkg="simulation" type="simulation" output="screen">
     <param name="urdf_param" value="/robot_description"/>
     <param name="gcode_in" value="$(arg gcode_in)"/>
+    <param name="one_layer_draw" value="$(arg one_layer_draw)" type = "int"/>
+    <param name="num_draw_point" value="$(arg num_draw_point)"/>
     <param name="joint_division" value="$(arg joint_division)"/>
   </node>
 </launch>
