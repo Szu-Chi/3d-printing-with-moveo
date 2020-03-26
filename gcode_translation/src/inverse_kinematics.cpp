@@ -23,7 +23,7 @@
 #include <unistd.h>
 
 #include "std_msgs/Float64MultiArray.h"
-#include "../include/Mesh/Mesh.h"
+#include "../include/Mesh/circle_new.h"
 
 #include <tf/tf.h>
 
@@ -81,7 +81,7 @@ void read_joint_division(std::string &input_file_name, KDL::Chain &chain){
     double result = 1.0;
 	  while (getline(templine, data, ',')) result = result * stod(data);
     joint_division.at(count) = result;
-    //ROS_INFO_STREAM(result); //check joint value
+    ROS_INFO_STREAM(result); //check joint value
     count++;
   }
   input_file.close();
@@ -187,9 +187,6 @@ int main(int argc, char **argv){
   push.data[0] = 1;
   respond_split_pub.publish(push);
   start_pub.publish(push);
-
-  Load_Mesh();
-  calc_abcd();
 
   //----------------------------
   //Setup
@@ -320,6 +317,9 @@ int main(int argc, char **argv){
   double z_init = 0;
   double save_all_need_times = 0;
   
+  Load_Mesh(11.75);
+  Calc_abcd();
+
   while(input_file){
     if(ros::ok()){
       std::getline(input_file, line);
@@ -348,11 +348,12 @@ int main(int argc, char **argv){
           if((!line.compare(0,2,"G0") || !line.compare(0,2,"G1")) && (line.find('J') == std::string::npos)){
             if(line.find('X') != std::string::npos) end_effector_target_vol.data[0] = (stod(line.substr(line.find('X')+1))*1e-3)+X_offset;
             if(line.find('Y') != std::string::npos) end_effector_target_vol.data[1] = (stod(line.substr(line.find('Y')+1))*1e-3)+Y_offset;
-            if(line.find('Z') != std::string::npos) end_effector_target_vol.data[2] = (stod(line.substr(line.find('Z')+1))*1e-3)+Z_offset;
+            if(line.find('Z') != std::string::npos) z_init = (stod(line.substr(line.find('Z')+1))*1e-3)+Z_offset;
             
-            double z_pos = calc_z((end_effector_target_vol.data[0]+0.09)*1000, (end_effector_target_vol.data[1]-0.2)*1000)/1000;
+            double z_pos = calc_z_rectangle(end_effector_target_vol.data[0], end_effector_target_vol.data[1], true); // Unit: m -> mm
+            if (z_pos == 9.99) return -1;
             // 9.18 nozzle high
-            //end_effector_target_vol.data[2] = end_effector_target_vol.data[2] + z_pos;
+            end_effector_target_vol.data[2] = z_init + z_pos;
             find_end_effector_target_vol.push_back(end_effector_target_vol);
             save_place.push_back(i);
             // Calculate position angle
