@@ -106,6 +106,7 @@ class CuraSceneNode(SceneNode):
                 return True
         return False
 
+    ##  Return if any area collides with the convex hull of x-z plane and y-z plane
     def collidesWithAreasForMoveo(self, areas: List[Polygon]) -> bool:
         convex_hull = self.callDecoration("getConvexHullForMoveo")
         self._check = True
@@ -114,10 +115,10 @@ class CuraSceneNode(SceneNode):
         if convex_hull:
             for area in areas:
                 self._queue.put(area)
-            for j in range(4):
-                for k in range(2):
-                    threads.append(threading.Thread(target=self.parallelCheck, args=(convex_hull,k)))
-                    threads[j*2+k].start()
+            for j in range(2):
+                # Use parallel to speedup
+                threads.append(threading.Thread(target=self.parallelCheck, args=(convex_hull,)))
+                threads[j].start()
             for thread in threads:
                 thread.join()
         if self._check:
@@ -125,12 +126,13 @@ class CuraSceneNode(SceneNode):
         else:
             return True
 
-    def parallelCheck(self,convex_hull,num):
+    def parallelCheck(self,convex_hull = None):
         while self._queue.qsize() > 0:
             area = self._queue.get()
             if self._check:
-                overlap = convex_hull[num].intersectsPolygon(area)
-                if overlap is None:
+                overlap_1 = convex_hull[0].intersectsPolygon(area)
+                overlap_2 = convex_hull[1].intersectsPolygon(area)
+                if overlap_1 is None and overlap_2 is None:
                     continue
                 self._lock.acquire()
                 self._check = False

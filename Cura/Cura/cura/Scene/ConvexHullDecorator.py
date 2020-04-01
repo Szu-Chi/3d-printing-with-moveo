@@ -123,8 +123,9 @@ class ConvexHullDecorator(SceneNodeDecorator):
         world_transform = self._node.getWorldTransformation()
         rotate_mesh = self._node.getMeshData()
         rotate_mesh_convexhull = rotate_mesh.getConvexHullTransformedVertices(world_transform)
+        # If change position or rotation, we have to find new convexhull
         if numpy.array_equal(self._rotate_mesh_convexhull,rotate_mesh_convexhull) or self._seve_world_position_x != self._node.getWorldPosition().x or self._seve_world_position_y != self._node.getWorldPosition().y or self._seve_world_position_z != self._node.getWorldPosition().z:
-            ## Save data
+            # Save data
             self._seve_world_position_x = self._node.getWorldPosition().x
             self._seve_world_position_y = self._node.getWorldPosition().y
             self._seve_world_position_z = self._node.getWorldPosition().z
@@ -132,21 +133,23 @@ class ConvexHullDecorator(SceneNodeDecorator):
 
             num = -1
             hypotenuse = 0
+            # Find the largest hypotenuse of all convexhull (drop z)
             for i in range(1,numpy.size(self._rotate_mesh_convexhull,0)):
                 if hypotenuse < ((self._rotate_mesh_convexhull[i][0]**2 + self._rotate_mesh_convexhull[i][2]**2)**0.5):
                     hypotenuse = (self._rotate_mesh_convexhull[i][0]**2 + self._rotate_mesh_convexhull[i][2]**2)**0.5
                     num = i
+            # Find angle of the largest hypotenuse
             angle = math.asin(self._rotate_mesh_convexhull[num][0]/hypotenuse)
             if self._node.getWorldPosition().x == 0.0 and self._node.getWorldPosition().z > 0:
                 angle = math.pi
             else:    
                 angle = angle if self._node.getWorldPosition().z < 0 else angle*(math.pi/abs(angle)-1)
-    
+            # Set rotate matrix
             rotate_and_shift_to_Y_matrix = numpy.array([[ math.cos(angle), 0, math.sin(angle), 0],
                                                         [               0, 1,               0, 0],
                                                         [-math.sin(angle), 0, math.cos(angle), 0],
                                                         [               0, 0,               0, 1]])
-
+            # Rotate all convexhull
             one_column = numpy.ones([1,numpy.size(self._rotate_mesh_convexhull,0)])
             shift_to_o = numpy.column_stack((self._rotate_mesh_convexhull,one_column.T))
             save = numpy.dot(rotate_and_shift_to_Y_matrix,shift_to_o[0])
@@ -155,6 +158,7 @@ class ConvexHullDecorator(SceneNodeDecorator):
                 save = numpy.row_stack((save,shift_to_Y))
             self._rotate_mesh_convexhull = numpy.delete(save,-1,axis=1)
 
+        # Use threads to speedup code
         q = Queue()
         threads = []
 

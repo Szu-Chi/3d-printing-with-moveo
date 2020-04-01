@@ -423,7 +423,7 @@ int main(int argc, char **argv){
         // Write gcode
         for(int m = 0;m < read_line_count ;m++){
           line = save.at(m);
-          if(save_place.size() > 0){
+          if(save_place.size() - pop_out > 0){
             if(save_place.at(pop_out) == m){
               output_file << line[0] << line[1];
               std::vector<double> joint_values(chain.getNrOfJoints());
@@ -444,7 +444,7 @@ int main(int argc, char **argv){
                   previous_angle = find_angle.at(pop_out-1);
                 }
                 // If joint4 turns back, we need to add a point
-                if(first_point == false && (previous_save_p_or_n != save_p_or_n.at(pop_out)) && 0){
+                if(first_point == false && (previous_save_p_or_n != save_p_or_n.at(pop_out))){
                   int rc = -1;
                   KDL::JntArray result;
                   KDL::Rotation end_effector_target_rot;
@@ -491,7 +491,7 @@ int main(int argc, char **argv){
                   write_file_origin_line(output_file, line);
                   output_file << std::endl;
                 }
-                if(pop_out < save_place.size() - 1){
+                if(pop_out <= save_place.size() - 1){
                   pop_out++;
                   first_point = false;
                 }

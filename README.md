@@ -39,7 +39,7 @@
     echo "source ~/moveo_ws/devel/setup.bash" >> ~/.bashrc
     ```
 
-### 2. 安裝 Cura SIPE version
+### 2. 安裝 Cura SPIE version
 ![image](https://github.com/Szu-Chi/3d-printing-with-moveo/blob/Feature_Position_Control/img/curaLoadingImg.png)
 - 使用autoInstall.bash
     ```
