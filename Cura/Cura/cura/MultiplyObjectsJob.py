@@ -1,5 +1,6 @@
 # Copyright (c) 2018 Ultimaker B.V.
 # Cura is released under the terms of the LGPLv3 or higher.
+## Find_moveo ##
 
 import copy
 from typing import List
@@ -33,6 +34,7 @@ class MultiplyObjectsJob(Job):
         self._save_z = 0
 
     def run(self) -> None:
+        # If type is moveo, move to origin
         if self._type:
             for node in self._objects:
                 if self._moveo_move == None:
@@ -112,6 +114,7 @@ class MultiplyObjectsJob(Job):
                 Job.yieldThread()
 
             Job.yieldThread()
+        # If type is moveo, move back to place
         if self._type:
             for node in self._objects:
                 op = GroupedOperation()

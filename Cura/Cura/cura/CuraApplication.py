@@ -1,5 +1,6 @@
 # Copyright (c) 2019 Ultimaker B.V.
 # Cura is released under the terms of the LGPLv3 or higher.
+## Find_moveo ##
 
 import os
 import sys
@@ -1796,6 +1797,7 @@ class CuraApplication(QtApplication):
             if select_models_on_load:
                 Selection.add(node)
 
+            # If type is moveo, put object to designated point
             if self.getGlobalContainerStack().getProperty("machine_shape", "value") == "moveo":
                 self.replaceMoveoObject(node)
 

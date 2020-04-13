@@ -647,6 +647,7 @@ class MeshBuilder:
         self.addIndices(numpy.asarray(indices, dtype = numpy.int32))
         self.addColors(numpy.asarray(colors, dtype = numpy.float32))
 
+    # Add a workspace of moveo
     def addMoveoWorkSpace(self, inner_radius, outer_radius, width, center, sections = 32):
         indices = []
 

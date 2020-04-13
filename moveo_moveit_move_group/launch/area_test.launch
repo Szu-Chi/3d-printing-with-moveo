@@ -14,9 +14,9 @@
   <arg name="eps" default="1e-5"/>
   <arg name="model" default="$(find moveo_urdf)/urdf/moveo_urdf1.urdf"/>
   <arg name="model2" default="$(find moveo_urdf)/urdf/moveo_urdf2.urdf"/>
-  <arg name="outermost_point" default="$(find moveo_moveit_move_group)/area/area_outermost1.csv"/>
-  <arg name="closest_point" default="$(find moveo_moveit_move_group)/area/area_closest1.csv"/>
-  <arg name="all_points" default="$(find moveo_moveit_move_group)/area/area_all_points1.csv"/>
+  <arg name="outermost_point" default="$(find moveo_moveit_move_group)/area/outermost_area.csv"/>
+  <arg name="closest_point" default="$(find moveo_moveit_move_group)/area/closest_area.csv"/>
+  <arg name="all_points" default="$(find moveo_moveit_move_group)/area/all_points_area.csv"/>
   <arg name="joint_division" default="$(find gcode_translation)/include/Joint_division/Joint_division.csv"/>
   <!-- arg name="num_threads" default="16"/ -->
 

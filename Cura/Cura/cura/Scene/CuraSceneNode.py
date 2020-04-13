@@ -1,5 +1,6 @@
 # Copyright (c) 2019 Ultimaker B.V.
 # Cura is released under the terms of the LGPLv3 or higher.
+## Find_moveo ##
 
 from copy import deepcopy
 from typing import cast, Dict, List, Optional
@@ -134,6 +135,7 @@ class CuraSceneNode(SceneNode):
                 overlap_2 = convex_hull[1].intersectsPolygon(area)
                 if overlap_1 is None and overlap_2 is None:
                     continue
+                # If we find an area out of range, then quickly break out this function
                 self._lock.acquire()
                 self._check = False
                 self._lock.release()

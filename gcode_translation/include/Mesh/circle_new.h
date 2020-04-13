@@ -744,14 +744,15 @@ void Load_Mesh(double z_offset_temp)
 
     printf("\ncircle_Mesh.txt\n      ");
     for (int i = 0; i <= region_max; i += Mystep)
-        printf("%-3d  ", (i == region_max) ? (i - (region_max - Circle_outside_r * 2)) : i);
+        printf(" %-3d  ", (i == region_max) ? (i - (region_max - Circle_outside_r * 2)) : i);
     printf("\n");
     for (int j = 0; j < 10; j += 1)
     {
         printf("%-3d | ", (j != 9) ? j * 100 : j * 100 - 20);
         for (int i = 0; i < 10; i += 1)
         {
-            printf("%-3.2lf ", (double)XYZ_Position[j * 10 + i][2]);
+            if(XYZ_Position[j * 10 + i][2] < 0) printf("%-3.2lf ", (double)XYZ_Position[j * 10 + i][2]);
+            else printf(" %-3.2lf ", (double)XYZ_Position[j * 10 + i][2]);
         }
         printf("\n");
     }
@@ -773,7 +774,7 @@ void Load_Mesh(double z_offset_temp)
     printf("\nRectangle probe points\n");
 
 #if defined(Print_Rectangle)
-    printf("   -------------------------------------------------\n");
+    printf("   -------------------------------------------------------\n");
     for (int j = 9; j >= 0; j--)
     {
         for (int i = 0; i < 10; i++)
@@ -781,18 +782,19 @@ void Load_Mesh(double z_offset_temp)
             if (In_Rectangle(XYZ_Position[j * 10 + i][0], XYZ_Position[j * 10 + i][1]))
             {
                 if (i == 2) printf("   | %.0lf | ", XYZ_Position[j * 10 + i][1]);
-                printf("%.2lf | ", XYZ_Position[j * 10 + i][2]);
+                if(XYZ_Position[j * 10 + i][2]<0) printf("%.2lf | ", XYZ_Position[j * 10 + i][2]);
+                else printf(" %.2lf | ", XYZ_Position[j * 10 + i][2]);
                 if (i == 7) printf("\n");
             }
         }
     }
-    printf("   |-----|------------------------------------------\n");
+    printf("   |-----|------------------------------------------------\n");
     printf("   |     | ");
     for (int i = 0; i < 6; i++)
     {
-        printf("%.0lf  | ", XYZ_Position[62 + i][0]);
+        printf(" %.0lf  | ", XYZ_Position[62 + i][0]);
     }
-    printf("\n   -------------------------------------------------\n");
+    printf("\n   -------------------------------------------------------\n");
     printf("\n");
 #endif
 }
@@ -1125,7 +1127,7 @@ void Calc_abcd(void)
     }
     //*/
 
-    printf("counter:%d\n", counter);
+    //printf("counter:%d\n", counter);
 }
 
 //*/
@@ -1299,7 +1301,7 @@ double calc_z_rectangle(double calc_x, double calc_y, bool choice)
             return z_pos_temp;
     }
     else
-        return 9.99;
+        return (std::numeric_limits<double>::max)();
 }
 #endif
 

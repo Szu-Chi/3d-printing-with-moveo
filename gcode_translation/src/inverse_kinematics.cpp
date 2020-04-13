@@ -1,33 +1,25 @@
-#include <moveit/move_group_interface/move_group_interface.h>
 #include <moveit/planning_scene_interface/planning_scene_interface.h>
-
-#include <moveit/robot_model_loader/robot_model_loader.h>
 #include <moveit/planning_scene/planning_scene.h>
+#include <moveit/move_group_interface/move_group_interface.h>
 #include <moveit/kinematic_constraints/utils.h>
-
+#include <moveit/robot_model_loader/robot_model_loader.h>
 #include <moveit_msgs/AttachedCollisionObject.h>
 #include <moveit_msgs/CollisionObject.h>
-
 #include <trac_ik/trac_ik.hpp>
 #include <ros/ros.h>
-
+#include <tf/tf.h>
 #include <sstream>
 #include <fstream>
-
 #include <time.h>
 #include <math.h>
-
 #include <omp.h>
-
 #include <stdio.h>
 #include <unistd.h>
-
 #include "std_msgs/Float64MultiArray.h"
 #include "../include/Mesh/circle_new.h"
 
-#include <tf/tf.h>
-
 std::vector<double> joint_division(5);
+// Let gocde look more clearly 
 int decimal_point(double &A){
   std::string change = std::to_string(A);
   bool point = false;
@@ -46,12 +38,14 @@ int decimal_point(double &A){
   }
 }
 
+// Use tf to translate 
 tf::Quaternion euler_to_quaternion(double yaw,double pitch,double roll){
   tf::Quaternion q;
   q.setRPY(yaw,pitch,roll);
   return q;
 }
 
+// Chrck the basic setting
 bool check_trac_ik_valid(TRAC_IK::TRAC_IK &tracik_solver,KDL::Chain &chain, KDL::JntArray &ll, KDL::JntArray &ul){
   bool valid = tracik_solver.getKDLChain(chain);
   //ROS_INFO_NAMED("moveo", "TRAC-IK setup");
@@ -67,6 +61,7 @@ bool check_trac_ik_valid(TRAC_IK::TRAC_IK &tracik_solver,KDL::Chain &chain, KDL:
   return true;
 }
 
+// Get the division from csv file that you given
 void read_joint_division(std::string &input_file_name, KDL::Chain &chain){
   std::string line;
   std::ifstream input_file(input_file_name);
@@ -81,12 +76,13 @@ void read_joint_division(std::string &input_file_name, KDL::Chain &chain){
     double result = 1.0;
 	  while (getline(templine, data, ',')) result = result * stod(data);
     joint_division.at(count) = result;
-    ROS_INFO_STREAM(result); //check joint value
+    //ROS_INFO_STREAM(result); //check joint value
     count++;
   }
   input_file.close();
 }
 
+// Translate the data from angle to steps
 void motor_steps_convert(Eigen::VectorXd &data, bool &judge, KDL::Chain &chain){
   if(!judge){
     for(int i = 0; i < chain.getNrOfJoints(); i++){
@@ -100,6 +96,7 @@ void motor_steps_convert(Eigen::VectorXd &data, bool &judge, KDL::Chain &chain){
   }
 }
 
+// Write output joint values(step) in the gcode
 void write_file_joint_value(std::ofstream &output_file, KDL::JntArray &result, KDL::Chain &chain){
   bool judge = false;
   motor_steps_convert(result.data, judge, chain);
@@ -109,12 +106,15 @@ void write_file_joint_value(std::ofstream &output_file, KDL::JntArray &result, K
   }
 }
 
+// If the line is not G1 or G0, that we just write it's original data
 void write_file_origin_line(std::ofstream &output_file, std::string &line){
   for(int j = 2;j < line.length(); j++){
     output_file << line[j];
   }
 }
 
+// If joint4 has change 180 degree, we have to creat th new line that the point is the same.
+// That means, we have to rotate the joint4 but, it must stay at the same position
 void write_file_new_point(std::ofstream &output_file, KDL::Vector &output_end_effector_target_vol, double &X_offset, double &Y_offset){
   double decimal_x = (output_end_effector_target_vol.data[0]-X_offset)*1e3;
   double decimal_y = (output_end_effector_target_vol.data[1]-Y_offset)*1e3;
@@ -122,6 +122,7 @@ void write_file_new_point(std::ofstream &output_file, KDL::Vector &output_end_ef
   output_file << std::fixed << std::setprecision(decimal_point(decimal_y)) << " Y" << decimal_y << std::defaultfloat;
 }
 
+// Write the position that we give the joint values
 void customize_joint(std::ofstream &output_file, KDL::Frame &end_effector_pose){
   double decimal_x = end_effector_pose.p.x()*1000;
   double decimal_y = end_effector_pose.p.y()*1000;
@@ -131,6 +132,27 @@ void customize_joint(std::ofstream &output_file, KDL::Frame &end_effector_pose){
   output_file << std::fixed << std::setprecision(decimal_point(decimal_z)) << " Z" << decimal_z << std::defaultfloat << " ";
 }
 
+// Write customize_joint to gcode
+void write_customize_joint(std::ofstream &output_file, std::string &line, KDL::Chain &chain){
+  KDL::ChainFkSolverPos_recursive fk_solver(chain);
+  KDL::JntArray Joint(chain.getNrOfJoints());
+  KDL::Frame end_effector_pose;
+  output_file << line[0] << line[1];
+  if(line.find('F') != std::string::npos && stoi(line.substr(line.find('F')+1)) != 0) output_file << " F" << stoi(line.substr(line.find('F')+1));
+  static const char joint_code[6] = {'J', 'A', 'B', 'C', 'D'};
+  for(int i = 0;i < chain.getNrOfJoints();i++){
+    Joint(i) = stod(line.substr(line.find(joint_code[i])+1));
+    output_file << " " << joint_code[i] << int(Joint(i));
+  }
+  bool judge = true;
+  motor_steps_convert(Joint.data, judge, chain);
+  fk_solver.JntToCart(Joint, end_effector_pose);
+  customize_joint(output_file, end_effector_pose);
+  if(line.find(';') != std::string::npos) for(int i = line.find(';');i < line.length();i++) output_file << line[i];
+  output_file << std::endl;
+}
+
+// If the translation has some error, that we will write it position, joint value and quaternion
 void show_error_point_and_joint(KDL::Vector &end_effector_target_vol, KDL::Chain &chain, KDL::JntArray &result, tf::Quaternion &q, int &p_n){
   ROS_ERROR_STREAM("===============Position===============");
   ROS_ERROR_STREAM("X : " << end_effector_target_vol.data[0]);
@@ -149,6 +171,7 @@ void show_error_point_and_joint(KDL::Vector &end_effector_target_vol, KDL::Chain
   ROS_ERROR_STREAM(p_n);
 }
 
+// Send data to the progressbar
 void publisher_to_progressbar(ros::Publisher &translation_pub, int &save_all_line, int &save_all_read_line_count, double &need_times){
   std_msgs::Float64MultiArray push_data;
   push_data.data.resize(3);
@@ -158,6 +181,7 @@ void publisher_to_progressbar(ros::Publisher &translation_pub, int &save_all_lin
   translation_pub.publish(push_data);              // push to progressbar.cpp 
 }
 
+// If split finish, that we can start this code
 bool start_judge = false;
 void start(const std_msgs::Float64MultiArray& receive){
   start_judge = true;
@@ -176,6 +200,7 @@ int main(int argc, char **argv){
   ros::Publisher respond_split_pub = node_handle.advertise<std_msgs::Float64MultiArray>("respond", 1000);
   ros::Subscriber split_sub = node_handle.subscribe("/gcode_translation/start", 100000, start); // get start from gcode_point_split
 
+  // Wait split finish
   while(!start_judge){
     if(ros::ok()) ros::spinOnce();
     else return -1;
@@ -246,8 +271,6 @@ int main(int argc, char **argv){
   for (uint j = 0; j < nominal.data.size(); j++){
     nominal(j) = (ll(j) + ul(j)) / 2.0;
   }
-
-  KDL::ChainFkSolverPos_recursive fk_solver(chain);
 
   //----------------------------
   // Setting robot collision
@@ -323,6 +346,7 @@ int main(int argc, char **argv){
   while(input_file){
     if(ros::ok()){
       std::getline(input_file, line);
+      // Creat one position that is 15mm taller than first position
       if(!line.compare(0,4,"M400") && check_first_point){
         check_first_point = false;
         std::ostringstream store;
@@ -351,7 +375,10 @@ int main(int argc, char **argv){
             if(line.find('Z') != std::string::npos) z_init = (stod(line.substr(line.find('Z')+1))*1e-3)+Z_offset;
             
             double z_pos = calc_z_rectangle(end_effector_target_vol.data[0], end_effector_target_vol.data[1], true); // Unit: m -> mm
-            if (z_pos == 9.99) return -1;
+            if (z_pos == (std::numeric_limits<double>::max)()){
+              ROS_INFO_STREAM("Out of rectangle area");
+              return -1;
+            }
             // 9.18 nozzle high
             end_effector_target_vol.data[2] = z_init + z_pos;
             find_end_effector_target_vol.push_back(end_effector_target_vol);
@@ -371,6 +398,7 @@ int main(int argc, char **argv){
         }
         std::vector<KDL::JntArray> save_result(1000);
         std::vector<int> save_use_onecore(1000);
+        // Use paralleled TRAC-IK to calculate
         omp_set_num_threads(num_threads);
         #pragma omp parallel for
         for(int j = 0;j < save_place.size();j++){
@@ -384,7 +412,7 @@ int main(int argc, char **argv){
           if(save_p_or_n.at(j) == 0) rc = tracik_solver_turn[thread_num]->CartToJnt(nominal, end_effector_pose, result, target_bounds); // Need turn
           else rc = tracik_solver[thread_num]->CartToJnt(nominal, end_effector_pose, result, target_bounds);
 
-          if(rc < 0) save_use_onecore.at(j) = 1; // Parallel can't calculate
+          if(rc < 0) save_use_onecore.at(j) = 1; // Parallel TRAC-IK can't calculate
           else{
             save_use_onecore.at(j) = 0;
             save_result.at(j) = result;
@@ -423,7 +451,9 @@ int main(int argc, char **argv){
         // Write gcode
         for(int m = 0;m < read_line_count ;m++){
           line = save.at(m);
-          if(save_place.size() - pop_out > 0){
+          // Translate the joint values to cartesian coordinates
+          if((!line.compare(0,2,"G0") || !line.compare(0,2,"G1")) && (line.find('J') != std::string::npos)) write_customize_joint(output_file, line, chain);
+          else if(save_place.size() - pop_out > 0){
             if(save_place.at(pop_out) == m){
               output_file << line[0] << line[1];
               std::vector<double> joint_values(chain.getNrOfJoints());
@@ -504,25 +534,6 @@ int main(int argc, char **argv){
                 tf::Quaternion q = euler_to_quaternion(0.0,0.0,find_angle.at(pop_out));
                 show_error_point_and_joint(find_end_effector_target_vol.at(pop_out), chain, save_result.at(pop_out), q, save_p_or_n.at(pop_out));
                 return -1;
-              }
-            }
-            else if((!line.compare(0,2,"G0") || !line.compare(0,2,"G1")) && (line.find('J') != std::string::npos)){
-              KDL::JntArray Joint(chain.getNrOfJoints());
-              KDL::Frame end_effector_pose;
-              output_file << line[0] << line[1];
-              if(line.find('F') != std::string::npos && stoi(line.substr(line.find('F')+1)) != 0) output_file << " F" << stoi(line.substr(line.find('F')+1));
-              static const char joint_code[6] = {'J', 'A', 'B', 'C', 'D'};
-              for(int i = 0;i < chain.getNrOfJoints();i++){
-                Joint(i) = stod(line.substr(line.find(joint_code[i])+1));
-                output_file << " " << joint_code[i] << Joint(i);
-              }
-              bool judge = true;
-              motor_steps_convert(Joint.data, judge, chain);
-              fk_solver.JntToCart(Joint, end_effector_pose);
-              customize_joint(output_file, end_effector_pose);
-              if(line.find(';') != std::string::npos){
-                for(int i = line.find(';');i < line.length();i++) output_file << line[i];
-                output_file << std::endl;
               }
             }
             else output_file << line << std::endl;
