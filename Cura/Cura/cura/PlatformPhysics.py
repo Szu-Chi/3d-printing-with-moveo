@@ -27,6 +27,7 @@ class PlatformPhysics:
         self._controller.toolOperationStopped.connect(self._onToolOperationStopped)
         self._build_volume = volume
         self._enabled = True
+        self._move_enabled = True
 
         self._change_timer = QTimer()
         self._change_timer.setInterval(100)
@@ -48,7 +49,9 @@ class PlatformPhysics:
     def _onChangeTimerFinished(self):
         if not self._enabled:
             return
-
+        if not self._move_enabled:
+            self._move_enabled = True
+            return
         root = self._controller.getScene().getRoot()
         build_volume = Application.getInstance().getBuildVolume()
         build_volume.updateNodeBoundaryCheck()
@@ -185,4 +188,6 @@ class PlatformPhysics:
                         node.removeDecorator(ZOffsetDecorator.ZOffsetDecorator)
 
         self._enabled = True
+        self._move_enabled = True
         self._onChangeTimerFinished()
+        self._move_enabled = False

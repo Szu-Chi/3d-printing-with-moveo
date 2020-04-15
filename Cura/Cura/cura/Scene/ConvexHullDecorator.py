@@ -1,5 +1,6 @@
 # Copyright (c) 2016 Ultimaker B.V.
 # Cura is released under the terms of the LGPLv3 or higher.
+## Find_moveo ##
 
 from PyQt5.QtCore import QTimer
 
@@ -22,6 +23,14 @@ if TYPE_CHECKING:
     from UM.Mesh.MeshData import MeshData
     from UM.Math.Matrix import Matrix
 
+from UM.Math.Quaternion import Quaternion
+from UM.Operations.SetTransformOperation import SetTransformOperation
+from UM.Operations.GroupedOperation import GroupedOperation
+from UM.Math.Vector import Vector
+import math
+
+import threading
+from queue import Queue
 
 ##  The convex hull decorator is a scene node decorator that adds the convex hull functionality to a scene node.
 #   If a scene node has a convex hull decorator, it will have a shadow in which other objects can not be printed.
@@ -29,6 +38,11 @@ class ConvexHullDecorator(SceneNodeDecorator):
     def __init__(self) -> None:
         super().__init__()
 
+        self._seve_world_position_x = None
+        self._seve_world_position_y = None
+        self._seve_world_position_z = None
+        self._rotate_mesh_convexhull = None
+        self._rotate_world_transform = None
         self._convex_hull_node = None  # type: Optional["SceneNode"]
         self._init2DConvexHullCache()
 
@@ -102,31 +116,70 @@ class ConvexHullDecorator(SceneNodeDecorator):
                 hull = self._add2DAdhesionMargin(hull)
         return hull
 
-    def getConvexHullForMoveo_XZ(self) -> Optional[Polygon]:
+    def getConvexHullForMoveo(self) -> Optional[Polygon]:
         if self._node is None:
             return None
         if self._node.callDecoration("isNonPrintingMesh"):
             return None
-        hull = self._compute2DConvexHull(moveo_check_xz_or_yz = 2)
-        if self._global_stack and self._node is not None and hull is not None:
-            # Parent can be None if node is just loaded.
-            if self._global_stack.getProperty("print_sequence", "value") == "one_at_a_time" and not self.hasGroupAsParent(self._node):
-                hull = hull.getMinkowskiHull(Polygon(numpy.array(self._global_stack.getProperty("machine_head_polygon", "value"), numpy.float32)))
-                hull = self._add2DAdhesionMargin(hull)
-        return hull
+        world_transform = self._node.getWorldTransformation()
+        rotate_mesh = self._node.getMeshData()
+        rotate_mesh_convexhull = rotate_mesh.getConvexHullTransformedVertices(world_transform)
+        # If change position or rotation, we have to find new convexhull
+        if numpy.array_equal(self._rotate_mesh_convexhull,rotate_mesh_convexhull) or self._seve_world_position_x != self._node.getWorldPosition().x or self._seve_world_position_y != self._node.getWorldPosition().y or self._seve_world_position_z != self._node.getWorldPosition().z:
+            # Save data
+            self._seve_world_position_x = self._node.getWorldPosition().x
+            self._seve_world_position_y = self._node.getWorldPosition().y
+            self._seve_world_position_z = self._node.getWorldPosition().z
+            self._rotate_mesh_convexhull = rotate_mesh.getConvexHullTransformedVertices(world_transform)
 
-    def getConvexHullForMoveo_YZ(self) -> Optional[Polygon]:
-        if self._node is None:
-            return None
-        if self._node.callDecoration("isNonPrintingMesh"):
-            return None
-        hull = self._compute2DConvexHull(moveo_check_xz_or_yz = 1)
-        if self._global_stack and self._node is not None and hull is not None:
+            num = -1
+            hypotenuse = 0
+            # Find the largest hypotenuse of all convexhull (drop z)
+            for i in range(1,numpy.size(self._rotate_mesh_convexhull,0)):
+                if hypotenuse < ((self._rotate_mesh_convexhull[i][0]**2 + self._rotate_mesh_convexhull[i][2]**2)**0.5):
+                    hypotenuse = (self._rotate_mesh_convexhull[i][0]**2 + self._rotate_mesh_convexhull[i][2]**2)**0.5
+                    num = i
+            # Find angle of the largest hypotenuse
+            angle = math.asin(self._rotate_mesh_convexhull[num][0]/hypotenuse)
+            if self._node.getWorldPosition().x == 0.0 and self._node.getWorldPosition().z > 0:
+                angle = math.pi
+            else:    
+                angle = angle if self._node.getWorldPosition().z < 0 else angle*(math.pi/abs(angle)-1)
+            # Set rotate matrix
+            rotate_and_shift_to_Y_matrix = numpy.array([[ math.cos(angle), 0, math.sin(angle), 0],
+                                                        [               0, 1,               0, 0],
+                                                        [-math.sin(angle), 0, math.cos(angle), 0],
+                                                        [               0, 0,               0, 1]])
+            # Rotate all convexhull
+            one_column = numpy.ones([1,numpy.size(self._rotate_mesh_convexhull,0)])
+            shift_to_o = numpy.column_stack((self._rotate_mesh_convexhull,one_column.T))
+            save = numpy.dot(rotate_and_shift_to_Y_matrix,shift_to_o[0])
+            for j in range(1,numpy.size(self._rotate_mesh_convexhull,0)):
+                shift_to_Y = numpy.dot(rotate_and_shift_to_Y_matrix,shift_to_o[j])
+                save = numpy.row_stack((save,shift_to_Y))
+            self._rotate_mesh_convexhull = numpy.delete(save,-1,axis=1)
+
+        # Use threads to speedup code
+        q = Queue()
+        threads = []
+
+        for i in range(2):
+            threads.append(threading.Thread(target=self._compute2DConvexHullForMoveo, args=(i+1, q)))
+            threads[i].start()
+
+        for thread in threads:
+            thread.join()
+
+        results = []
+        for _ in range(2):
+            hull = q.get()
+            if self._global_stack and self._node is not None and hull is not None:
             # Parent can be None if node is just loaded.
-            if self._global_stack.getProperty("print_sequence", "value") == "one_at_a_time" and not self.hasGroupAsParent(self._node):
-                hull = hull.getMinkowskiHull(Polygon(numpy.array(self._global_stack.getProperty("machine_head_polygon", "value"), numpy.float32)))
-                hull = self._add2DAdhesionMargin(hull)
-        return hull
+                if self._global_stack.getProperty("print_sequence", "value") == "one_at_a_time" and not self.hasGroupAsParent(self._node):
+                    hull = hull.getMinkowskiHull(Polygon(numpy.array(self._global_stack.getProperty("machine_head_polygon", "value"), numpy.float32)))
+                    hull = self._add2DAdhesionMargin(hull)
+            results.append(hull)
+        return results
 
     ##  Get the convex hull of the node with the full head size
     def getConvexHullHeadFull(self) -> Optional[Polygon]:
@@ -223,7 +276,20 @@ class ConvexHullDecorator(SceneNodeDecorator):
         self._2d_convex_hull_mesh_world_transform = None  # type: Optional[Matrix]
         self._2d_convex_hull_mesh_result = None  # type: Optional[Polygon]
 
-    def _compute2DConvexHull(self, moveo_check_xz_or_yz = None) -> Optional[Polygon]:
+    def eulerToQuaternion(self, roll, pitch, yaw):
+        quaternion_x = math.sin(roll/2) * math.cos(pitch/2) * math.cos(yaw/2) - math.cos(roll/2) * math.sin(pitch/2) * math.sin(yaw/2)
+        quaternion_y = math.cos(roll/2) * math.sin(pitch/2) * math.cos(yaw/2) + math.sin(roll/2) * math.cos(pitch/2) * math.sin(yaw/2)
+        quaternion_z = math.cos(roll/2) * math.cos(pitch/2) * math.sin(yaw/2) - math.sin(roll/2) * math.sin(pitch/2) * math.cos(yaw/2)
+        quaternion_w = math.cos(roll/2) * math.cos(pitch/2) * math.cos(yaw/2) + math.sin(roll/2) * math.sin(pitch/2) * math.sin(yaw/2)
+        return [quaternion_x,quaternion_y,quaternion_z,quaternion_w]
+
+    def quaternionToEuler(self, quaternion_x, quaternion_y, quaternion_z, quaternion_w):
+        roll = math.atan2(2.0*(quaternion_w*quaternion_x+quaternion_y*quaternion_z),1.0-2.0*(quaternion_x*quaternion_x+quaternion_y*quaternion_y))
+        pitch = math.asin(2.0*(quaternion_w*quaternion_y-quaternion_z*quaternion_x))
+        yaw = math.atan2(2.0*(quaternion_w*quaternion_z+quaternion_x*quaternion_y),1.0-2.0*(quaternion_z*quaternion_z+quaternion_y*quaternion_y))
+        return [roll,pitch,yaw]
+
+    def _compute2DConvexHull(self) -> Optional[Polygon]:
         if self._node is None:
             return None
         if self._node.callDecoration("isGroup"):
@@ -262,9 +328,8 @@ class ConvexHullDecorator(SceneNodeDecorator):
             world_transform = self._node.getWorldTransformation()
 
             # Check the cache
-            if moveo_check_xz_or_yz != 1 and moveo_check_xz_or_yz != 2:
-                if mesh is self._2d_convex_hull_mesh and world_transform == self._2d_convex_hull_mesh_world_transform:
-                    return self._2d_convex_hull_mesh_result
+            if mesh is self._2d_convex_hull_mesh and world_transform == self._2d_convex_hull_mesh_world_transform:
+                return self._2d_convex_hull_mesh_result
 
             vertex_data = mesh.getConvexHullTransformedVertices(world_transform)
             # Don't use data below 0.
@@ -277,12 +342,9 @@ class ConvexHullDecorator(SceneNodeDecorator):
                 # This is done to greatly speed up further convex hull calculations as the convex hull
                 # becomes much less complex when dealing with highly detailed models.
                 vertex_data = numpy.round(vertex_data, 1)
-                if moveo_check_xz_or_yz == 1:
-                    vertex_data = vertex_data[:, [0, 1]]  # Drop the Z components to project to 2D.(Y)
-                elif moveo_check_xz_or_yz == 2:
-                    vertex_data = vertex_data[:, [2, 1]]  # Drop the X components to project to 2D.(X)
-                else:
-                    vertex_data = vertex_data[:, [0, 2]]  # Drop the Y components to project to 2D.(Z)
+
+                vertex_data = vertex_data[:, [0, 2]]  # Drop the Y components to project to 2D.
+
                 # Grab the set of unique points.
                 #
                 # This basically finds the unique rows in the array by treating them as opaque groups of bytes
@@ -300,12 +362,79 @@ class ConvexHullDecorator(SceneNodeDecorator):
                     offset_hull = self._offsetHull(convex_hull)
 
             # Store the result in the cache
-            if moveo_check_xz_or_yz != 1 and moveo_check_xz_or_yz != 2:
-                self._2d_convex_hull_mesh = mesh
-                self._2d_convex_hull_mesh_world_transform = world_transform
-                self._2d_convex_hull_mesh_result = offset_hull
+            self._2d_convex_hull_mesh = mesh
+            self._2d_convex_hull_mesh_world_transform = world_transform
+            self._2d_convex_hull_mesh_result = offset_hull
 
             return offset_hull
+
+    def _compute2DConvexHullForMoveo(self, moveo_check_xz_or_yz = None, q = None) -> Optional[Polygon]:
+        if self._node is None:
+            q.put(None)
+        if self._node.callDecoration("isGroup"):
+            points = numpy.zeros((0, 2), dtype=numpy.int32)
+            for child in self._node.getChildren():
+                child_hull = child.callDecoration("_compute2DConvexHull")
+                if child_hull:
+                    try:
+                        points = numpy.append(points, child_hull.getPoints(), axis = 0)
+                    except ValueError:
+                        pass
+
+                if points.size < 3:
+                    q.put(None)
+            child_polygon = Polygon(points)
+
+            # Check the cache
+            if child_polygon == self._2d_convex_hull_group_child_polygon:
+                q.put(self._2d_convex_hull_group_result)
+
+            convex_hull = child_polygon.getConvexHull() #First calculate the normal convex hull around the points.
+            offset_hull = self._offsetHull(convex_hull) #Then apply the offset from the settings.
+
+            # Store the result in the cache
+            self._2d_convex_hull_group_child_polygon = child_polygon
+            self._2d_convex_hull_group_result = offset_hull
+            q.put(offset_hull)
+        else:
+            offset_hull = Polygon([])
+
+            mesh = self._node.getMeshData()
+            if mesh is None:
+                q.put(Polygon([]))
+
+            vertex_data = self._rotate_mesh_convexhull
+            # Don't use data below 0.
+            # TODO; We need a better check for this as this gives poor results for meshes with long edges.
+            # Do not throw away vertices: the convex hull may be too small and objects can collide.
+            # vertex_data = vertex_data[vertex_data[:,1] >= -0.01]
+
+            if len(vertex_data) >= 4:  # type: ignore # mypy and numpy don't play along well just yet.
+                # Round the vertex data to 1/10th of a mm, then remove all duplicate vertices
+                # This is done to greatly speed up further convex hull calculations as the convex hull
+                # becomes much less complex when dealing with highly detailed models.
+                vertex_data = numpy.round(vertex_data, 1)
+                if moveo_check_xz_or_yz == 1:
+                    vertex_data = vertex_data[:, [0, 1]]  # Drop the Z components to project to 2D.(Y)
+                elif moveo_check_xz_or_yz == 2:
+                    vertex_data = vertex_data[:, [2, 1]]  # Drop the X components to project to 2D.(X)
+                # Grab the set of unique points.
+                #
+                # This basically finds the unique rows in the array by treating them as opaque groups of bytes
+                # which are as long as the 2 float64s in each row, and giving this view to numpy.unique() to munch.
+                # See http://stackoverflow.com/questions/16970982/find-unique-rows-in-numpy-array
+                vertex_byte_view = numpy.ascontiguousarray(vertex_data).view(
+                    numpy.dtype((numpy.void, vertex_data.dtype.itemsize * vertex_data.shape[1])))
+                _, idx = numpy.unique(vertex_byte_view, return_index = True)
+                vertex_data = vertex_data[idx]  # Select the unique rows by index.
+
+                hull = Polygon(vertex_data)
+
+                if len(vertex_data) >= 3:
+                    convex_hull = hull.getConvexHull()
+                    offset_hull = self._offsetHull(convex_hull)
+
+            q.put(offset_hull)
 
     def _getHeadAndFans(self) -> Polygon:
         if not self._global_stack:

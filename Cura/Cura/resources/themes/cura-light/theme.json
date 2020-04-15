@@ -436,7 +436,9 @@
         "monitor_shadow": [200, 200, 200, 255],
 
         "monitor_carousel_dot": [216, 216, 216, 255],
-        "monitor_carousel_dot_current": [119, 119, 119, 255]
+        "monitor_carousel_dot_current": [119, 119, 119, 255],
+        "moveo_disallowed_area": [0, 0, 0, 0],
+        "moveo_workspace": [231, 130, 240, 100]
     },
 
     "sizes": {

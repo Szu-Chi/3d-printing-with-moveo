@@ -38,7 +38,7 @@ UM.Dialog
             id: logo
             width: (base.minimumWidth * 0.85) | 0
             height: (width * (UM.Theme.getSize("logo").height / UM.Theme.getSize("logo").width)) | 0
-            source: UM.Theme.getImage("logo")
+            source: UM.Theme.getImage("SPIE_Lab_Moveo_logo")
             sourceSize.width: width
             sourceSize.height: height
             fillMode: Image.PreserveAspectFit

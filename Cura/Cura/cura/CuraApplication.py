@@ -1,5 +1,6 @@
 # Copyright (c) 2019 Ultimaker B.V.
 # Cura is released under the terms of the LGPLv3 or higher.
+## Find_moveo ##
 
 import os
 import sys
@@ -281,14 +282,13 @@ class CuraApplication(QtApplication):
     def ultimakerCloudAccountRootUrl(self) -> str:
         return UltimakerCloudAuthentication.CuraCloudAccountAPIRoot
 
+    def getShape(self):
+        return self.getGlobalContainerStack().getProperty("machine_shape", "value")
+
+    def setCheck(self):
+        self.getBuildVolume().setCheck()
     # Adds command line options to the command line parser. This should be called after the application is created and
     # before the pre-start.
-    def getShapeFromBuildVolume(self):
-        root = self.getController().getScene().getRoot()
-        build_volume_moveo = BuildVolume.BuildVolume(self, root)
-        Shape = build_volume_moveo.getShape()
-        return Shape
-
     def addCommandLineOptions(self):
         super().addCommandLineOptions()
         self._cli_parser.add_argument("--help", "-h",
@@ -1255,6 +1255,13 @@ class CuraApplication(QtApplication):
                 op.addOperation(SetTransformOperation(node, Vector(0, center_y, 0)))
             op.push()
 
+    ## Replace Moveo Object.
+    def replaceMoveoObject(self,node):
+        op = GroupedOperation()
+        node.removeDecorator(ZOffsetDecorator.ZOffsetDecorator)
+        op.addOperation(SetTransformOperation(node, Vector(node.getWorldPosition().x, node.getWorldPosition().y, -290.0)))
+        op.push()
+
     ## Reset all transformations on nodes with mesh data.
     @pyqtSlot()
     def resetAll(self):
@@ -1789,6 +1796,10 @@ class CuraApplication(QtApplication):
 
             if select_models_on_load:
                 Selection.add(node)
+
+            # If type is moveo, put object to designated point
+            if self.getGlobalContainerStack().getProperty("machine_shape", "value") == "moveo":
+                self.replaceMoveoObject(node)
 
         self.fileCompleted.emit(file_name)
 

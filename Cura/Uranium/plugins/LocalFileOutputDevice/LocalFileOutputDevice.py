@@ -1,5 +1,6 @@
 # Copyright (c) 2018 Ultimaker B.V.
 # Uranium is released under the terms of the LGPLv3 or higher.
+## Find_moveo ##
 
 import os
 import sys
@@ -132,7 +133,7 @@ class LocalFileOutputDevice(OutputDevice):
 
         # Get file name from file dialog
         file_name = dialog.selectedFiles()[0]
-
+        
         self._checkType(selected_type["mime_type"])
 
         if not file_name.endswith(self._type_of_file): # If there isn't type in file_name  
@@ -201,11 +202,13 @@ class LocalFileOutputDevice(OutputDevice):
             self.writeError.emit(self)
 
         data = "check"
-        Shape = CuraApplication.getInstance().getShapeFromBuildVolume()
+        Shape = CuraApplication.getInstance().getShape()
+        # Call G -code Translation
         if Shape == "moveo" and self._type_of_file == ".gcode":
-            data = self._runGocdeTranslation()
+            data = self._runGcodeTranslation() 
+        # If we got error or stop translation, remove it
         if data == "Error":
-            os.system("rm -f "+ self._save_name) # Remove error file
+            os.system("rm -f "+ self._save_name)
             message = Message(catalog.i18nc("@info:status", "gcode_translation went wrong saving to <filename>{0}</filename>: <message>{1}</message>").format(job.getFileName(), str(job.getError())), title = catalog.i18nc("@info:title", "Error"))
             message.show()
             self.writeError.emit(self)
@@ -242,10 +245,12 @@ class LocalFileOutputDevice(OutputDevice):
             self._type_of_file = ".obj"
 
     # Run gcode translation
-    def _runGocdeTranslation(self):
+    def _runGcodeTranslation(self):
         now_place = os.getcwd()
         file_in = " gcode_in:="
         file_out = " gcode_out:="
         os.system("roslaunch gcode_translation  gcode_translation.launch"+ file_in + self._save_name + file_out + self._save_name)
+        os.system("cp " + self._save_name + " " + now_place[:-10]+'/gcode_translation/gcode/test.gcode')
+        os.system("rm -f "+ now_place[:-10]+'/gcode_translation/gcode/split_register.gcode')
         read_file = open(now_place[:-10]+'/gcode_translation/check_success/check_success.txt','r')
         return read_file.read().strip()

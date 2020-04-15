@@ -26,7 +26,7 @@ Item
         anchors.leftMargin: UM.Theme.getSize("default_margin").width
         anchors.verticalCenter: parent.verticalCenter
 
-        source: UM.Theme.getImage("logo")
+        source: UM.Theme.getImage("SPIE_Lab_Moveo_logo")
         width: UM.Theme.getSize("logo").width
         height: UM.Theme.getSize("logo").height
         fillMode: Image.PreserveAspectFit

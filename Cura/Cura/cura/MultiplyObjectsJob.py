@@ -1,5 +1,6 @@
 # Copyright (c) 2018 Ultimaker B.V.
 # Cura is released under the terms of the LGPLv3 or higher.
+## Find_moveo ##
 
 import copy
 from typing import List
@@ -16,16 +17,33 @@ from cura.Arranging.ShapeArray import ShapeArray
 
 from UM.Application import Application
 from UM.Operations.AddSceneNodeOperation import AddSceneNodeOperation
+from UM.Operations.SetTransformOperation import SetTransformOperation
+from UM.Math.Vector import Vector
 
 
 class MultiplyObjectsJob(Job):
-    def __init__(self, objects, count, min_offset = 8):
+    def __init__(self, objects, count, min_offset = 8,shape_type = False):
         super().__init__()
         self._objects = objects
         self._count = count
         self._min_offset = min_offset
+        self._type = shape_type
+        self._moveo_move = None
+        self._save_x = 0
+        self._save_y = 0
+        self._save_z = 0
 
     def run(self) -> None:
+        # If type is moveo, move to origin
+        if self._type:
+            for node in self._objects:
+                if self._moveo_move == None:
+                    self._save_x = node.getPosition().x
+                    self._save_y = node.getPosition().y
+                    self._save_z = node.getPosition().z
+                op = GroupedOperation()
+                op.addOperation(SetTransformOperation(node, Vector(node.getPosition().x - self._save_x, node.getWorldPosition().y, node.getPosition().z - self._save_z)))
+            op.push()
         status_message = Message(i18n_catalog.i18nc("@info:status", "Multiplying and placing objects"), lifetime=0,
                                  dismissable=False, progress=0, title = i18n_catalog.i18nc("@info:title", "Placing Objects"))
         status_message.show()
@@ -96,11 +114,20 @@ class MultiplyObjectsJob(Job):
                 Job.yieldThread()
 
             Job.yieldThread()
+        # If type is moveo, move back to place
+        if self._type:
+            for node in self._objects:
+                op = GroupedOperation()
+                op.addOperation(SetTransformOperation(node, Vector(node.getPosition().x + self._save_x, node.getWorldPosition().y, node.getPosition().z + self._save_z)))
+            op.push()
 
         if nodes:
             op = GroupedOperation()
             for new_node in nodes:
                 op.addOperation(AddSceneNodeOperation(new_node, current_node.getParent()))
+            if self._type:
+                for move_node in nodes:
+                    op.addOperation(SetTransformOperation(move_node, Vector(move_node.getPosition().x + self._save_x, move_node.getWorldPosition().y, move_node.getPosition().z + self._save_z)))
             op.push()
         status_message.hide()
 

@@ -1,5 +1,6 @@
 # Copyright (c) 2018 Ultimaker B.V.
 # Cura is released under the terms of the LGPLv3 or higher.
+## Find_moveo ##
 
 from PyQt5.QtCore import QObject, QUrl
 from PyQt5.QtGui import QDesktopServices
@@ -81,7 +82,11 @@ class CuraActions(QObject):
     @pyqtSlot(int)
     def multiplySelection(self, count: int) -> None:
         min_offset = cura.CuraApplication.CuraApplication.getInstance().getBuildVolume().getEdgeDisallowedSize() + 2  # Allow for some rounding errors
-        job = MultiplyObjectsJob(Selection.getAllSelectedObjects(), count, min_offset = max(min_offset, 8))
+        # If type is moveo, we have to use special way to do
+        if cura.CuraApplication.CuraApplication.getInstance().getShape() == "moveo":
+            job = MultiplyObjectsJob(Selection.getAllSelectedObjects(), count, min_offset = max(min_offset, 8), shape_type = True)
+        else:
+            job = MultiplyObjectsJob(Selection.getAllSelectedObjects(), count, min_offset = max(min_offset, 8))
         job.start()
 
     ##  Delete all selected objects.
@@ -89,6 +94,9 @@ class CuraActions(QObject):
     def deleteSelection(self) -> None:
         if not cura.CuraApplication.CuraApplication.getInstance().getController().getToolsEnabled():
             return
+        # If type is moveo, we speedup delete function
+        if cura.CuraApplication.CuraApplication.getInstance().getShape() == "moveo":
+            cura.CuraApplication.CuraApplication.getInstance().setCheck()
 
         removed_group_nodes = [] #type: List[SceneNode]
         op = GroupedOperation()

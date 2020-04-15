@@ -647,12 +647,13 @@ class MeshBuilder:
         self.addIndices(numpy.asarray(indices, dtype = numpy.int32))
         self.addColors(numpy.asarray(colors, dtype = numpy.float32))
 
-    def addMoveoWorkSpace(self, inner_radius, outer_radius, width, center, sections = 320):
+    # Add a workspace of moveo
+    def addMoveoWorkSpace(self, inner_radius, outer_radius, width, center, sections = 32):
         indices = []
 
         start = self.getVertexCount() #Starting index.
 
-        for i in range(sections):
+        for i in range(sections + 1):
             v1 = start + i * 3 #Indices for each of the vertices we'll add for this section.
             v2 = v1 + 1
             v3 = v1 + 2

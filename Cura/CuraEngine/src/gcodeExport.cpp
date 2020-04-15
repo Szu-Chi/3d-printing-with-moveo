@@ -1,5 +1,6 @@
 //Copyright (c) 2019 Ultimaker B.V.
 //CuraEngine is released under the terms of the AGPLv3 or higher.
+// Find_moveo //
 
 #include <assert.h>
 #include <cmath>
@@ -275,7 +276,6 @@ std::string GCodeExport::getFileHeader(const std::vector<bool>& extruder_is_used
         if(mesh_group_settings.get<BuildPlateShape>("machine_shape") == BuildPlateShape::MOVEO)
         {
             prefix << "G28 ;Home" << new_line;
-            prefix << "G1 X0 Y300 Z15 F2000" << new_line;
             prefix << "M400" << new_line;
         }
     }

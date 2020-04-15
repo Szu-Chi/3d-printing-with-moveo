@@ -111,7 +111,7 @@ ROS中用來測試Moveo動作、列印範圍及IK解答效能
 由SolidWorks外掛模組SW2URDF所生成的Moveo的URDF(Unified Robot Description File)
 ### progressbar
 在Cura切片時產生當前進度條
-### virtual_shift
+### simulation
 讀取G-code中機械軸的位置，利用Rviz模擬Moveo列印情況
 ## Troubleshooting
 - 
