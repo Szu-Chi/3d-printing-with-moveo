@@ -62,8 +62,6 @@ catkin_package(
     EIGEN3
   INCLUDE_DIRS
     include
-  LIBRARIES
-    Mesh
 )
 
 ###########
@@ -85,5 +83,8 @@ target_link_libraries(gcode_point_split
 target_link_libraries(gcode_point_split  Qt5::Widgets )
 ## Specify libraries to link a library or executable target against
 target_link_libraries(inverse_kinematics
+  ${catkin_LIBRARIES}
+)
+ADD_LIBRARY(joint_division include/Joint_division/joint_division.hpp
   ${catkin_LIBRARIES}
 )

@@ -1,30 +1,20 @@
 #include <moveit/move_group_interface/move_group_interface.h>
 #include <moveit/planning_scene_interface/planning_scene_interface.h>
-
 #include <moveit/robot_model_loader/robot_model_loader.h>
 #include <moveit/planning_scene/planning_scene.h>
 #include <moveit/kinematic_constraints/utils.h>
-
 #include <moveit_msgs/DisplayRobotState.h>
 #include <moveit_msgs/DisplayTrajectory.h>
-
 #include <moveit_msgs/AttachedCollisionObject.h>
 #include <moveit_msgs/CollisionObject.h>
-
 #include <moveit_visual_tools/moveit_visual_tools.h>
-
 #include <trac_ik/trac_ik.hpp>
 #include <ros/ros.h>
-
-#include <sstream>
-#include <fstream>
-
 #include <time.h>
 #include <math.h>
-
 #include <omp.h>
+#include <include/Joint_division/joint_division.hpp>
 
-std::vector<double> joint_division(5);
 bool check_trac_ik_valid(TRAC_IK::TRAC_IK &tracik_solver,KDL::Chain &chain, KDL::JntArray &ll, KDL::JntArray &ul){
   bool valid = tracik_solver.getKDLChain(chain);
   //ROS_INFO_NAMED("moveo", "TRAC-IK setup");
@@ -40,39 +30,19 @@ bool check_trac_ik_valid(TRAC_IK::TRAC_IK &tracik_solver,KDL::Chain &chain, KDL:
   return true;
 }
 
-void read_joint_division(std::string &input_file_name, KDL::Chain &chain){
-  std::string line;
-  std::ifstream input_file(input_file_name);
-  if(!input_file.is_open()) ROS_ERROR_STREAM("Can't open " << input_file_name);
-  int count = 0;
-  while(input_file){
-    if(count == chain.getNrOfJoints()) break;
-    std::getline(input_file, line);
-    if(!line.compare(0,2,"//")) continue;
-    std::istringstream templine(line);
-	  std::string data;
-    double result = 1.0;
-	  while (getline(templine, data, ',')) result = result * stod(data);
-    joint_division.at(count) = result;
-    //ROS_INFO_STREAM(result); //check joint value
-    count++;
-  }
-  input_file.close();
-}
-
-void motor_steps_convert(Eigen::VectorXd &data, KDL::Chain &chain){
+void motor_steps_convert(Eigen::VectorXd &data, KDL::Chain &chain, std::vector<double> &joint_division){
   for(int i = 0; i < chain.getNrOfJoints(); i++){
     data(i) = data(i)/(M_PI)*180 * joint_division[i]/360;
   }
 }
 
-void show_error_point_and_joint(KDL::Vector &end_effector_target_vol, KDL::Chain &chain, KDL::JntArray &result){
+void show_error_point_and_joint(KDL::Vector &end_effector_target_vol, KDL::Chain &chain, KDL::JntArray &result, std::vector<double> &joint_division){
   ROS_ERROR_STREAM("===============Position===============");
   ROS_ERROR_STREAM("X : " << end_effector_target_vol.data[0]);
   ROS_ERROR_STREAM("Y : " << end_effector_target_vol.data[1]);
   ROS_ERROR_STREAM("Z : " << end_effector_target_vol.data[2]);
   ROS_ERROR_STREAM("=============Joint Values=============");
-  //motor_steps_convert(result.data, chain);
+  //motor_steps_convert(result.data, chain, joint_division);
   for(int i = 0;i < chain.getNrOfJoints(); i++){
     static const char joint_code[5] = {'J', 'A', 'B', 'C', 'D'};
     ROS_ERROR_STREAM(joint_code[i] << " : " << result.data(i));
@@ -183,7 +153,7 @@ int main(int argc, char **argv){
 
   std::string joint_division_name;
   node_handle.param("joint_division", joint_division_name, std::string("/joint_division"));
-  read_joint_division(joint_division_name, chain);
+  std::vector<double> joint_division = read_joint_division(joint_division_name, chain.getNrOfJoints());
 
   std::ofstream outermost_file(outermost_point);
   if(!outermost_file.is_open()) ROS_ERROR_STREAM("Can't open " << outermost_point);
@@ -271,7 +241,7 @@ int main(int argc, char **argv){
       }
       if(rc < 0){
         //ROS_ERROR_STREAM("Can't use one core to find joint values");
-        //show_error_point_and_joint(find_end_effector_target_vol.at(use_onecore.at(k)), chain, result);
+        //show_error_point_and_joint(find_end_effector_target_vol.at(use_onecore.at(k)), chain, result, joint_division);
         save_place.at(use_onecore.at(k)) = 0;
       }
       else{
@@ -300,7 +270,7 @@ int main(int argc, char **argv){
         collision_result.clear();
         planning_scene.checkSelfCollision(collision_request, collision_result);
         if(collision_result.collision == 0){
-          motor_steps_convert(save_result.at(l).data, chain);
+          motor_steps_convert(save_result.at(l).data, chain, joint_division);
           if(save_result.at(l).data(3) <= 2500){
             save_positive_draw_point.at(times_positive).x = find_end_effector_target_vol.at(l).data[0];
             save_positive_draw_point.at(times_positive).y = find_end_effector_target_vol.at(l).data[1];
@@ -324,7 +294,7 @@ int main(int argc, char **argv){
           {
             ROS_INFO("Contact between: %s and %s", it->first.first.c_str(), it->first.second.c_str());
           }
-          //show_error_point_and_joint(find_end_effector_target_vol.at(l), chain, save_result.at(l));
+          //show_error_point_and_joint(find_end_effector_target_vol.at(l), chain, save_result.at(l), joint_division);
         }
         */
         joint_values.clear();

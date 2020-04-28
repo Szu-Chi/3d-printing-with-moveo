@@ -24,8 +24,9 @@ find_package(catkin REQUIRED
     trac_ik_lib
 )
 
-find_package(Boost REQUIRED system filesystem date_time thread)
+find_package(gcode_translation)
 
+find_package(Boost REQUIRED system filesystem date_time thread)
 
 ################################################
 ## Declare ROS messages, services and actions ##
@@ -54,6 +55,7 @@ catkin_package(
 ###########
 
 include_directories(SYSTEM ${Boost_INCLUDE_DIR} ${EIGEN3_INCLUDE_DIRS})
+include_directories(${CMAKE_SOURCE_DIR}/gcode_translation)
 include_directories(${catkin_INCLUDE_DIRS})
 link_directories(${catkin_LIBRARY_DIRS})
 
@@ -61,6 +63,6 @@ link_directories(${catkin_LIBRARY_DIRS})
 add_executable(simulation src/simulation.cpp)
 
 ## Specify libraries to link a library or executable target against
-target_link_libraries(simulation
+target_link_libraries(simulation joint_division
   ${catkin_LIBRARIES}
 )
