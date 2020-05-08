@@ -1,19 +1,25 @@
 # 3D printing with Moveo
 ![image](https://github.com/Szu-Chi/3d-printing-with-moveo/blob/Feature_Position_Control/img/moveo.gif)
-### 將BCN3D-Moveo結合ROS、Marlin以及 Ultimaker Cura，產生新型態的3D列印機。
+### 將BCN3D-Moveo結合ROS、Marlin以及 Ultimaker Cura，產生新型態的3D列印機
 我們變更3D列印切片軟體Cura的列印機模型與列印空間，並將Cura與ROS中的逆運動學求解器(IK-Slover)整合，把Cura生成的笛卡爾座標系轉換成更機械軸的轉動角度，最終透過Marlin控制BCN3D-Moveo移動噴嘴進行3D列印
-### 系統架構 System Structure:
+### 系統架構 System Structure
 ![image](https://github.com/Szu-Chi/3d-printing-with-moveo/blob/Feature_Position_Control/img/system_structure.png)
 
 
-## How to Use:
+## Demonstration
+### 1. 產生g-code與模擬
+- 1. [使用Cura(SPIE Lab version)產生g-code](https://www.youtube.com/watch?v=-8nMFFa6ZWg)
+- 2. [使用g-code模擬手臂列印](https://www.youtube.com/watch?v=KlCehcnmZSg)
+- 3. [使用笛卡兒座標模擬手臂位置](https://www.youtube.com/watch?v=2ucYWZgq9BI)
+- 4. [使用各軸轉動角度模擬手臂位置](https://www.youtube.com/watch?v=yYCW1fAp2H8)
+## How to Use
 ### 1. 環境準備
 - 1. 安裝ROS、MoveIt和trac-ik
         1.  安裝ros-melodic-desktop-full\
-            參考 http://wiki.ros.org/melodic/Installation/Ubuntu
+            參考 [ROS-melodic](http://wiki.ros.org/melodic/Installation/Ubuntu)
 
         2.  使用原始碼安裝MoveIt\
-            參考 https://moveit.ros.org/install/source/
+            參考 [MoveIt](https://moveit.ros.org/install/source/)
         3.  安裝trac-ik
             ```
             sudo apt-get install ros-melodic-trac-ik
@@ -49,7 +55,7 @@
     ```
 or
 
-- 參考 https://github.com/Ultimaker/Cura/wiki/Running-Cura-from-Source-on-Ubuntu 手動安裝
+- 參考 [Running-Cura-from-Source-on-Ubuntu](https://github.com/Ultimaker/Cura/wiki/Running-Cura-from-Source-on-Ubuntu) 手動安裝
 
 ### 3. 燒錄Marlin
 - 1. 開啟Arduino ~/moveo_ws/src/Marlin/Marlin.ino
@@ -76,14 +82,14 @@ or
 - 4. 增進4M1D與3M2之間的穩定度
 - 5. 在機構內部新增走線空間
 
-原始版本:https://github.com/BCN3D/BCN3D-Moveo
+[BCN3D-Moveo 原始版本](https://github.com/BCN3D/BCN3D-Moveo)
 ### Cura
 我們更改過後的Cura，變更內容如下:
 - 1. 新增列印機型 SPIE Joint Lab Moveo
 - 2. 在機型為Moveo時，改變空間界線判斷方式
 - 3. 在機型為Moveo時，連接ROS轉換座標與機械軸位置
 
-原始版本:https://github.com/Ultimaker/Cura/wiki/Running-Cura-from-Source-on-Ubuntu 
+[Cura 原始版本](https://github.com/Ultimaker/Cura/wiki/Running-Cura-from-Source-on-Ubuntu) 
 ### Marlin
 我們更改過後的Marlin，變更內容如下:
 - 1. 變更Mother Board Arduino腳位
@@ -91,13 +97,13 @@ or
 - 3. 平面測量方式
 - 4. Motion Planner規劃方式
 
-原始版本:https://github.com/MarlinFirmware/Marlin
+[Marlin 原始版本](https://github.com/MarlinFirmware/Marlin)
 ### circuit
 - 1. Arduino 3D印表機擴充版電路圖及PCB layout\
-     原始版本:https://github.com/MarlinFirmware/Marlin
+     [RAMPSv1.6 原始版本](https://github.com/MarlinFirmware/Marlin)
 
 - 2. 馬達閉迴路控制板電路圖及PCB layout\
-     原始版本:https://github.com/uStepper/uStepper1
+     [uStepper 原始版本](https://github.com/uStepper/uStepper1)
 
 ### gcode_translation
 將原始G-code的笛卡爾座標轉換成機械軸
