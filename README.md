@@ -12,6 +12,10 @@
 - 2. [使用g-code模擬手臂列印](https://www.youtube.com/watch?v=KlCehcnmZSg)
 - 3. [使用笛卡兒座標模擬手臂位置](https://www.youtube.com/watch?v=2ucYWZgq9BI)
 - 4. [使用各軸轉動角度模擬手臂位置](https://www.youtube.com/watch?v=yYCW1fAp2H8)
+### 2. 實際列印
+| [寶箱](https://www.youtube.com/watch?v=BejQ-XHtku4)                                                                  | [摩艾石像](https://www.youtube.com/watch?v=KtgakZhjTZc)                                                    | [20X20mm方框(厚度0.6mm)](https://www.youtube.com/watch?v=YZfbAIXzUUw)                                                      |
+|:----------------------------------------------------------------------------------------------------------------------:|:------------------------------------------------------------------------------------------------------------:|:----------------------------------------------------------------------------------------------------------------------------:|
+| <img src="https://github.com/TIAO-JI-FU/3d-printing-with-moveo-1/blob/Develop/img/treasure_chest.png" height="300" /> | <img src="https://github.com/TIAO-JI-FU/3d-printing-with-moveo-1/blob/Develop/img/moai.png" height="300" /> | <img src="https://github.com/TIAO-JI-FU/3d-printing-with-moveo-1/blob/Develop/img/20x20mm_square_frame.png" height="300" /> |
 ## How to Use
 ### 1. 環境準備
 - 1. 安裝ROS、MoveIt和trac-ik
