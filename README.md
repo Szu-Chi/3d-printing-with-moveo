@@ -1,11 +1,11 @@
 # 3D printing with Moveo
-![image](https://github.com/Szu-Chi/3d-printing-with-moveo/blob/Feature_Position_Control/img/moveo.gif)
+<img src="https://github.com/TIAO-JI-FU/3d-printing-with-moveo-1/blob/Develop/img/moveo_shake_horizon.gif" height="500">
+
 ### 將BCN3D-Moveo結合ROS、Marlin以及 Ultimaker Cura，產生新型態的3D列印機
 我們變更3D列印切片軟體Cura的列印機模型與列印空間，並將Cura與ROS中的逆運動學求解器(IK-Slover)整合，把Cura生成的笛卡爾座標系轉換成更機械軸的轉動角度，最終透過Marlin控制BCN3D-Moveo移動噴嘴進行3D列印
 ### 系統架構 System Structure
 ![image](https://github.com/Szu-Chi/3d-printing-with-moveo/blob/Feature_Position_Control/img/system_structure.png)
-
-
+  
 ## Demonstration
 ### 1. 產生g-code與模擬
 - 1. [使用Cura(SPIE Lab version)產生g-code](https://www.youtube.com/watch?v=-8nMFFa6ZWg)
