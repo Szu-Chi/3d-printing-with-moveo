@@ -94,11 +94,12 @@ int main(int argc, char **argv){
     if(ros::ok()){
       std::getline(input_file, line);
       now_line++;
+      if(!line.compare(0,6,"G92 E0")) pre_E = 0;
       if((!line.compare(0,2,"G0") || !line.compare(0,2,"G1"))){
         if(line.find('X') != std::string::npos) x = stod(line.substr(line.find('X')+1));
         if(line.find('Y') != std::string::npos) y = stod(line.substr(line.find('Y')+1));
         if(line.find('Z') != std::string::npos) z = stod(line.substr(line.find('Z')+1));
-        if(line.find('E') != std::string::npos && (stod(line.substr(line.find('E')+1)) != 0)) E = stod(line.substr(line.find('E')+1));
+        if(line.find('E') != std::string::npos) E = stod(line.substr(line.find('E')+1));
 
         if(check_distance == true){
           output_file << line[0] << line[1];
@@ -121,7 +122,6 @@ int main(int argc, char **argv){
               store << std::fixed << std::setprecision(decimal_point(pre_x)) << " X" << pre_x << std::defaultfloat;
               store << std::fixed << std::setprecision(decimal_point(pre_y)) << " Y" << pre_y << std::defaultfloat;
               if(line.find('E') != std::string::npos && stod(line.substr(line.find('E')+1)) != 0) store << std::fixed << std::setprecision(5) << " E" << pre_E << std::defaultfloat;
-              //if(i == 1) store << " K0";
               store << std::endl;
               store << line[0] << line[1];
             }
@@ -131,7 +131,7 @@ int main(int argc, char **argv){
               if(line.find('X') != std::string::npos) output_file << std::fixed << std::setprecision(decimal_point(x)) << " X" << x << std::defaultfloat;
               if(line.find('Y') != std::string::npos) output_file << std::fixed << std::setprecision(decimal_point(y)) << " Y" << y << std::defaultfloat;
               if(line.find('Z') != std::string::npos) output_file << std::fixed << std::setprecision(decimal_point(z)) << " Z" << z << std::defaultfloat;
-              if(line.find('E') != std::string::npos && (stod(line.substr(line.find('E')+1)) != 0)) output_file << std::fixed << std::setprecision(5) << " E" << E << std::defaultfloat;
+              if(line.find('E') != std::string::npos) output_file << std::fixed << std::setprecision(5) << " E" << E << std::defaultfloat;
             }
             else{
               for(int j = 2;j < line.length(); j++){
@@ -144,7 +144,6 @@ int main(int argc, char **argv){
               output_file << line[j];
             }    
           }
-          //if(cut_part > 1) output_file << " K1";
           output_file << std::endl;
         }
         else output_file << line << std::endl;
