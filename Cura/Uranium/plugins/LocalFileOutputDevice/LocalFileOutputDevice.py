@@ -174,8 +174,14 @@ class LocalFileOutputDevice(OutputDevice):
             job.progress.connect(self._onJobProgress)
             job.finished.connect(self._onWriteJobFinished)
 
-            message = Message(catalog.i18nc("@info:progress Don't translate the XML tags <filename>!", "Saving to <filename>{0}</filename>").format(file_name),
-                              0, False, -1 , catalog.i18nc("@info:title", "Saving"))
+            Shape = CuraApplication.getInstance().getShape()
+            message = None
+            if Shape == "moveo" and self._type_of_file == ".gcode":
+                message = Message(catalog.i18nc("@info:progress Don't translate the XML tags <filename>!", "Saving to <filename>{0}</filename>").format(file_name),
+                                  0, False, None , catalog.i18nc("@info:title", "Saving"))
+            else:
+                message = Message(catalog.i18nc("@info:progress Don't translate the XML tags <filename>!", "Saving to <filename>{0}</filename>").format(file_name),
+                                  0, False, -1 , catalog.i18nc("@info:title", "Saving"))
             message.show()
 
             job.setMessage(message)

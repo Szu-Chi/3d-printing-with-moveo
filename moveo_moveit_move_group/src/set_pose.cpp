@@ -1,20 +1,23 @@
 #include <moveit/move_group_interface/move_group_interface.h>
 #include <moveit/planning_scene_interface/planning_scene_interface.h>
-
 #include <moveit_msgs/DisplayRobotState.h>
 #include <moveit_msgs/DisplayTrajectory.h>
-
 #include <moveit_msgs/AttachedCollisionObject.h>
 #include <moveit_msgs/CollisionObject.h>
-
 #include <moveit_visual_tools/moveit_visual_tools.h>
-
-
 #include <trac_ik/trac_ik.hpp>
 #include <ros/ros.h>
-
 #include <tf/tf.h>
+#include <include/Joint_division/joint_division.hpp>
+
 tf::Quaternion euler_to_quaternion(double yaw,double pitch,double roll);
+
+void motor_steps_convert(Eigen::VectorXd &data, KDL::Chain &chain, std::vector<double> &joint_division){
+  for(int i = 0; i < chain.getNrOfJoints(); i++){
+    data(i) = data(i)/(M_PI)*180*joint_division[i]/360;
+    ROS_INFO_STREAM("Joint" << (i+1) << " = " << int(data(i)));
+  }
+}
 
 std::vector<double> solveJoint(KDL::Frame end_effector_pose){
   ros::NodeHandle node_handle("~");
@@ -58,6 +61,11 @@ std::vector<double> solveJoint(KDL::Frame end_effector_pose){
   assert(chain.getNrOfJoints() == ll.data.size());
   assert(chain.getNrOfJoints() == ul.data.size());
   ROS_INFO("Using %d joints", chain.getNrOfJoints());
+
+  std::string joint_division_name;
+  node_handle.param("joint_division", joint_division_name, std::string("/joint_division"));
+  std::vector<double> joint_division = read_joint_division(joint_division_name, chain.getNrOfJoints());
+
   // Create Nominal chain configuration midway between all joint limits
   KDL::JntArray nominal(chain.getNrOfJoints());
   for (uint j = 0; j < nominal.data.size(); j++){
@@ -75,6 +83,7 @@ std::vector<double> solveJoint(KDL::Frame end_effector_pose){
     for(int i = 0; i < chain.getNrOfJoints(); i++){
         target_joints.at(i) = result.data(i);
     }
+    motor_steps_convert(result.data, chain, joint_division);
     return target_joints;
   }else{
     return {};
@@ -178,8 +187,7 @@ void set_target_pose(const geometry_msgs::PoseStamped& chain_end){
     visual_tools.publishTrajectoryLine(my_plan.trajectory_, joint_model_group);
     visual_tools.trigger();
     move_group.move();
-    //ROS_INFO_STREAM("joint :" << target_joints);
-     print_current_pose(move_group.getCurrentPose());
+    print_current_pose(move_group.getCurrentPose());
     sensor_msgs::JointState moveo_joint_state;
     std::vector<std::string> name{"moveo_joint1", "moveo_joint2", "moveo_joint3", "moveo_joint4", "moveo_joint5"};
     std::vector<double> position = move_group.getCurrentJointValues();

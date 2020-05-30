@@ -1,32 +1,12 @@
 #include <moveit/move_group_interface/move_group_interface.h>
 #include <moveit/trajectory_processing/iterative_time_parameterization.h>
 #include <moveit_visual_tools/moveit_visual_tools.h>
+#include <trac_ik/trac_ik.hpp>
 #include <ros/ros.h>
-#include <sstream>
-#include <fstream>
 #include <math.h>
+#include <include/Joint_division/joint_division.hpp>
 
 ros::WallTime start_, end_;
-std::vector<double> joint_division(5);
-void read_joint_division(std::string &input_file_name){
-  std::string line;
-  std::ifstream input_file(input_file_name);
-  if(!input_file.is_open()) ROS_ERROR_STREAM("Can't open " << input_file_name);
-  int count = 0;
-  while(input_file){
-    if(count == 5) break;
-    std::getline(input_file, line);
-    if(!line.compare(0,2,"//")) continue;
-    std::istringstream templine(line);
-	  std::string data;
-    double result = 1.0;
-	  while (getline(templine, data, ',')) result = result * stod(data);
-    joint_division.at(count) = result;
-    //ROS_INFO_STREAM(result); //check joint value
-    count++;
-  }
-  input_file.close();
-}
 
 int main(int argc, char **argv)
 {
@@ -47,10 +27,11 @@ int main(int argc, char **argv)
   target_joints = move_group.getCurrentJointValues();
   moveit::core::RobotStatePtr start_state(move_group.getCurrentState());
   const robot_state::JointModelGroup *joint_model_group = start_state->getJointModelGroup(move_group.getName());
+  std::vector<std::string> active_joints = move_group.getActiveJoints();
 
   std::string joint_division_name;
   node_handle.param("joint_division", joint_division_name, std::string("/joint_division"));
-  read_joint_division(joint_division_name);
+  std::vector<double> joint_division = read_joint_division(joint_division_name, active_joints.size());
 
   std::string gcode_in;
   node_handle.param("gcode_in", gcode_in, std::string("/gcode_in"));

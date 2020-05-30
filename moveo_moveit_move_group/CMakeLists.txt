@@ -24,6 +24,8 @@ find_package(catkin REQUIRED
     trac_ik_lib
 )
 
+find_package(gcode_translation)
+
 find_package(OpenMP)
 if (OPENMP_FOUND)
     set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
@@ -47,13 +49,17 @@ generate_messages(
   geometry_msgs
 )
 
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTOUIC ON)
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+
 catkin_package(
   CATKIN_DEPENDS
     moveit_core
     moveit_ros_planning_interface
     interactive_markers
     DEPENDS
-    EIGEN3
+    EIGEN3Z
 )
 
 ###########
@@ -61,12 +67,14 @@ catkin_package(
 ###########
 
 include_directories(SYSTEM ${Boost_INCLUDE_DIR} ${EIGEN3_INCLUDE_DIRS})
+include_directories(${CMAKE_SOURCE_DIR}/gcode_translation)
 include_directories(${catkin_INCLUDE_DIRS})
 link_directories(${catkin_LIBRARY_DIRS})
 
 ## Declare a C++ executable
 add_executable(ik_test src/ik_test.cpp)
 add_executable(set_pose src/set_pose.cpp)
+add_executable(set_joint src/set_joint.cpp)
 add_executable(parallel_ik_test src/parallel_ik_test.cpp)
 add_executable(area_test src/area_test.cpp)
 
@@ -74,12 +82,15 @@ add_executable(area_test src/area_test.cpp)
 target_link_libraries(ik_test
   ${catkin_LIBRARIES}
 )
-target_link_libraries(set_pose
+target_link_libraries(set_pose joint_division
+  ${catkin_LIBRARIES}
+)
+target_link_libraries(set_joint joint_division
   ${catkin_LIBRARIES}
 )
 target_link_libraries(parallel_ik_test
   ${catkin_LIBRARIES}
 )
-target_link_libraries(area_test
+target_link_libraries(area_test joint_division
   ${catkin_LIBRARIES}
 )
